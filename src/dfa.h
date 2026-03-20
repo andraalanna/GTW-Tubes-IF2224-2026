@@ -54,7 +54,6 @@ enum State{
     // error
     S_ERROR,
 
-
 };
 
 #endif
