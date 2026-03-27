@@ -4,18 +4,109 @@
 
 using namespace std;
 
-Lexer::Lexer(string src){};
+Lexer::Lexer(string src){
+    source = src;
+    pos = 0;
+};
 
-char Lexer::peek(){};
+char Lexer::peek(){
+    if (pos >= source.size()) return '\0';
+    return source[pos];
+};
 
-char Lexer::advance(){};
+char Lexer::advance(){
+    if (pos >= source.size()) return '\0';
+    return source[pos++];
+};
 
-string Lexer::classifyKeyword(string val){};
 
-Token Lexer::readNumber(){};
+Token Lexer::readNumber(){
+    string val = "";
 
+    while (isdigit(peek())){
+        val += advance();
+    }
+
+    if (peek()== '.'){
+        val += advance();
+        while(isdigit(peek())){
+            val += advance();
+        }
+        return Token({"realcon", val});
+    }
+
+    return Token({"intcon", val});
+}
+
+Token Lexer::readComment(char ch){};
 Token Lexer::readString(){};
+
 Token Lexer::readOperator(char ch){};
 Token Lexer::readPunctuation(char ch){};
+
+string Lexer::classifyKeyword(string val){};
 Token Lexer::readIdentOrKeyword(){};
-vector<Token> Lexer::tokenize(){};
+
+vector<Token> Lexer::tokenize(){
+    vector<Token> tokens;
+    
+    while (peek!= '\0'){
+        char ch = peek();
+
+        //skip whitespace
+        if (isspace(ch)){
+            advance();
+            continue;
+        }
+
+        //read Number
+        if (isdigit(ch)){
+            tokens.push_back(readNumber());
+        }
+
+        //read Identifier(variable name) or Keyword(beginsy, termausuk -> MOD, AND, div, termasuk semua yang pakai string)
+        else if (isalpha(ch)){
+            tokens.push_back(readIdentOrKeyword());
+        }
+
+        //read String
+        else if(ch == '\''){
+            tokens.push_back(readString());
+        }
+
+        //read Comment
+        else if(ch == '{'){
+            tokens.push_back(readComment(ch));
+        }
+        else if(ch == '('){
+            advance();
+            if (ch == '*'){
+                tokens.push_back(readComment(ch));
+            }
+            else {
+                tokens.push_back({"lparent", "(" });
+            }
+        }
+
+        else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' | 
+            ch == '=' || ch == '<' || ch == '>' ){
+                advance();
+                tokens.push_back(readOperator(ch));
+            }
+        
+        else if (ch == ',' ||  ch == '.' || ch == ';' || ch == ':' ||
+            ch == ')' ||  ch == '[' ||  ch == ']'){
+                advance();
+                tokens.push_back(readPunctuation(ch));
+            }
+
+        //Karakter tidak dikenal
+        else{
+            tokens.push_back(Token{"Token", string(1, ch)});
+            advance();
+        }
+        
+        return tokens;
+
+    }
+};
