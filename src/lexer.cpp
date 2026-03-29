@@ -41,7 +41,43 @@ Token Lexer::readNumber(){
 Token Lexer::readComment(char ch){};
 Token Lexer::readString(){};
 
-Token Lexer::readOperator(char ch){};
+Token Lexer::readOperator(char ch){
+    string val(1, ch);
+
+    switch (ch) {
+        case '+':
+            return Token{"plus", val};
+        case '-':
+            return Token{"minus", val};
+        case '*':
+            return Token{"times", val};
+        case '/':
+            return Token{"rdiv", val};
+        case '=':
+            if (peek() == '=') {
+                val += advance(); // Consume '=' yang kedua
+                return Token{"eql", val};
+            }
+            return Token{"error", val}; 
+        case '<':
+            if (peek() == '>') {
+                val += advance(); 
+                return Token{"neq", val}; 
+            } else if (peek() == '=') {
+                val += advance(); // Consume '='
+                return Token{"leq", val};
+            }
+            return Token{"lss", val};
+        case '>':
+            if (peek() == '=') {
+                val += advance(); // Consume '='
+                return Token{"geq", val};
+            }
+            return Token{"gtr", val};
+        default:
+            return Token{"error", val};
+    }
+};
 Token Lexer::readPunctuation(char ch){};
 
 string Lexer::classifyKeyword(string val){};
@@ -50,7 +86,7 @@ Token Lexer::readIdentOrKeyword(){};
 vector<Token> Lexer::tokenize(){
     vector<Token> tokens;
     
-    while (peek!= '\0'){
+    while (peek() != '\0'){
         char ch = peek();
 
         //skip whitespace
@@ -88,7 +124,7 @@ vector<Token> Lexer::tokenize(){
             }
         }
 
-        else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' | 
+        else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || 
             ch == '=' || ch == '<' || ch == '>' ){
                 advance();
                 tokens.push_back(readOperator(ch));
