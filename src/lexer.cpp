@@ -38,8 +38,60 @@ Token Lexer::readNumber(){
     return Token({"intcon", val});
 }
 
-Token Lexer::readComment(char ch){};
-Token Lexer::readString(){};
+Token Lexer::readComment(char ch){
+    if(ch == '{'){
+        advance();  
+        while(peek() != '}' || peek() != '\0'){
+            advance();
+        }
+        if(peek() == '\0' ) return Token{"error", "unterminated comment"};
+
+        return Token{"comment", ""};
+        
+    }
+    else{
+        while(peek() != '\0'){
+            if (peek() == '*')
+            {
+                advance();
+                if (peek() == ')')
+                {
+                    return Token{"comment", ""};
+                }
+            }
+            else advance();
+        }
+        return Token{"error", "unterminated comment"};
+    }
+};
+Token Lexer::readString(){
+    string val = "";
+    advance();
+   while(true){
+    char ch = peek();
+    if (ch == '\0' || ch == '\n')
+    {
+        return Token{"error", "unterminated string"};
+    }
+
+    if(ch == '\''){
+        advance();
+        if(peek() ==  '\''){
+            advance();
+            val += '\'';
+        }
+        else{
+            if(val.empty()) return Token{"string", ""};
+            if(val.size() == 1) return Token{"charcon", val};   
+                                return Token{"string", val};
+        }
+    }
+    else{
+        val += peek();
+    }
+   }
+
+};
 
 Token Lexer::readOperator(char ch){
     string val(1, ch);
@@ -104,7 +156,6 @@ vector<Token> Lexer::tokenize(){
         else if (isalpha(ch)){
             tokens.push_back(readIdentOrKeyword());
         }
-
         //read String
         else if(ch == '\''){
             tokens.push_back(readString());
@@ -116,7 +167,7 @@ vector<Token> Lexer::tokenize(){
         }
         else if(ch == '('){
             advance();
-            if (ch == '*'){
+            if (peek() == '*'){
                 tokens.push_back(readComment(ch));
             }
             else {
