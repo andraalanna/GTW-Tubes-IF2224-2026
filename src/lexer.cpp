@@ -141,8 +141,7 @@ vector<Token> Lexer::tokenize(){
             tokens.push_back(Token{"Token", string(1, ch)});
             advance();
         }
-        
-        return tokens;
 
     }
+    return tokens;
 };

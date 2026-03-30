@@ -1,0 +1,5 @@
+plus
+minus
+times
+leq
+neq
