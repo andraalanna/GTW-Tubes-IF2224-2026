@@ -13,6 +13,7 @@ TARGET = $(BIN_DIR)/lexer
 # Target default yang dijalankan saat ketik 'make'
 all: $(TARGET)
 
+
 # Cara membuat program lexer
 # Compile main.cpp dan lexer.cpp menjadi satu executable
 $(TARGET): $(SRC_DIR)/main.cpp $(SRC_DIR)/lexer.cpp | $(BIN_DIR)

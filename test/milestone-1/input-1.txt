@@ -4,4 +4,6 @@
 <= 
 /
 2
-(* test comment *)
+(* test comment *abb*)
+{   tes komentarrr   }
+'a ''kbbi'''

@@ -13,14 +13,14 @@ Lexer::Lexer(string src)
 
 char Lexer::peek()
 {
-    if (pos >= source.size())
+    if (static_cast<unsigned long int>(pos) >= source.size())
         return '\0';
     return source[pos];
 };
 
 char Lexer::advance()
 {
-    if (pos >= source.size())
+    if (static_cast<unsigned long int>(pos) >= source.size())
         return '\0';
     return source[pos++];
 };
@@ -47,8 +47,103 @@ Token Lexer::readNumber()
     return Token({"intcon", val});
 }
 
-Token Lexer::readComment(char ch) {};
-Token Lexer::readString() {};
+Token Lexer::readComment(char ch)
+{
+    string val = "";
+    if (ch == '{')
+    {
+        advance();
+        while (peek() != '}' && peek() != '\0')
+        {
+            val += peek();
+
+            advance();
+        }
+        if (peek() == '\0')
+        {
+            currentState = S_ERROR;
+            return Token{"error", "unterminated comment"};
+        }
+        currentState = S_CMT1;
+        advance();
+        return Token{"comment", val};
+    }
+    else
+    {
+        advance();
+        while (peek() != '\0')
+        {
+
+            if (peek() == '*')
+            {
+                currentState = S_CMT2_STAR;
+                advance();
+                if (peek() == ')')
+                {
+                    currentState = S_CMT2;
+                    advance();
+                    return Token{"comment", val};
+                }
+                val += '*';
+                if (peek() != '\0')
+                {
+                    val += peek();
+                    advance();
+                }
+            }
+            else
+            {
+                val += peek();
+                advance();
+            }
+        }
+        currentState = S_ERROR;
+        return Token{"error", "unterminated comment"};
+    }
+};
+Token Lexer::readString()
+{
+    string val = "";
+    advance();
+    while (true)
+    {
+        char ch = peek();
+        if (ch == '\0' || ch == '\n')
+        {
+            return Token{"error", "unterminated string"};
+        }
+
+        if (ch == '\'')
+        {
+            advance();
+            if (peek() == '\'')
+            {
+                advance();
+                val += '\'';
+            }
+            else
+            {
+                if (val.empty())
+                {
+                    currentState = S_QUOTE;
+                    return Token{"string", ""};
+                }
+                if (val.size() == 1)
+                {
+                    currentState = S_CHAR;
+                    return Token{"charcon", val};
+                }
+                currentState = S_QUOTE;
+                return Token{"string", val};
+            }
+        }
+        else
+        {
+            val += peek();
+            advance();
+        }
+    }
+};
 
 Token Lexer::readOperator(char ch)
 {
@@ -138,9 +233,15 @@ Token Lexer::readPunctuation(char ch)
     }
 };
 
-string Lexer::classifyKeyword(string val) {};
+string Lexer::classifyKeyword(string val)
+{
+    return "hai";
+};
 
-Token Lexer::readIdentOrKeyword() {};
+Token Lexer::readIdentOrKeyword()
+{
+    return Token{"string", ""};
+};
 
 vector<Token> Lexer::tokenize()
 {
@@ -169,7 +270,6 @@ vector<Token> Lexer::tokenize()
         {
             tokens.push_back(readIdentOrKeyword());
         }
-
         // read String
         else if (ch == '\'')
         {
@@ -183,11 +283,10 @@ vector<Token> Lexer::tokenize()
         }
         else if (ch == '(')
         {
-            if (source[pos + 1] == '*')
-            {              // Cek karakter setelah '('
-                advance(); // Maju untuk '('
-                advance(); // Maju untuk '*'
-                tokens.push_back(readComment('*'));
+            advance();
+            if (peek() == '*')
+            {
+                tokens.push_back(readComment(ch));
             }
             else
             {
