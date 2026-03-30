@@ -1,0 +1,9 @@
++ 
+- 
+* 
+<= 
+/
+2
+(* test comment *abb*)
+{   tes komentarrr   }
+'a ''kbbi'''
