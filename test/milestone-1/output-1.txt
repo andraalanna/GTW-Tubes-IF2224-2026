@@ -2,4 +2,5 @@ plus
 minus
 times
 leq
-neq
+rdiv
+intcon (2)

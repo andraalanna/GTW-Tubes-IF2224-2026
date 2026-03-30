@@ -7,6 +7,7 @@ using namespace std;
 Lexer::Lexer(string src){
     source = src;
     pos = 0;
+    currentState = S0;
 };
 
 char Lexer::peek(){
@@ -46,35 +47,48 @@ Token Lexer::readOperator(char ch){
 
     switch (ch) {
         case '+':
+            currentState = S_PLUS;
             return Token{"plus", val};
         case '-':
+            currentState = S_MINUS;
             return Token{"minus", val};
         case '*':
+            currentState = S_TIMES;
             return Token{"times", val};
         case '/':
+            currentState = S_RDIV;
             return Token{"rdiv", val};
         case '=':
+            currentState = S_EQL1;
             if (peek() == '=') {
                 val += advance(); // Consume '=' yang kedua
+                currentState = S_EQL2;
                 return Token{"eql", val};
             }
+            currentState = S_ERROR;
             return Token{"error", val}; 
         case '<':
+            currentState = S_LESS;
             if (peek() == '>') {
                 val += advance(); 
+                currentState = S_NOTEQUAL;
                 return Token{"neq", val}; 
             } else if (peek() == '=') {
                 val += advance(); // Consume '='
+                currentState = S_LESSEQUAL;
                 return Token{"leq", val};
             }
             return Token{"lss", val};
         case '>':
+            currentState = S_GREATER;
             if (peek() == '=') {
                 val += advance(); // Consume '='
+                currentState = S_GREATEREQUAL;
                 return Token{"geq", val};
             }
             return Token{"gtr", val};
         default:
+            currentState = S_ERROR;
             return Token{"error", val};
     }
 };
@@ -87,6 +101,7 @@ vector<Token> Lexer::tokenize(){
     vector<Token> tokens;
     
     while (peek() != '\0'){
+        currentState = S0;
         char ch = peek();
 
         //skip whitespace
@@ -115,14 +130,18 @@ vector<Token> Lexer::tokenize(){
             tokens.push_back(readComment(ch));
         }
         else if(ch == '('){
-            advance();
-            if (ch == '*'){
-                tokens.push_back(readComment(ch));
-            }
+            if (source[pos+1] == '*'){ // Cek karakter setelah '('
+                advance(); // Maju untuk '('
+                advance(); // Maju untuk '*'
+                tokens.push_back(readComment('*'));
+            } 
             else {
-                tokens.push_back({"lparent", "(" });
-            }
+                advance(); // Cukup maju untuk '('
+                currentState = S_LPAR;
+                tokens.push_back({"lparent", "("});
+           }
         }
+        
 
         else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || 
             ch == '=' || ch == '<' || ch == '>' ){

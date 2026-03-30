@@ -32,7 +32,7 @@ enum State{
     S_LESSEQUAL, // <=
     S_NOTEQUAL, // !=
     S_GREATER, // >
-    S_GREATERQEUAL, // >=
+    S_GREATEREQUAL, // >=
 
     // tanda baca & assignment
     S_COLON, // baru baca ':'
