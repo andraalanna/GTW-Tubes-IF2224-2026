@@ -4,3 +4,8 @@ times
 leq
 rdiv
 intcon (2)
+realcon (2.35)
+error
+comment ( test comment *abb)
+comment (   tes komentarrr   )
+string (a 'kbbi')

@@ -4,6 +4,8 @@
 <= 
 /
 2
+2.35
+2.
 (* test comment *abb*)
 {   tes komentarrr   }
 'a ''kbbi'''

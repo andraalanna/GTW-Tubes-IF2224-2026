@@ -29,18 +29,28 @@ Token Lexer::readNumber()
 {
     string val = "";
 
+    currentState = S_INT;
+
     while (isdigit(peek()))
     {
         val += advance();
     }
 
+    
     if (peek() == '.')
     {
+        currentState = S_REAL_DOT;
         val += advance();
+
+        if (!isdigit(peek())){
+            currentState = S_ERROR;
+            return Token{"error", val};
+        }
         while (isdigit(peek()))
         {
             val += advance();
         }
+        currentState = S_REAL;
         return Token({"realcon", val});
     }
 
