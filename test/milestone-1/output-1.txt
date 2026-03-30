@@ -1,0 +1,6 @@
+plus
+minus
+times
+leq
+rdiv
+intcon (2)

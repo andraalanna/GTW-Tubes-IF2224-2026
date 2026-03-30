@@ -15,6 +15,7 @@ class Lexer{
     private:
         string source; // Nyimpan seluruh isi source code
         int pos; // Posisi karakter yang sedang dibaca
+        State currentState; // State DFA saat ini
 
         // Melihat karakter di posisi sekarang TANPA MAJU, 
         // dipakai untuk cek karakter berikutnya.
