@@ -9,9 +9,9 @@ enum State
     S0,
 
     // Konstata
-    S_INT,
-    S_REAL_DOT,
-    S_REAL,
+    S1, // intcon
+    S2, //
+    S3, // realcon
 
     // string & charcon
     S_QUOTE,
@@ -33,15 +33,15 @@ enum State
     S_GREATEREQUAL, // >=
 
     // tanda baca & assignment
-    S_COLON,     // baru baca ':'
-    S_BECOMES,   // sudah baca ':' + '=' -> ':='
-    S_LPAR,      // '('
-    S_RPAR,      //  ')'
-    S_LBRACK,    //  '['
-    S_RBRACK,    // ']'
-    S_COMMA,     // ','
-    S_SEMICOLON, // ';'
-    S_PERIOD,    // '.'
+    S7,       // colon ':'
+    S8,       // sudah baca ':' + '=' -> ':='
+    S_LPAR,   // '('
+    S_RPAR,   //  ')'
+    S_LBRACK, //  '['
+    S_RBRACK, // ']'
+    S4,       // comma ','
+    S5,       // semicolon';'
+    S6,       // period'.'
 
     // komentar
     S_CMT1,      // di dalam komentar { ... }

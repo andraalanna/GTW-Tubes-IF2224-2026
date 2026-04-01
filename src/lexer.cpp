@@ -29,7 +29,7 @@ Token Lexer::readNumber()
 {
     string val = "";
 
-    currentState = S_INT;
+    currentState = S1;
 
     while (isdigit(peek()))
     {
@@ -38,7 +38,7 @@ Token Lexer::readNumber()
 
     if (peek() == '.')
     {
-        currentState = S_REAL_DOT;
+        currentState = S2;
         val += advance();
 
         if (!isdigit(peek()))
@@ -50,7 +50,7 @@ Token Lexer::readNumber()
         {
             val += advance();
         }
-        currentState = S_REAL;
+        currentState = S3;
         return Token({"realcon", val});
     }
 
@@ -220,20 +220,20 @@ Token Lexer::readPunctuation(char ch)
     switch (ch)
     {
     case ',':
-        currentState = S_COMMA;
+        currentState = S4;
         return Token{"comma", val};
     case ';':
-        currentState = S_SEMICOLON;
+        currentState = S5;
         return Token{"semicolon", val};
     case '.':
-        currentState = S_PERIOD;
+        currentState = S5;
         return Token{"period", val};
     case ':':
-        currentState = S_COLON;
+        currentState = S6;
         if (peek() == '=')
         {
             val += advance();
-            currentState = S_BECOMES;
+            currentState = S8;
             return Token{"becomes", val};
         }
         return Token{"colon", val};
