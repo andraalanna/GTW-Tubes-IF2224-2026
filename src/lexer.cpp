@@ -2,6 +2,7 @@
 #include <cctype>
 #include <iostream>
 #include <map>
+#include <algorithm>
 using namespace std;
 
 Lexer::Lexer(string src)
@@ -258,14 +259,19 @@ Token Lexer::readPunctuation(char ch)
 };
 string Lexer::classifyKeyword(string val)
 {
+    string lower = val;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
     std::map<string, string> keywords = {{"const","constsy"}, {"case", "casesy"}, {"var", "varsy"}, {"function", "functionsy"}, {"for", "forsy"}, {"array", "arraysy"}, {"record", "recordsy"}, {"repeat", "repeatsy"}, {"if", "ifsy"}, {"while", "whilesy"},
                           {"end", "endsy"}, {"else", "elsesy"}, {"of", "ofsy"}, {"do", "dosy"}, {"downto", "downtosy"}, {"procedure", "proceduresy"}, {"program", "programsy"}, {"until", "untilsy"}, {"begin", "beginsy"}, {"type", "typesy"}, {"then", "thensy"}, {"to", "tosy"}};
     // "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "if", "of", "procedure", "program", "record", "repeat", "then", "to", "type", "until", "var", "while"
-    for (auto& key:keywords){
-        if(key.first == val){
-            return key.second;
-        }
+    
+    auto it = keywords.find(lower);
+    if (it != keywords.end())
+    {
+        currentState = S_KEYWORD;
+        return it->second;
     }
+
     
     currentState = S_IDENT;
     return "ident";
@@ -284,13 +290,17 @@ Token Lexer::readIdentOrKeyword(char ch)
         advance();
     }
 
+    string lower = val;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
     
     if (!isalnum(peek()))
     {
         currentState = S_KEY_CLASSIFY;
-        return Token{classifyKeyword(val), val};
+        return Token{classifyKeyword(val), lower};
     }
 
+    
     currentState = S_ERROR;
     return Token{"error", ""};
 };
