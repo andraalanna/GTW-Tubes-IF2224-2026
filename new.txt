@@ -136,13 +136,13 @@ semicolon
 ident (c)
 becomes
 ident (a)
-ident (div)
+idiv
 ident (b)
 semicolon
 ident (c)
 becomes
 ident (a)
-ident (mod)
+imod
 ident (b)
 semicolon
 ident (x)
@@ -217,7 +217,7 @@ ident (a)
 gtr
 intcon (0)
 rparent
-ident (and)
+andsy
 lparent
 ident (b)
 gtr
@@ -235,7 +235,7 @@ ident (a)
 gtr
 intcon (0)
 rparent
-ident (or)
+orsy
 lparent
 ident (b)
 gtr
@@ -248,7 +248,7 @@ string (or)
 rparent
 semicolon
 ifsy
-ident (not)
+notsy
 lparent
 ident (a)
 eql
@@ -430,13 +430,13 @@ semicolon
 ident (h4g)
 becomes
 ident (h4g)
-ident (div)
+idiv
 intcon (2)
 semicolon
 ident (h4g)
 becomes
 ident (h4g)
-ident (mod)
+imod
 intcon (3)
 semicolon
 ifsy
@@ -445,7 +445,7 @@ ident (h4g)
 gtr
 intcon (0)
 rparent
-ident (and)
+andsy
 lparent
 ident (h4g)
 lss
@@ -457,7 +457,7 @@ becomes
 intcon (50)
 semicolon
 ifsy
-ident (not)
+notsy
 lparent
 ident (h4g)
 eql

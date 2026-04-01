@@ -252,15 +252,6 @@ Token Lexer::readPunctuation(char ch)
     case ']':
         currentState = S_RBRACK;
         return Token{"rbrack", val};
-    case ')':
-        currentState = S_RPAR;
-        return Token{"rparent", val};
-    case '[':
-        currentState = S_LBRACK;
-        return Token{"lbrack", val};
-    case ']':
-        currentState = S_RBRACK;
-        return Token{"rbrack", val};
     default:
         currentState = S_ERROR;
         return Token{"error", val};
@@ -271,7 +262,8 @@ string Lexer::classifyKeyword(string val)
     string lower = val;
     transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
     std::map<string, string> keywords = {{"const","constsy"}, {"case", "casesy"}, {"var", "varsy"}, {"function", "functionsy"}, {"for", "forsy"}, {"array", "arraysy"}, {"record", "recordsy"}, {"repeat", "repeatsy"}, {"if", "ifsy"}, {"while", "whilesy"},
-                          {"end", "endsy"}, {"else", "elsesy"}, {"of", "ofsy"}, {"do", "dosy"}, {"downto", "downtosy"}, {"procedure", "proceduresy"}, {"program", "programsy"}, {"until", "untilsy"}, {"begin", "beginsy"}, {"type", "typesy"}, {"then", "thensy"}, {"to", "tosy"}};
+                        {"end", "endsy"}, {"else", "elsesy"}, {"of", "ofsy"}, {"do", "dosy"}, {"downto", "downtosy"}, {"procedure", "proceduresy"}, {"program", "programsy"}, {"until", "untilsy"}, {"begin", "beginsy"}, {"type", "typesy"}, {"then", "thensy"}, {"to", "tosy"}, {"not", "notsy"}, {"and", "andsy"}, {"or", "orsy"},
+                        {"div", "idiv"},  {"mod", "imod"}};
     // "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "if", "of", "procedure", "program", "record", "repeat", "then", "to", "type", "until", "var", "while"
     
     auto it = keywords.find(lower);

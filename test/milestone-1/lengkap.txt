@@ -1,0 +1,134 @@
+{ ===== NORMAL CASES ===== }
+
+program ContohProgram;
+
+const
+  PI := 3;
+  MaxVal := 100;
+  Nama := 'Arion';
+
+type
+  Bilangan := integer;
+
+var
+  a, b, c : integer;
+  x       : real;
+  huruf   : char;
+  kata    : string;
+  arr     : array [1..10] of integer;
+
+type
+  Mahasiswa := record
+    nama  : string;
+    nilai : integer;
+  end;
+
+function Tambah(a : integer; b : integer) : integer;
+begin
+  Tambah := a + b;
+end;
+
+procedure CetakHasil(n : integer);
+begin
+  writeln(n);
+end;
+
+begin
+  a := 10;
+  b := 3;
+  c := a + b;
+  c := a - b;
+  c := a * b;
+  c := a div b;
+  c := a mod b;
+  x := 10 / 3;
+
+  if a == b then writeln('sama');
+  if a <> b then writeln('beda');
+  if a > b  then writeln('besar');
+  if a >= b then writeln('besarsama');
+  if a < b  then writeln('kecil');
+  if a <= b then writeln('kecilsama');
+
+  if (a > 0) AND (b > 0) then writeln('and');
+  if (a > 0) OR  (b > 0) then writeln('or');
+  if NOT (a == b) then writeln('not');
+
+  while a > 0 do
+  begin
+    a := a - 1;
+  end;
+
+  for a := 1 to 10 do
+  begin
+    c := c + a;
+  end;
+
+  for a := 10 downto 1 do
+  begin
+    c := c - a;
+  end;
+
+  repeat
+    a := a + 1;
+  until a >= 10;
+
+  case a of
+    1 : writeln('satu');
+    2 : writeln('dua');
+  end;
+
+  kata    := 'Hello World';
+  huruf   := 'A';
+  arr[1]  := 42;
+  c       := arr[1];
+  c       := Tambah(a, b);
+  CetakHasil(c);
+
+end.
+
+{ ===== EDGE CASES ===== }
+
+program EdgeCase;
+var
+  beginners  : integer;
+  endurance  : integer;
+  forloop    : integer;
+  h4g        : integer;
+  my2ndVar   : integer;
+  identIniSangatPanjang24tetapiTetapValid : integer;
+
+BEGIN
+  beginners := 1;
+END;
+
+bEgIn
+  h4g := 2;
+eNd;
+
+begin
+  h4g := 0;
+  h4g := 999999;
+
+  h4g := h4g DIV 2;
+  h4g := h4g MOD 3;
+  if (h4g > 0) and (h4g < 100) then h4g := 50;
+  if not (h4g == 0) then h4g := 1;
+
+  kata := '';
+  huruf := '5';
+  kata := 'Hello World ini string panjang';
+
+  { komentar dengan simbol := + - * / 123 }
+  (* komentar bintang *)
+  {
+    komentar
+    multi baris
+  }
+
+  h4g:=5;
+  h4g:=h4g+1;
+  h4g:=h4g*2;
+  h4g := (my2ndVar + h4g) * (identIniSangatPanjang24tetapiTetapValid - 1);
+
+end.
