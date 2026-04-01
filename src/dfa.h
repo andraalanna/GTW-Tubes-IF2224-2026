@@ -58,5 +58,4 @@ enum State
     S_ERROR,
 
 };
-
 #endif

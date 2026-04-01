@@ -252,6 +252,15 @@ Token Lexer::readPunctuation(char ch)
     case ']':
         currentState = S_RBRACK;
         return Token{"rbrack", val};
+    case ')':
+        currentState = S_RPAR;
+        return Token{"rparent", val};
+    case '[':
+        currentState = S_LBRACK;
+        return Token{"lbrack", val};
+    case ']':
+        currentState = S_RBRACK;
+        return Token{"rbrack", val};
     default:
         currentState = S_ERROR;
         return Token{"error", val};
