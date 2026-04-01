@@ -51,6 +51,12 @@ enum State
     S_CMT2,      // di dalam komentar (* ... *)
     S_CMT2_STAR, // sudah baca '*' di dalam (* ... *), nunggu ')'
 
+    // ident & keyword
+    S_KEY_INPUT,
+    S_KEY_CLASSIFY,
+    S_KEYWORD,
+    S_IDENT,
+
     // error
     S_ERROR,
 

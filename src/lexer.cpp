@@ -245,12 +245,34 @@ Token Lexer::readPunctuation(char ch)
 
 string Lexer::classifyKeyword(string val)
 {
-    return "hai";
+    string[] keyword = {"const", "case", "var", "function", "for", "array", "record", "repeat", "if", "while", 
+        "end", "else", "of", "do", "downto", "procedure", "program", "until", "begin", "type", "then", "to"};
+    // "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "if", "of", "procedure", "program", "record", "repeat", "then", "to", "type", "until", "var", "while"
+    for(int i = 0; i < keyword.length(); i++){
+        if (val == keyword[i]) {
+            currentState = S_KEYWORD;
+            return keyword[i];
+        }
+    }
+    currentState = S_IDENT;
+    return "ident";
 };
 
-Token Lexer::readIdentOrKeyword()
+Token Lexer::readIdentOrKeyword(char ch)
 {
-    return Token{"string", ""};
+    string val(1, ch);
+    currentState = S_KEY_INPUT;
+    
+    while (isalpha(peek())) {
+        val += advance
+    }
+    
+    if (peek() == ' ' || peek == ''){
+        currentState = S_KEY_CLASSIFY;
+        return Token{classifyKeyword(val), val};
+    }
+    currentState = S_ERROR;
+    return Token{"error", ""};
 };
 
 vector<Token> Lexer::tokenize()
