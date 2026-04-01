@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include <cctype>
 #include <iostream>
-
+#include <map>
 using namespace std;
 
 Lexer::Lexer(string src)
@@ -38,20 +38,25 @@ Token Lexer::readNumber()
 
     if (peek() == '.')
     {
-        currentState = S_REAL_DOT;
-        val += advance();
-
-        if (!isdigit(peek()))
+        if (isdigit(source[pos+1]))
         {
-            currentState = S_ERROR;
-            return Token{"error", val};
-        }
-        while (isdigit(peek()))
-        {
+            currentState = S_REAL_DOT;
             val += advance();
+
+            if (!isdigit(peek()))
+            {
+                currentState = S_ERROR;
+                return Token{"error", val};
+            }
+            while (isdigit(peek()))
+            {
+                val += advance();
+            }
+            currentState = S_REAL;
+            return Token({"realcon", val});
         }
-        currentState = S_REAL;
-        return Token({"realcon", val});
+        return Token({"intcon", val});
+       
     }
 
     return Token({"intcon", val});
@@ -237,44 +242,55 @@ Token Lexer::readPunctuation(char ch)
             return Token{"becomes", val};
         }
         return Token{"colon", val};
+    case ')':
+        currentState = S_RPAR;
+        return Token{"rparent", val};
+    case '[':
+        currentState = S_LBRACK;
+        return Token{"lbrack", val};
+    case ']':
+        currentState = S_RBRACK;
+        return Token{"rbrack", val};
     default:
         currentState = S_ERROR;
         return Token{"error", val};
     }
 };
-
 string Lexer::classifyKeyword(string val)
 {
-    string keyword[22] = {"const", "case", "var", "function", "for", "array", "record", "repeat", "if", "while",
-                          "end", "else", "of", "do", "downto", "procedure", "program", "until", "begin", "type", "then", "to"};
+    std::map<string, string> keywords = {{"const","constsy"}, {"case", "casesy"}, {"var", "varsy"}, {"function", "functionsy"}, {"for", "forsy"}, {"array", "arraysy"}, {"record", "recordsy"}, {"repeat", "repeatsy"}, {"if", "ifsy"}, {"while", "whilesy"},
+                          {"end", "endsy"}, {"else", "elsesy"}, {"of", "ofsy"}, {"do", "dosy"}, {"downto", "downtosy"}, {"procedure", "proceduresy"}, {"program", "programsy"}, {"until", "untilsy"}, {"begin", "beginsy"}, {"type", "typesy"}, {"then", "thensy"}, {"to", "tosy"}};
     // "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "if", "of", "procedure", "program", "record", "repeat", "then", "to", "type", "until", "var", "while"
-    for (int i = 0; i < 22; i++)
-    {
-        if (val == keyword[i])
-        {
-            currentState = S_KEYWORD;
-            return keyword[i];
+    for (auto& key:keywords){
+        if(key.first == val){
+            return key.second;
         }
     }
+    
     currentState = S_IDENT;
     return "ident";
 };
 
 Token Lexer::readIdentOrKeyword(char ch)
 {
-    string val(1, ch);
+    string val = "";
+    val += ch;
     currentState = S_KEY_INPUT;
+    advance();
 
-    while (isalpha(peek()))
+    while (isalnum(peek()))
     {
-        val += advance();
+        val += peek();
+        advance();
     }
 
-    if (peek() == ' ')
+    
+    if (!isalnum(peek()))
     {
         currentState = S_KEY_CLASSIFY;
         return Token{classifyKeyword(val), val};
     }
+
     currentState = S_ERROR;
     return Token{"error", ""};
 };
@@ -326,7 +342,7 @@ vector<Token> Lexer::tokenize()
             }
             else
             {
-                advance(); // Cukup maju untuk '('
+                // advance(); // Cukup maju untuk '('
                 currentState = S_LPAR;
                 tokens.push_back({"lparent", "("});
             }

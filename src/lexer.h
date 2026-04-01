@@ -5,6 +5,7 @@
 #include <vector>
 #include "token.h"
 #include "dfa.h"
+
 using namespace std;
 
 /**
