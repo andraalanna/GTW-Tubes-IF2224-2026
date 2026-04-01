@@ -142,15 +142,15 @@ Token Lexer::readString()
                 if (val.empty())
                 {
                     currentState = S_QUOTE;
-                    return Token{"string", ""};
+                    return Token{"string", "''"};
                 }
                 if (val.size() == 1)
                 {
                     currentState = S_CHAR;
-                    return Token{"charcon", val};
+                    return Token{"charcon", "'" + val + "'"};
                 }
                 currentState = S_QUOTE;
-                return Token{"string", val};
+                return Token{"string", "'" + val + "'"};
             }
         }
         else

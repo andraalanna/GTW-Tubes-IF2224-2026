@@ -13,7 +13,7 @@ intcon (100)
 semicolon
 ident (nama)
 becomes
-string (Arion)
+string ('Arion')
 semicolon
 typesy
 ident (bilangan)
@@ -158,7 +158,7 @@ ident (b)
 thensy
 ident (writeln)
 lparent
-string (sama)
+string ('sama')
 rparent
 semicolon
 ifsy
@@ -168,7 +168,7 @@ ident (b)
 thensy
 ident (writeln)
 lparent
-string (beda)
+string ('beda')
 rparent
 semicolon
 ifsy
@@ -178,7 +178,7 @@ ident (b)
 thensy
 ident (writeln)
 lparent
-string (besar)
+string ('besar')
 rparent
 semicolon
 ifsy
@@ -188,7 +188,7 @@ ident (b)
 thensy
 ident (writeln)
 lparent
-string (besarsama)
+string ('besarsama')
 rparent
 semicolon
 ifsy
@@ -198,7 +198,7 @@ ident (b)
 thensy
 ident (writeln)
 lparent
-string (kecil)
+string ('kecil')
 rparent
 semicolon
 ifsy
@@ -208,7 +208,7 @@ ident (b)
 thensy
 ident (writeln)
 lparent
-string (kecilsama)
+string ('kecilsama')
 rparent
 semicolon
 ifsy
@@ -226,7 +226,7 @@ rparent
 thensy
 ident (writeln)
 lparent
-string (and)
+string ('and')
 rparent
 semicolon
 ifsy
@@ -244,7 +244,7 @@ rparent
 thensy
 ident (writeln)
 lparent
-string (or)
+string ('or')
 rparent
 semicolon
 ifsy
@@ -257,7 +257,7 @@ rparent
 thensy
 ident (writeln)
 lparent
-string (not)
+string ('not')
 rparent
 semicolon
 whilesy
@@ -325,25 +325,25 @@ intcon (1)
 colon
 ident (writeln)
 lparent
-string (satu)
+string ('satu')
 rparent
 semicolon
 intcon (2)
 colon
 ident (writeln)
 lparent
-string (dua)
+string ('dua')
 rparent
 semicolon
 endsy
 semicolon
 ident (kata)
 becomes
-string (Hello World)
+string ('Hello World')
 semicolon
 ident (huruf)
 becomes
-charcon (A)
+charcon ('A')
 semicolon
 ident (arr)
 lbrack
@@ -470,15 +470,15 @@ intcon (1)
 semicolon
 ident (kata)
 becomes
-string ()
+string ('')
 semicolon
 ident (huruf)
 becomes
-charcon (5)
+charcon ('5')
 semicolon
 ident (kata)
 becomes
-string (Hello World ini string panjang)
+string ('Hello World ini string panjang')
 semicolon
 comment ( komentar dengan simbol := + - * / 123 )
 comment ( komentar bintang )
