@@ -237,6 +237,15 @@ Token Lexer::readPunctuation(char ch)
             return Token{"becomes", val};
         }
         return Token{"colon", val};
+    case ')':
+        currentState = S_RPAR;
+        return Token{"rparent", val};
+    case '[':
+        currentState = S_LBRACK;
+        return Token{"lbrack", val};
+    case ']':
+        currentState = S_RBRACK;
+        return Token{"rbrack", val};
     default:
         currentState = S_ERROR;
         return Token{"error", val};
@@ -300,7 +309,6 @@ vector<Token> Lexer::tokenize()
             }
             else
             {
-                advance(); // Cukup maju untuk '('
                 currentState = S_LPAR;
                 tokens.push_back({"lparent", "("});
             }

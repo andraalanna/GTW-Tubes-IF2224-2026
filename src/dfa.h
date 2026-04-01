@@ -31,7 +31,7 @@ enum State
     S_EQL2,         // sudah baca "=" yang kedua ->  ==
     S_LESS,         // <
     S_LESSEQUAL,    // <=
-    S_NOTEQUAL,     // !=
+    S_NOTEQUAL,     // <>
     S_GREATER,      // >
     S_GREATEREQUAL, // >=
 
