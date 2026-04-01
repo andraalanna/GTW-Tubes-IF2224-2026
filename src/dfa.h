@@ -17,9 +17,6 @@ enum State
     S_QUOTE,
     S_CHAR,
 
-    // identifier & charcon
-    S_IDENT,
-
     // operator aritmatika
     S_PLUS,  // '+'
     S_MINUS, // '-'

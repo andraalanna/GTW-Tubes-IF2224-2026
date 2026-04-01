@@ -36,13 +36,13 @@ Token Lexer::readNumber()
         val += advance();
     }
 
-    
     if (peek() == '.')
     {
         currentState = S_REAL_DOT;
         val += advance();
 
-        if (!isdigit(peek())){
+        if (!isdigit(peek()))
+        {
             currentState = S_ERROR;
             return Token{"error", val};
         }
@@ -245,11 +245,13 @@ Token Lexer::readPunctuation(char ch)
 
 string Lexer::classifyKeyword(string val)
 {
-    string[] keyword = {"const", "case", "var", "function", "for", "array", "record", "repeat", "if", "while", 
-        "end", "else", "of", "do", "downto", "procedure", "program", "until", "begin", "type", "then", "to"};
+    string keyword[22] = {"const", "case", "var", "function", "for", "array", "record", "repeat", "if", "while",
+                          "end", "else", "of", "do", "downto", "procedure", "program", "until", "begin", "type", "then", "to"};
     // "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "if", "of", "procedure", "program", "record", "repeat", "then", "to", "type", "until", "var", "while"
-    for(int i = 0; i < keyword.length(); i++){
-        if (val == keyword[i]) {
+    for (int i = 0; i < 22; i++)
+    {
+        if (val == keyword[i])
+        {
             currentState = S_KEYWORD;
             return keyword[i];
         }
@@ -262,12 +264,14 @@ Token Lexer::readIdentOrKeyword(char ch)
 {
     string val(1, ch);
     currentState = S_KEY_INPUT;
-    
-    while (isalpha(peek())) {
-        val += advance
+
+    while (isalpha(peek()))
+    {
+        val += advance();
     }
-    
-    if (peek() == ' ' || peek == ''){
+
+    if (peek() == ' ')
+    {
         currentState = S_KEY_CLASSIFY;
         return Token{classifyKeyword(val), val};
     }
@@ -300,7 +304,7 @@ vector<Token> Lexer::tokenize()
         // read Identifier(variable name) or Keyword(beginsy, termausuk -> MOD, AND, div, termasuk semua yang pakai string)
         else if (isalpha(ch))
         {
-            tokens.push_back(readIdentOrKeyword());
+            tokens.push_back(readIdentOrKeyword(ch));
         }
         // read String
         else if (ch == '\'')

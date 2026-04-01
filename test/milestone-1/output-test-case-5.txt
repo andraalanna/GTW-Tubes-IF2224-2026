@@ -1,0 +1,28 @@
+ident (pprogram)
+error
+semicolon
+error
+error
+comma
+error
+colon
+error
+semicolon
+error
+ident (aa)
+becomes
+intcon (5)
+semicolon
+ident (bb)
+becomes
+ident (aa)
+plus
+intcon (10)
+semicolon
+error
+lparent
+ident (RResult)
+error
+error
+error
+period
