@@ -59,7 +59,12 @@ Token Lexer::readNumber()
         return Token({"intcon", val});
     }
 
-    return Token({"intcon", val});
+    if (!isalnum(peek())) return Token({"intcon", val});
+
+    while(isalnum(peek())){
+        val += advance();
+    }
+    return Token({"unknown", val});
 }
 
 Token Lexer::readComment(char ch)
