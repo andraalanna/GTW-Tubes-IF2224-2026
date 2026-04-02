@@ -39,7 +39,7 @@ Token Lexer::readNumber()
 
     if (peek() == '.')
     {
-        if (isdigit(source[pos+1]))
+        if (isdigit(source[pos + 1]))
         {
             currentState = S_REAL_DOT;
             val += advance();
@@ -57,7 +57,6 @@ Token Lexer::readNumber()
             return Token({"realcon", val});
         }
         return Token({"intcon", val});
-       
     }
 
     return Token({"intcon", val});
@@ -243,6 +242,9 @@ Token Lexer::readPunctuation(char ch)
             return Token{"becomes", val};
         }
         return Token{"colon", val};
+    case '<':
+        currentState = S_LPAR;
+        return Token{"rparent", val};
     case ')':
         currentState = S_RPAR;
         return Token{"rparent", val};
@@ -257,15 +259,14 @@ Token Lexer::readPunctuation(char ch)
         return Token{"error", val};
     }
 };
+
 string Lexer::classifyKeyword(string val)
 {
     string lower = val;
     transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-    std::map<string, string> keywords = {{"const","constsy"}, {"case", "casesy"}, {"var", "varsy"}, {"function", "functionsy"}, {"for", "forsy"}, {"array", "arraysy"}, {"record", "recordsy"}, {"repeat", "repeatsy"}, {"if", "ifsy"}, {"while", "whilesy"},
-                        {"end", "endsy"}, {"else", "elsesy"}, {"of", "ofsy"}, {"do", "dosy"}, {"downto", "downtosy"}, {"procedure", "proceduresy"}, {"program", "programsy"}, {"until", "untilsy"}, {"begin", "beginsy"}, {"type", "typesy"}, {"then", "thensy"}, {"to", "tosy"}, {"not", "notsy"}, {"and", "andsy"}, {"or", "orsy"},
-                        {"div", "idiv"},  {"mod", "imod"}};
+    std::map<string, string> keywords = {{"const", "constsy"}, {"case", "casesy"}, {"var", "varsy"}, {"function", "functionsy"}, {"for", "forsy"}, {"array", "arraysy"}, {"record", "recordsy"}, {"repeat", "repeatsy"}, {"if", "ifsy"}, {"while", "whilesy"}, {"end", "endsy"}, {"else", "elsesy"}, {"of", "ofsy"}, {"do", "dosy"}, {"downto", "downtosy"}, {"procedure", "proceduresy"}, {"program", "programsy"}, {"until", "untilsy"}, {"begin", "beginsy"}, {"type", "typesy"}, {"then", "thensy"}, {"to", "tosy"}, {"not", "notsy"}, {"and", "andsy"}, {"or", "orsy"}, {"div", "idiv"}, {"mod", "imod"}};
     // "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "if", "of", "procedure", "program", "record", "repeat", "then", "to", "type", "until", "var", "while"
-    
+
     auto it = keywords.find(lower);
     if (it != keywords.end())
     {
@@ -273,7 +274,6 @@ string Lexer::classifyKeyword(string val)
         return it->second;
     }
 
-    
     currentState = S_IDENT;
     return "ident";
 };
@@ -294,14 +294,12 @@ Token Lexer::readIdentOrKeyword(char ch)
     string lower = val;
     transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-    
     if (!isalnum(peek()))
     {
         currentState = S_KEY_CLASSIFY;
         return Token{classifyKeyword(val), lower};
     }
 
-    
     currentState = S_ERROR;
     return Token{"error", ""};
 };

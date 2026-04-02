@@ -1,28 +1,30 @@
-ident (pprogram)
-error
+programsy
+ident (hello)
 semicolon
-error
-error
+varsy
+ident (a)
 comma
-error
+ident (b)
 colon
-error
+ident (integer)
 semicolon
-error
-ident (aa)
+beginsy
+ident (a)
 becomes
 intcon (5)
 semicolon
-ident (bb)
+ident (b)
 becomes
-ident (aa)
+ident (a)
 plus
 intcon (10)
 semicolon
-error
+ident (writeln)
 lparent
-ident (RResult)
-error
-error
-error
+string ('Result = ')
+comma
+ident (b)
+rparent
+semicolon
+endsy
 period

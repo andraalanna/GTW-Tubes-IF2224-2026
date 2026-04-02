@@ -8,7 +8,7 @@ FLAGS = -std=c++17 -Wall
 
 SRC_DIR = src
 BIN_DIR = bin
-TARGET = $(BIN_DIR)/lexer	
+TARGET = $(BIN_DIR)/lexer.exe	
 
 # Target default yang dijalankan saat ketik 'make'
 all: $(TARGET)
