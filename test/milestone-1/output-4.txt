@@ -1,0 +1,49 @@
+programsy
+ident (testpunct)
+semicolon
+varsy
+ident (a)
+comma
+ident (b)
+colon
+ident (integer)
+semicolon
+ident (arr)
+colon
+arraysy
+lbrack
+intcon (3)
+rbrack
+ofsy
+ident (integer)
+semicolon
+beginsy
+ident (a)
+error (=)
+colon
+becomes
+intcon (5)
+semicolon
+ident (a)
+error (=)
+intcon (6)
+semicolon
+ident (writeln)
+lparent
+lparent
+ident (a)
+rparent
+comma
+ident (arr)
+lbrack
+intcon (1)
+rbrack
+rparent
+semicolon
+ident (a)
+becomes
+intcon (1)
+period
+semicolon
+endsy
+period

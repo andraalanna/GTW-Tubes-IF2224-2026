@@ -173,8 +173,8 @@ period
 
 | Nama | NIM | Tugas |
 |------|-----|-------|
-| Muhammad Jordan Ferimeison | 13524047 | `readNumber()`, `peek()`, `advance()`, `tokenize()`, integrasi |
-| Arina Azka | 13524049 | `readString()`, `readCharcon()`, `classifyKeyword()` |
-| Hakam Avicena Mustain | 13524075 | `readOperator()` |
-| Yavie Azka Putra Araly | 13524077 | `readPunctuation()` |
-| Angelina Andra Alanna | 13524079 | `readIdentOrKeyword()`, `readComment()`, integrasi |
+| Muhammad Jordan Ferimeison | 13524047 | `readIdentOrKeyword()`, `classifyKeyword()`, ` tokenize()`, integrasi |
+| Arina Azka | 13524049 | `readPunctuation()` |
+| Hakam Avicena Mustain | 13524075 | `readComment()`, `readString()`|
+| Yavie Azka Putra Araly | 13524077 | `readOperator()` |
+| Angelina Andra Alanna | 13524079 | ` readNumber()`, `Lexer()`, `peek()`, `advance()` |

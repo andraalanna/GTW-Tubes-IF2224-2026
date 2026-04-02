@@ -1,0 +1,38 @@
+comment (Tes case untuk uji ketahanan program lexer)
+programsy
+ident (robustness)
+semicolon
+varsy
+comment (uji string dan char)
+ident (q)
+becomes
+string ('')
+semicolon
+ident (s)
+becomes
+charcon (''')
+semicolon
+ident (t)
+becomes
+string ('it's')
+semicolon
+ident (v)
+becomes
+string ('string\n biasa')
+semicolon
+ident (w)
+becomes
+error (unterminated string)
+comment (input x := ''')
+ident (x)
+becomes
+error (unterminated string)
+ident (y)
+becomes
+realcon (1.2)
+ident (a)
+ident (x)
+becomes
+realcon (1.2)
+endsy
+period

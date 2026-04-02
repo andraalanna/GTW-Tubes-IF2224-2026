@@ -1,0 +1,41 @@
+programsy
+ident (testident)
+semicolon
+varsy
+ident (ifvar)
+comma
+ident (array2)
+comma
+ident (h4g)
+colon
+ident (integer)
+semicolon
+beginsy
+ifsy
+becomes
+intcon (1)
+semicolon
+ident (ifvar)
+becomes
+intcon (2)
+semicolon
+arraysy
+becomes
+intcon (3)
+semicolon
+ident (array2)
+becomes
+intcon (4)
+semicolon
+programsy
+becomes
+intcon (5)
+semicolon
+ident (baca)
+error (_)
+ident (buku)
+becomes
+intcon (6)
+semicolon
+endsy
+period

@@ -1,0 +1,44 @@
+programsy
+ident (intrealtest)
+semicolon
+varsy
+ident (a)
+comma
+ident (b)
+comma
+ident (c)
+comma
+ident (d)
+colon
+ident (real)
+semicolon
+beginsy
+ident (a)
+becomes
+intcon (42)
+semicolon
+ident (b)
+becomes
+realcon (3.14)
+semicolon
+ident (c)
+becomes
+intcon (12)
+period
+semicolon
+ident (d)
+becomes
+intcon (-5)
+semicolon
+ident (b)
+becomes
+realcon (-6.7)
+minus
+realcon (7.2)
+semicolon
+ident (c)
+becomes
+error (12abc)
+semicolon
+endsy
+period
