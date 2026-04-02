@@ -1,0 +1,15 @@
+Program robustness;
+
+var  
+   a:= -10;
+    b := 12n;
+    d := 011
+    g := 1.2e10;
+    k := 1.e7;
+
+
+(* operator depan angka *)
+    l := 6- 7;
+    m := -6.7 -7.2;
+    n := 10.-5;
+end.

@@ -29,6 +29,10 @@ char Lexer::advance()
 Token Lexer::readNumber()
 {
     string val = "";
+    if (currentState == S_MINUS)
+    {
+        val += '-';
+    }
 
     currentState = S_INT;
 
@@ -59,9 +63,11 @@ Token Lexer::readNumber()
         return Token({"intcon", val});
     }
 
-    if (!isalnum(peek())) return Token({"intcon", val});
+    if (!isalnum(peek()))
+        return Token({"intcon", val});
 
-    while(isalnum(peek())){
+    while (isalnum(peek()))
+    {
         val += advance();
     }
     return Token({"unknown", val});
@@ -175,7 +181,14 @@ Token Lexer::readOperator(char ch)
         currentState = S_PLUS;
         return Token{"plus", val};
     case '-':
+        if (isdigit(peek()) && (currentState != S_INT && currentState != S_REAL))
+        {
+            currentState = S_MINUS;
+
+            return readNumber();
+        }
         currentState = S_MINUS;
+
         return Token{"minus", val};
     case '*':
         currentState = S_TIMES;
@@ -247,9 +260,7 @@ Token Lexer::readPunctuation(char ch)
             return Token{"becomes", val};
         }
         return Token{"colon", val};
-    case '<':
-        currentState = S_LPAR;
-        return Token{"rparent", val};
+    
     case ')':
         currentState = S_RPAR;
         return Token{"rparent", val};
@@ -308,7 +319,11 @@ vector<Token> Lexer::tokenize()
 
     while (peek() != '\0')
     {
-        currentState = S0;
+        if((currentState != S_INT && currentState != S_REAL) && peek() != '-')
+        {
+            currentState = S0;
+        }
+
         char ch = peek();
 
         // skip whitespace

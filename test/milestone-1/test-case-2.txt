@@ -1,0 +1,22 @@
+program OperatorTest;
+var
+  x: integer;
+  y: real;
+  s: string;
+  a: integer;
+  b: integer;
+  c: integer;
+  d: integer;
+  e: integer;
+  z: integer;
+  check: boolean;
+begin
+    z = a + b - c * d / e;
+    check := x == y;
+    check := x <> y;
+    check := x <= y;
+    { == error test operator }
+    check := a >- b
+    check := a >< b
+    check := a = b
+end.
