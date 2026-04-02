@@ -1,0 +1,14 @@
+program testIdent;
+
+var
+  ifVar, array2, h4g: integer;
+  
+begin
+  IF := 1;
+  ifVar := 2;
+  ARRAY := 3;
+  array2 := 4;
+  program := 5;
+  baca_buku := 6;
+end.
+

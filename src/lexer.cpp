@@ -1,7 +1,8 @@
 #include "lexer.h"
 #include <cctype>
 #include <iostream>
-
+#include <map>
+#include <algorithm>
 using namespace std;
 
 Lexer::Lexer(string src)
@@ -28,6 +29,10 @@ char Lexer::advance()
 Token Lexer::readNumber()
 {
     string val = "";
+    if (currentState == S_MINUS)
+    {
+        val += '-';
+    }
 
     currentState = S_INT;
 
@@ -36,25 +41,36 @@ Token Lexer::readNumber()
         val += advance();
     }
 
-    
     if (peek() == '.')
     {
-        currentState = S_REAL_DOT;
-        val += advance();
-
-        if (!isdigit(peek())){
-            currentState = S_ERROR;
-            return Token{"error", val};
-        }
-        while (isdigit(peek()))
+        if (isdigit(source[pos + 1]))
         {
+            currentState = S_REAL_DOT;
             val += advance();
+
+            if (!isdigit(peek()))
+            {
+                currentState = S_ERROR;
+                return Token{"error", val};
+            }
+            while (isdigit(peek()))
+            {
+                val += advance();
+            }
+            currentState = S_REAL;
+            return Token({"realcon", val});
         }
-        currentState = S_REAL;
-        return Token({"realcon", val});
+        return Token({"intcon", val});
     }
 
-    return Token({"intcon", val});
+    if (!isalnum(peek()))
+        return Token({"intcon", val});
+
+    while (isalnum(peek()))
+    {
+        val += advance();
+    }
+    return Token({"error", val});
 }
 
 Token Lexer::readComment(char ch)
@@ -136,15 +152,15 @@ Token Lexer::readString()
                 if (val.empty())
                 {
                     currentState = S_QUOTE;
-                    return Token{"string", ""};
+                    return Token{"string", "''"};
                 }
                 if (val.size() == 1)
                 {
                     currentState = S_CHAR;
-                    return Token{"charcon", val};
+                    return Token{"charcon", "'" + val + "'"};
                 }
                 currentState = S_QUOTE;
-                return Token{"string", val};
+                return Token{"string", "'" + val + "'"};
             }
         }
         else
@@ -165,7 +181,14 @@ Token Lexer::readOperator(char ch)
         currentState = S_PLUS;
         return Token{"plus", val};
     case '-':
+        if (isdigit(peek()) && (currentState != S_INT && currentState != S_REAL))
+        {
+            currentState = S_MINUS;
+
+            return readNumber();
+        }
         currentState = S_MINUS;
+
         return Token{"minus", val};
     case '*':
         currentState = S_TIMES;
@@ -237,6 +260,7 @@ Token Lexer::readPunctuation(char ch)
             return Token{"becomes", val};
         }
         return Token{"colon", val};
+
     case ')':
         currentState = S_RPAR;
         return Token{"rparent", val};
@@ -254,12 +278,39 @@ Token Lexer::readPunctuation(char ch)
 
 string Lexer::classifyKeyword(string val)
 {
-    return "hai";
+    string lower = val;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    std::map<string, string> keywords = {{"const", "constsy"}, {"case", "casesy"}, {"var", "varsy"}, {"function", "functionsy"}, {"for", "forsy"}, {"array", "arraysy"}, {"record", "recordsy"}, {"repeat", "repeatsy"}, {"if", "ifsy"}, {"while", "whilesy"}, {"end", "endsy"}, {"else", "elsesy"}, {"of", "ofsy"}, {"do", "dosy"}, {"downto", "downtosy"}, {"procedure", "proceduresy"}, {"program", "programsy"}, {"until", "untilsy"}, {"begin", "beginsy"}, {"type", "typesy"}, {"then", "thensy"}, {"to", "tosy"}, {"not", "notsy"}, {"and", "andsy"}, {"or", "orsy"}, {"div", "idiv"}, {"mod", "imod"}};
+    // "array", "begin", "case", "const", "do", "downto", "else", "end", "for", "function", "if", "of", "procedure", "program", "record", "repeat", "then", "to", "type", "until", "var", "while"
+
+    auto it = keywords.find(lower);
+    if (it != keywords.end())
+    {
+        currentState = S_KEYWORD;
+        return it->second;
+    }
+
+    currentState = S_IDENT;
+    return "ident";
 };
 
-Token Lexer::readIdentOrKeyword()
+Token Lexer::readIdentOrKeyword(char ch)
 {
-    return Token{"string", ""};
+    string val = "";
+    val += ch;
+    currentState = S_KEY_INPUT;
+    advance();
+
+    while (isalnum(peek()))
+    {
+        val += peek();
+        advance();
+    }
+
+    string lower = val;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    currentState = S_KEY_CLASSIFY;
+    return Token{classifyKeyword(val), lower};
 };
 
 vector<Token> Lexer::tokenize()
@@ -268,10 +319,13 @@ vector<Token> Lexer::tokenize()
 
     while (peek() != '\0')
     {
-        currentState = S0;
+        if ((currentState != S_INT && currentState != S_REAL) && peek() != '-')
+        {
+            currentState = S0;
+        }
+
         char ch = peek();
 
-        // skip whitespace
         if (isspace(ch))
         {
             advance();
@@ -283,18 +337,16 @@ vector<Token> Lexer::tokenize()
         {
             tokens.push_back(readNumber());
         }
-
-        // read Identifier(variable name) or Keyword(beginsy, termausuk -> MOD, AND, div, termasuk semua yang pakai string)
+        // read Identifier(variable name) or Keyword
         else if (isalpha(ch))
         {
-            tokens.push_back(readIdentOrKeyword());
+            tokens.push_back(readIdentOrKeyword(ch));
         }
         // read String
         else if (ch == '\'')
         {
             tokens.push_back(readString());
         }
-
         // read Comment
         else if (ch == '{')
         {
@@ -313,14 +365,14 @@ vector<Token> Lexer::tokenize()
                 tokens.push_back({"lparent", "("});
             }
         }
-
+        // read operator
         else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' ||
                  ch == '=' || ch == '<' || ch == '>')
         {
             advance();
             tokens.push_back(readOperator(ch));
         }
-
+        // read punctuation
         else if (ch == ',' || ch == '.' || ch == ';' || ch == ':' ||
                  ch == ')' || ch == '[' || ch == ']')
         {
@@ -331,7 +383,7 @@ vector<Token> Lexer::tokenize()
         // Karakter tidak dikenal
         else
         {
-            tokens.push_back(Token{"Token", string(1, ch)});
+            tokens.push_back(Token({"error", string(1, ch)}));
             advance();
         }
     }
