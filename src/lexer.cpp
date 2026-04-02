@@ -70,7 +70,7 @@ Token Lexer::readNumber()
     {
         val += advance();
     }
-    return Token({"unknown", val});
+    return Token({"error", val});
 }
 
 Token Lexer::readComment(char ch)
@@ -383,7 +383,7 @@ vector<Token> Lexer::tokenize()
         // Karakter tidak dikenal
         else
         {
-            tokens.push_back(Token{"Token", string(1, ch)});
+            tokens.push_back(Token({"error", string(1, ch)}));
             advance();
         }
     }
