@@ -293,15 +293,8 @@ Token Lexer::readIdentOrKeyword(char ch)
 
     string lower = val;
     transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-
-    if (!isalnum(peek()))
-    {
-        currentState = S_KEY_CLASSIFY;
-        return Token{classifyKeyword(val), lower};
-    }
-
-    currentState = S_ERROR;
-    return Token{"error", ""};
+    currentState = S_KEY_CLASSIFY;
+    return Token{classifyKeyword(val), lower};
 };
 
 vector<Token> Lexer::tokenize()
