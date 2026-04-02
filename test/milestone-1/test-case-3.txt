@@ -12,13 +12,7 @@ var
     w := 'belum ditutup
     {input x := '''}
     x := ''';
-
-(* comment edge case *)
-    { komentar tidak ditutup
-    (* komentar bintang tidak ditutup
-
-(* comment dengan karakter spesial di dalamnya *)
-    { komentar dengan } di tengah lanjutan }
-    (* komentar dengan *) di tengah lanjutan *)
+    y := 1.2a
+    x := 1.2
 
 end.
