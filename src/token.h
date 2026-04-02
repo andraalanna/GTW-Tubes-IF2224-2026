@@ -24,7 +24,8 @@ inline bool tokenHasValue(const string& type) {
            type == "charcon" ||
            type == "string"  ||
            type == "ident"   ||
-           type == "comment";
+           type == "comment" ||
+           type == "unknown";
 }
 
 #endif
