@@ -1,0 +1,95 @@
+programsy
+ident (operatortest)
+semicolon
+varsy
+ident (x)
+colon
+ident (integer)
+semicolon
+ident (y)
+colon
+ident (real)
+semicolon
+ident (s)
+colon
+ident (string)
+semicolon
+ident (a)
+colon
+ident (integer)
+semicolon
+ident (b)
+colon
+ident (integer)
+semicolon
+ident (c)
+colon
+ident (integer)
+semicolon
+ident (d)
+colon
+ident (integer)
+semicolon
+ident (e)
+colon
+ident (integer)
+semicolon
+ident (z)
+colon
+ident (integer)
+semicolon
+ident (check)
+colon
+ident (boolean)
+semicolon
+beginsy
+ident (z)
+error
+ident (a)
+plus
+ident (b)
+minus
+ident (c)
+times
+ident (d)
+rdiv
+ident (e)
+semicolon
+ident (check)
+becomes
+ident (x)
+eql
+ident (y)
+semicolon
+ident (check)
+becomes
+ident (x)
+neq
+ident (y)
+semicolon
+ident (check)
+becomes
+ident (x)
+leq
+ident (y)
+semicolon
+comment ( == error test operator )
+ident (check)
+becomes
+ident (a)
+gtr
+minus
+ident (b)
+ident (check)
+becomes
+ident (a)
+gtr
+lss
+ident (b)
+ident (check)
+becomes
+ident (a)
+error
+ident (b)
+endsy
+period
