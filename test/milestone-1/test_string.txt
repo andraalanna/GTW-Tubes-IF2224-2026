@@ -1,5 +1,0 @@
-begin
-  writeln('hello');
-  writeln('it''s working');
-  writeln('');
-end.

@@ -260,7 +260,7 @@ Token Lexer::readPunctuation(char ch)
             return Token{"becomes", val};
         }
         return Token{"colon", val};
-    
+
     case ')':
         currentState = S_RPAR;
         return Token{"rparent", val};
@@ -319,14 +319,13 @@ vector<Token> Lexer::tokenize()
 
     while (peek() != '\0')
     {
-        if((currentState != S_INT && currentState != S_REAL) && peek() != '-')
+        if ((currentState != S_INT && currentState != S_REAL) && peek() != '-')
         {
             currentState = S0;
         }
 
         char ch = peek();
 
-        // skip whitespace
         if (isspace(ch))
         {
             advance();
@@ -338,8 +337,7 @@ vector<Token> Lexer::tokenize()
         {
             tokens.push_back(readNumber());
         }
-
-        // read Identifier(variable name) or Keyword(beginsy, termausuk -> MOD, AND, div, termasuk semua yang pakai string)
+        // read Identifier(variable name) or Keyword
         else if (isalpha(ch))
         {
             tokens.push_back(readIdentOrKeyword(ch));
@@ -349,7 +347,6 @@ vector<Token> Lexer::tokenize()
         {
             tokens.push_back(readString());
         }
-
         // read Comment
         else if (ch == '{')
         {
@@ -364,19 +361,18 @@ vector<Token> Lexer::tokenize()
             }
             else
             {
-                // advance(); // Cukup maju untuk '('
                 currentState = S_LPAR;
                 tokens.push_back({"lparent", "("});
             }
         }
-
+        // read operator
         else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' ||
                  ch == '=' || ch == '<' || ch == '>')
         {
             advance();
             tokens.push_back(readOperator(ch));
         }
-
+        // read punctuation
         else if (ch == ',' || ch == '.' || ch == ';' || ch == ':' ||
                  ch == ')' || ch == '[' || ch == ']')
         {
