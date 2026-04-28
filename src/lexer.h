@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "token.h"
 #include "dfa.h"
 
@@ -61,6 +62,26 @@ private:
 public:
     Lexer(string src);
     vector<Token> tokenize();
+};
+
+struct ParseNode{
+    string type;
+    string value;
+    // Pakai shared_ptr untuk child nodes biar auto manage memory
+    vector<shared_ptr<ParseNode>> children;
+
+    ParseNode(const string& t): type(t){};
+    ParseNode(const string& t, const string& v): type(t), value(v){};
+};
+
+// ini untuk buat non-terminal
+inline shared_ptr<ParseNode> makeNode(const string& t){
+    return make_shared<ParseNode>(t);
+}
+
+// ini untuk terminal
+inline shared_ptr<ParseNode> makeLeaf(const string& t, const string& v){
+    return make_shared<ParseNode>(t, v);
 };
 
 #endif
