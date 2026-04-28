@@ -8,17 +8,15 @@ class Parser {
 public:
     Parser(const vector<Token>& tokens);
 
-    // Entry point — kembalikan root ParseNode "<program>"
+    // Entry point, kembalikan root ParseNode "<program>"
     shared_ptr<ParseNode> parse();
 
-    // Orang 1: Andra
     shared_ptr<ParseNode> parseProgram();
     shared_ptr<ParseNode> parseProgramHeader();
     shared_ptr<ParseNode> parseDeclarationPart();
     shared_ptr<ParseNode> parseConstDeclaration();
     shared_ptr<ParseNode> parseConstant();
 
-    // Orang 2: Yavie
     shared_ptr<ParseNode> parseTypeDeclaration();
     shared_ptr<ParseNode> parseVarDeclaration();
     shared_ptr<ParseNode> parseIdentifierList();
@@ -30,14 +28,13 @@ public:
     shared_ptr<ParseNode> parseFieldList();
     shared_ptr<ParseNode> parseFieldPart();
 
-    // Orang 3: Arin
+    shared_ptr<ParseNode> parseSubProgramDeclaration();
     shared_ptr<ParseNode> parseProcedureDeclaration();
     shared_ptr<ParseNode> parseFunctionDeclaration();
     shared_ptr<ParseNode> parseBlock();
     shared_ptr<ParseNode> parseFormalParameterList();
     shared_ptr<ParseNode> parseParameterGroup();
 
-    // Orang 4: Hakam
     shared_ptr<ParseNode> parseCompoundStatement();
     shared_ptr<ParseNode> parseStatementList();
     shared_ptr<ParseNode> parseStatement();
@@ -51,7 +48,6 @@ public:
     shared_ptr<ParseNode> parseProcedureFunctionCall(shared_ptr<ParseNode> identLeaf);
     shared_ptr<ParseNode> parseParameterList();
 
-    // Orang 5: Jordan
     shared_ptr<ParseNode> parseExpression();
     shared_ptr<ParseNode> parseSimpleExpression();
     shared_ptr<ParseNode> parseTerm();
@@ -65,13 +61,13 @@ private:
     int pos;  
 
     // Lihat token sekarang
-    const Token& current() const;
+    const Token& current();
 
     // Lihat token selanjutnya, tanpa lewatin yang sekarang
-    const Token& lookahead() const;
+    const Token& lookahead();
 
     // Cek apakah token saat ini bertipe 'type'
-    bool check(const string& type) const;
+    bool check(const string& type);
 
     // Konsumsi token saat ini dan kembalikan leaf ParseNode-nya;
     // jika tipe tidak sesuai → lempar syntax error.
@@ -83,8 +79,8 @@ private:
     // Konsumsi token saat ini dan kembalikan leaf-nya (tanpa cek tipe)
     shared_ptr<ParseNode> consume();
 
-    // Apakah sudah habis token?
-    bool isAtEnd() const;
+    // true kalau udah selesai, false kalau belum.
+    bool isAtEnd();
 
     // Format pesan error syntax
     [[noreturn]] void syntaxError(const string& expected);

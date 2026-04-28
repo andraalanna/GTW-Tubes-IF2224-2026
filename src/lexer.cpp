@@ -394,10 +394,10 @@ vector<Token> Lexer::tokenize()
         }
 
         // Fix milestone 1: titik cuman valid kalau setelahnya spasi, /0, atau '.' lagi.
-        else if (ch = '.'){
+        else if (ch == '.'){
             char next = (static_cast<size_t>(pos + 1) < source.size()) ? source[pos+1] : '\0';
             // kasus valid
-            if (next == '.' || next == '\0' || next == isspace(next)){
+            if (next == '.' || next == '\0' || isspace(next)){
                 advance();
                 tokens.push_back(readPunctuation(ch));
             }
