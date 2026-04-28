@@ -70,7 +70,7 @@ Token Lexer::readNumber()
     {
         val += advance();
     }
-    return Token({"unknown", val});
+    return Token({"error", val});
 }
 
 Token Lexer::readComment(char ch)
@@ -313,24 +313,44 @@ Token Lexer::readIdentOrKeyword(char ch)
     return Token{classifyKeyword(val), lower};
 };
 
+Token Lexer::readUnknown(char ch){
+    string val(1, ch);
+    currentState = S_UNKNOWN;
+
+    while (peek() != '\0' && !isspace(peek())){
+        val += peek();
+        advance();
+    }
+
+    return Token{"unknown", val};
+}
+
+
 vector<Token> Lexer::tokenize()
 {
     vector<Token> tokens;
 
     while (peek() != '\0')
     {
-        if ((currentState != S_INT && currentState != S_REAL) && peek() != '-')
-        {
+
+        if (isspace(peek())){
+            advance();
             currentState = S0;
+            continue;
         }
+        
+        // if ((currentState != S_INT && currentState != S_REAL) && peek() != '-')
+        // {
+        //     currentState = S0;
+        // }
 
         char ch = peek();
 
-        if (isspace(ch))
-        {
-            advance();
-            continue;
-        }
+        // if (isspace(ch))
+        // {
+        //     advance();
+        //     continue;
+        // }
 
         // read Number
         if (isdigit(ch))
@@ -372,6 +392,22 @@ vector<Token> Lexer::tokenize()
             advance();
             tokens.push_back(readOperator(ch));
         }
+
+        // Fix milestone 1: titik cuman valid kalau setelahnya spasi, /0, atau '.' lagi.
+        else if (ch = '.'){
+            char next = (static_cast<size_t>(pos + 1) < source.size()) ? source[pos+1] : '\0';
+            // kasus valid
+            if (next == '.' || next == '\0' || next == isspace(next)){
+                advance();
+                tokens.push_back(readPunctuation(ch));
+            }
+            else {
+                // kasus diikuti non-seperator
+                advance();
+                tokens.push_back(readUnknown(ch));
+            }
+        }
+
         // read punctuation
         else if (ch == ',' || ch == '.' || ch == ';' || ch == ':' ||
                  ch == ')' || ch == '[' || ch == ']')
@@ -383,7 +419,7 @@ vector<Token> Lexer::tokenize()
         // Karakter tidak dikenal
         else
         {
-            tokens.push_back(Token{"Token", string(1, ch)});
+            tokens.push_back(Token({"", string(1, ch)}));
             advance();
         }
     }

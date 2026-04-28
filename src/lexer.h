@@ -55,6 +55,9 @@ private:
     // Dipanggil dari tokenize() ketika peek() adalah { atau (*
     Token readComment(char ch);
 
+    // Untuk baca karakter yang tidak diketahui
+    Token readUnknown(char ch);
+
 public:
     Lexer(string src);
     vector<Token> tokenize();

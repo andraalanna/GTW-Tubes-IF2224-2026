@@ -11,3 +11,4 @@ begin
   program := 5;
   baca_buku := 6;
 end.
+
