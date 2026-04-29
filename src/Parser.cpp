@@ -180,6 +180,140 @@ shared_ptr<ParseNode> Parser::parseConstant()
     return node;
 }
 
+// STUB
+shared_ptr<ParseNode> Parser::parseIdentifierList()
+{
+    auto node = makeNode("<identifier-list>");
+
+    // Stub minimal supaya compile
+
+    return node;
+}
+
+// STUB
+shared_ptr<ParseNode> Parser::parseArrayType()
+{
+    auto node = makeNode("<array-type-STUB>");
+
+    // Stub minimal supaya compile
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseSubProgramDeclaration()
+{
+    auto node = makeNode("<subprogram-declaration>");
+
+    if (check("proceduresy"))
+    {
+        node->children.push_back(parseProcedureDeclaration());
+    }
+    else if (check("functionsy"))
+    {
+        node->children.push_back(parseFunctionDeclaration());
+    }
+    else
+    {
+        syntaxError("proceduresy or functionsy");
+    }
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseProcedureDeclaration()
+{
+    auto node = makeNode("<procedure-declaration>");
+
+    node->children.push_back(expect("proceduresy"));
+    node->children.push_back(expect("ident"));
+
+    if (check("lparent"))
+    {
+        node->children.push_back(parseFormalParameterList());
+    }
+
+    node->children.push_back(expect("semicolon"));
+    node->children.push_back(parseBlock());
+    node->children.push_back(expect("semicolon"));
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseFunctionDeclaration()
+{
+    auto node = makeNode("<function-declaration>");
+
+    node->children.push_back(expect("functionsy"));
+    node->children.push_back(expect("ident"));
+
+    // formal-parameter-list opsional
+    if (check("lparent"))
+    {
+        node->children.push_back(parseFormalParameterList());
+    }
+
+    node->children.push_back(expect("colon"));
+    node->children.push_back(expect("ident"));
+    node->children.push_back(expect("semicolon"));
+
+    node->children.push_back(parseBlock());
+    node->children.push_back(expect("semicolon"));
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseBlock()
+{
+    auto node = makeNode("<block>");
+
+    node->children.push_back(parseDeclarationPart());
+    node->children.push_back(parseCompoundStatement());
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseFormalParameterList()
+{
+    auto node = makeNode("<formal-parameter-list>");
+
+    node->children.push_back(expect("lparent"));
+    node->children.push_back(parseParameterGroup());
+
+    while (check("semicolon"))
+    {
+        node->children.push_back(expect("semicolon"));
+        node->children.push_back(parseParameterGroup());
+    }
+
+    node->children.push_back(expect("rparent"));
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseParameterGroup()
+{
+    auto node = makeNode("<parameter-group>");
+
+    node->children.push_back(parseIdentifierList());
+    node->children.push_back(expect("colon"));
+
+    // Sesuai spek: parameter-group -> identifier-list colon (ident | array-type)
+    if (check("ident"))
+    {
+        node->children.push_back(expect("ident"));
+    }
+    else if (check("arraysy"))
+    {
+        node->children.push_back(parseArrayType());
+    }
+    else
+    {
+        syntaxError("ident or array-type");
+    }
+
+    return node;
+}
+
 // STUB FOR TESTING
 // Fungsi-fungsi ini sementara saja supaya Parser.cpp bisa di-compile
 // sebelum bagian Orang 2, 3, dan 4 selesai.
@@ -199,15 +333,6 @@ shared_ptr<ParseNode> Parser::parseVarDeclaration()
 
     // Stub ini tidak memproses var declaration.
     // Jangan dipakai untuk test var dulu.
-    return node;
-}
-
-shared_ptr<ParseNode> Parser::parseSubProgramDeclaration()
-{
-    auto node = makeNode("<subprogram-declaration-STUB>");
-
-    // Stub ini tidak memproses procedure/function declaration.
-    // Jangan dipakai untuk test subprogram dulu.
     return node;
 }
 
