@@ -51,7 +51,7 @@ Token Lexer::readNumber()
             if (!isdigit(peek()))
             {
                 currentState = S_ERROR;
-                return Token{"error", val};
+                return Token{"unknown", val};
             }
             while (isdigit(peek()))
             {
@@ -70,7 +70,7 @@ Token Lexer::readNumber()
     {
         val += advance();
     }
-    return Token({"error", val});
+    return Token({"unknown", val});
 }
 
 Token Lexer::readComment(char ch)
@@ -88,7 +88,7 @@ Token Lexer::readComment(char ch)
         if (peek() == '\0')
         {
             currentState = S_ERROR;
-            return Token{"error", "unterminated comment"};
+            return Token{"unknown", "unterminated comment"};
         }
         currentState = S_CMT1;
         advance();
@@ -124,7 +124,7 @@ Token Lexer::readComment(char ch)
             }
         }
         currentState = S_ERROR;
-        return Token{"error", "unterminated comment"};
+        return Token{"unknown", "unterminated comment"};
     }
 };
 Token Lexer::readString()
@@ -136,7 +136,7 @@ Token Lexer::readString()
         char ch = peek();
         if (ch == '\0' || ch == '\n')
         {
-            return Token{"error", "unterminated string"};
+            return Token{"unknown", "unterminated string"};
         }
 
         if (ch == '\'')
@@ -205,7 +205,7 @@ Token Lexer::readOperator(char ch)
             return Token{"eql", val};
         }
         currentState = S_ERROR;
-        return Token{"error", val};
+        return Token{"unknown", val};
     case '<':
         currentState = S_LESS;
         if (peek() == '>')
@@ -232,7 +232,7 @@ Token Lexer::readOperator(char ch)
         return Token{"gtr", val};
     default:
         currentState = S_ERROR;
-        return Token{"error", val};
+        return Token{"unknown", val};
     }
 };
 
@@ -272,7 +272,7 @@ Token Lexer::readPunctuation(char ch)
         return Token{"rbrack", val};
     default:
         currentState = S_ERROR;
-        return Token{"error", val};
+        return Token{"unknown", val};
     }
 };
 
@@ -313,18 +313,19 @@ Token Lexer::readIdentOrKeyword(char ch)
     return Token{classifyKeyword(val), lower};
 };
 
-Token Lexer::readUnknown(char ch){
+Token Lexer::readUnknown(char ch)
+{
     string val(1, ch);
     currentState = S_UNKNOWN;
 
-    while (peek() != '\0' && !isspace(peek())){
+    while (peek() != '\0' && !isspace(peek()))
+    {
         val += peek();
         advance();
     }
 
     return Token{"unknown", val};
 }
-
 
 vector<Token> Lexer::tokenize()
 {
@@ -333,12 +334,13 @@ vector<Token> Lexer::tokenize()
     while (peek() != '\0')
     {
 
-        if (isspace(peek())){
+        if (isspace(peek()))
+        {
             advance();
             currentState = S0;
             continue;
         }
-        
+
         // if ((currentState != S_INT && currentState != S_REAL) && peek() != '-')
         // {
         //     currentState = S0;
@@ -394,14 +396,17 @@ vector<Token> Lexer::tokenize()
         }
 
         // Fix milestone 1: titik cuman valid kalau setelahnya spasi, /0, atau '.' lagi.
-        else if (ch == '.'){
-            char next = (static_cast<size_t>(pos + 1) < source.size()) ? source[pos+1] : '\0';
+        else if (ch == '.')
+        {
+            char next = (static_cast<size_t>(pos + 1) < source.size()) ? source[pos + 1] : '\0';
             // kasus valid
-            if (next == '.' || next == '\0' || isspace(next)){
+            if (next == '.' || next == '\0' || isspace(next))
+            {
                 advance();
                 tokens.push_back(readPunctuation(ch));
             }
-            else {
+            else
+            {
                 // kasus diikuti non-seperator
                 advance();
                 tokens.push_back(readUnknown(ch));

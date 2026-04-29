@@ -18,7 +18,7 @@ inline bool tokenHasValue(const string &type)
            type == "string" ||
            type == "ident" ||
            type == "comment" ||
-           type == "error" ||
+           type == "unknown" ||
            type == "unknown";
 }
 
