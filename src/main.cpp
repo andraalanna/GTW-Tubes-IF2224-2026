@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     for (Token t : tokens)
     {
         if (tokenHasValue(t.type))
-            outFile << t.type << " (" << t.value << ")" << endl;
+            outFile << t.type << "(" << t.value << ")" << endl;
         else
             outFile << t.type << endl;
     }
