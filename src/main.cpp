@@ -6,28 +6,43 @@
 
 using namespace std;
 
-void printTree(shared_ptr<ParseNode> node, ostream &out, string prefix = "", bool isLast = true)
+void printTree(shared_ptr<ParseNode> node, ostream &out, string prefix = "", bool isLast = true, bool isRoot = true)
 {
     if (!node)
         return;
 
-    out << prefix;
-    out << (isLast ? "└── " : "├── ");
-
-    out << node->type;
-    if (!node->value.empty())
+    if (isRoot)
     {
-        out << "(" << node->value << ")";
+        out << node->type;
+        if (!node->value.empty())
+        {
+            out << "(" << node->value << ")";
+        }
+        out << endl;
     }
-    out << endl;
+    else
+    {
+        out << prefix;
+        out << (isLast ? "└── " : "├── ");
+
+        if (tokenHasValue(node->type))
+        {
+            out << node->type << "(" << node->value << ")" << endl;
+        }
+        else
+        {
+            out << node->type << endl;
+        }
+    }
 
     for (size_t i = 0; i < node->children.size(); i++)
     {
         printTree(
             node->children[i],
             out,
-            prefix + (isLast ? "    " : "│   "),
-            i == node->children.size() - 1);
+            prefix + (isRoot ? "" : (isLast ? "    " : "│   ")),
+            i == node->children.size() - 1,
+            false);
     }
 }
 
