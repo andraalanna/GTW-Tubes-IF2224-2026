@@ -8,7 +8,8 @@ FLAGS = -std=c++17 -Wall
 
 SRC_DIR = src
 BIN_DIR = bin
-TARGET = $(BIN_DIR)/lexer
+TARGET = $(BIN_DIR)/program
+SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/lexer.cpp $(SRC_DIR)/Parser.cpp
 
 # Target default yang dijalankan saat ketik 'make'
 all: $(TARGET)
@@ -16,8 +17,8 @@ all: $(TARGET)
 
 # Cara membuat program lexer
 # Compile main.cpp dan lexer.cpp menjadi satu executable
-$(TARGET): $(SRC_DIR)/main.cpp $(SRC_DIR)/lexer.cpp | $(BIN_DIR)
-	$(CC) $(FLAGS) $(SRC_DIR)/main.cpp $(SRC_DIR)/lexer.cpp -o $(TARGET)
+$(TARGET): $(SOURCES) | $(BIN_DIR)
+	$(CC) $(FLAGS) $(SOURCES) -o $(TARGET)
 
 
 $(BIN_DIR):

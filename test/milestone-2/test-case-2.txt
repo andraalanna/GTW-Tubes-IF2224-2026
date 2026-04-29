@@ -1,0 +1,8 @@
+program Hello;
+const
+  A == 10;
+  B == -3.14;
+  C == 'x';
+  D == 'TBFO';
+begin
+end.

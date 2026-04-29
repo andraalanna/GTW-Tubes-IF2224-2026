@@ -2,15 +2,41 @@
 #include <fstream>
 #include <sstream>
 #include "lexer.h"
+#include "Parser.h"
 
 using namespace std;
 
+void printTree(shared_ptr<ParseNode> node, ostream &out, string prefix = "", bool isLast = true)
+{
+    if (!node)
+        return;
+
+    out << prefix;
+    out << (isLast ? "└── " : "├── ");
+
+    out << node->type;
+    if (!node->value.empty())
+    {
+        out << "(" << node->value << ")";
+    }
+    out << endl;
+
+    for (size_t i = 0; i < node->children.size(); i++)
+    {
+        printTree(
+            node->children[i],
+            out,
+            prefix + (isLast ? "    " : "│   "),
+            i == node->children.size() - 1);
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    // Contoh input: ./lexer input.txt output.txt
+    // Contoh input: ./arion input.txt output.txt
     if (argc < 3)
     {
-        cerr << "Usage: ./lexer input.txt output.txt" << endl;
+        cerr << "Usage: ./arion input.txt output.txt" << endl;
         return 1;
     }
 
@@ -24,30 +50,45 @@ int main(int argc, char *argv[])
     stringstream ss;
     ss << inputFile.rdbuf();
     string source = ss.str();
-
     inputFile.close();
 
     Lexer lexer(source);
-
     vector<Token> tokens = lexer.tokenize();
 
-    ofstream outFile(argv[2]);
-    if (!outFile)
+    try
     {
-        cerr << "ERROR: tidak bisa membuat file: " << argv[2] << endl;
+        Parser parser(tokens);
+        shared_ptr<ParseNode> root = parser.parse();
+
+        ofstream outFile(argv[2]);
+        if (!outFile)
+        {
+            cerr << "ERROR: tidak bisa membuat file: " << argv[2] << endl;
+            return 1;
+        }
+
+        // Print ke terminal
+        printTree(root, cout);
+
+        // Simpan ke file output
+        printTree(root, outFile);
+
+        outFile.close();
+        cout << "Selesai! Parse tree tersimpan di " << argv[2] << endl;
+    }
+    catch (const exception &e)
+    {
+        cerr << e.what() << endl;
+
+        ofstream outFile(argv[2]);
+        if (outFile)
+        {
+            outFile << e.what() << endl;
+            outFile.close();
+        }
+
         return 1;
     }
-
-    for (Token t : tokens)
-    {
-        if (tokenHasValue(t.type))
-            outFile << t.type << "(" << t.value << ")" << endl;
-        else
-            outFile << t.type << endl;
-    }
-
-    outFile.close();
-    cout << "Selesai! Output tersimpan di " << argv[2] << endl;
 
     return 0;
 }
