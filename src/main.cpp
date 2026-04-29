@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
         printTree(root, outFile);
 
         outFile.close();
-        cout << "Selesai! Parse tree tersimpan di " << argv[2] << endl;
     }
     catch (const exception &e)
     {

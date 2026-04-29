@@ -310,6 +310,14 @@ Token Lexer::readIdentOrKeyword(char ch)
     string lower = val;
     transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
     currentState = S_KEY_CLASSIFY;
+
+    string type = classifyKeyword(val);
+
+    if (type == "ident")
+    {
+        return Token{type, val};
+    }
+
     return Token{classifyKeyword(val), lower};
 };
 
