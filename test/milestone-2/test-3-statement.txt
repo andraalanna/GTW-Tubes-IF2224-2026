@@ -1,0 +1,5 @@
+program Test;
+begin
+  x := 5;
+  y := 3
+end.

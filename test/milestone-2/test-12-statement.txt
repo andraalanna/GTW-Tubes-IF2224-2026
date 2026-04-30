@@ -1,0 +1,6 @@
+program Test;
+begin
+  case i of
+    1: x := 1;
+  end
+end.

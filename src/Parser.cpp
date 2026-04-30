@@ -497,7 +497,15 @@ shared_ptr<ParseNode> Parser::parseParameterList(){
     return node;
 }
 
-shared_ptr<ParseNode> Parser::parseExpression(){
-    auto node = makeNode("<expression>");
+shared_ptr<ParseNode> Parser::parseExpression()
+{
+    auto node = makeNode("<expression-STUB>");
+
+    // Consume token sampai ketemu delimiter
+    while (!isAtEnd() && !check("thensy") && !check("dosy") && !check("untilsy") && !check("ofsy") && !check("endsy") && !check("semicolon") && !check("period") && !check("rparent") && !check("comma") && !check("elsesy") && !check("tosy") && !check("downtosy"))
+    {
+        node->children.push_back(consume());
+    }
+
     return node;
 }
