@@ -1,0 +1,12 @@
+program testPunct;
+
+var
+  a,b: integer;
+  arr: array[3] of integer;
+  
+begin
+  a =::= 5;
+  a = 6;
+  writeln((a), arr[1]);
+  a := 1.;
+end.

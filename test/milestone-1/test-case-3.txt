@@ -1,0 +1,18 @@
+(*Tes case untuk uji ketahanan program lexer*)
+
+Program robustness;
+
+var
+ 
+{uji string dan char}
+    q := '';
+    s := '''';
+    t := 'it''s';
+    v := 'string\n biasa';
+    w := 'belum ditutup
+    {input x := '''}
+    x := ''';
+    y := 1.2a
+    x := 1.2
+
+end.

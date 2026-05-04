@@ -1,0 +1,6 @@
+katasambung 
+kata pisah 
+:= kata
+1.23
+ident:=1
+.23.e-+/1.e-+/1

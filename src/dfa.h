@@ -57,5 +57,8 @@ enum State
     // error
     S_ERROR,
 
+    // unknown
+    S_UNKNOWN,
+
 };
 #endif

@@ -1,0 +1,11 @@
+program Test1;
+
+type Range == 1 .. 10;
+type Month == (Jan, Feb, Mar, Apr);
+
+
+var a, b: integer;
+var num: array [1 .. 10] of integer;
+
+begin
+end.

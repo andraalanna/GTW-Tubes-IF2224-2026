@@ -1,0 +1,8 @@
+program TestProcedureNoParam;
+
+procedure Hello;
+begin
+end;
+
+begin
+end.
