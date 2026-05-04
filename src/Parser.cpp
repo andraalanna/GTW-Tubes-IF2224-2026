@@ -180,22 +180,164 @@ shared_ptr<ParseNode> Parser::parseConstant()
     return node;
 }
 
-// STUB
-shared_ptr<ParseNode> Parser::parseIdentifierList()
+shared_ptr<ParseNode> Parser::parseEnumerated()
 {
-    auto node = makeNode("<identifier-list>");
+    auto node = makeNode("<enumerated>");
 
-    // Stub minimal supaya compile
+    node->children.push_back(expect("lparent"));
+    node->children.push_back(expect("ident"));
+
+    while (check("comma"))
+    {
+        node->children.push_back(expect("comma"));
+        node->children.push_back(expect("ident"));
+    }
+
+    node->children.push_back(expect("rparent"));
 
     return node;
 }
 
-// STUB
+shared_ptr<ParseNode> Parser::parseRange(shared_ptr<ParseNode> firstConst)
+{
+    auto node = makeNode("<range>");
+    node->children.push_back(firstConst);
+
+    node->children.push_back(expect("period"));
+    node->children.push_back(expect("period"));
+
+    node->children.push_back(parseConstant());
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseRecordType()
+{
+    auto node = makeNode("<record-type>");
+
+    node->children.push_back(expect("recordsy"));
+    node->children.push_back(parseFieldList());
+    node->children.push_back(expect("endsy"));
+
+    return node;
+}
+
+
+shared_ptr<ParseNode> Parser::parseType()
+{
+    auto node = makeNode("<type>");
+
+    if (check("arraysy")) {
+        node->children.push_back(parseArrayType());
+    }
+    else if (check("lparent")) {
+        node->children.push_back(parseEnumerated());
+    }
+    else if (check("recordsy")) {
+        node->children.push_back(parseRecordType());
+    }
+    else if (check("ident") && lookahead().type == "period") {
+        auto firstConst = makeNode("<constant>");
+        firstConst->children.push_back(consume()); // consume ident
+        node->children.push_back(parseRange(firstConst));
+    }
+    else if (check("intcon") || check("realcon") || check("charcon") ||
+             check("string") || check("plus") || check("minus"))
+    {
+        auto firstConst = parseConstant();
+        if (check("period")) {
+            node->children.push_back(parseRange(firstConst));
+        }
+        else {
+            // Standalone constant (jarang, tapi valid secara grammar)
+            node->children.push_back(firstConst);
+        }
+    }
+    else if (check("ident")) {
+        node->children.push_back(expect("ident"));
+    }
+    else
+    {
+        syntaxError("type (ident, array-type, range, enumerated, or record-type)");
+    }
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseIdentifierList()
+{
+    auto node = makeNode("<identifier-list>");
+    node->children.push_back(expect("ident"));
+
+    while (check("comma") && lookahead().type == "ident") {
+        node->children.push_back(expect("comma"));
+        node->children.push_back(expect("ident"));
+    }
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseFieldPart()
+{
+    auto node = makeNode("<field-part>");
+
+    node->children.push_back(parseIdentifierList());
+    node->children.push_back(expect("colon"));
+    node->children.push_back(parseType());
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseFieldList()
+{
+    auto node = makeNode("<field-list>");
+
+    node->children.push_back(parseFieldPart());
+
+    while (check("semicolon") && lookahead().type == "ident")
+    {
+        node->children.push_back(expect("semicolon"));
+        node->children.push_back(parseFieldPart());
+    }
+
+    return node;
+}
+
 shared_ptr<ParseNode> Parser::parseArrayType()
 {
-    auto node = makeNode("<array-type-STUB>");
+    auto node = makeNode("<array-type>");
 
-    // Stub minimal supaya compile
+    node->children.push_back(expect("arraysy"));
+    node->children.push_back(expect("lbrack"));
+
+    if (check("ident") && lookahead().type == "period")
+    {
+        // Range diawali ident
+        auto firstConst = makeNode("<constant>");
+        firstConst->children.push_back(consume()); // consume ident
+        node->children.push_back(parseRange(firstConst));
+    }
+    else if (check("intcon") || check("charcon") || check("realcon") ||
+             check("plus") || check("minus"))
+    {
+        // Range diawali intcon/charcon/etc
+        auto firstConst = parseConstant();
+        node->children.push_back(parseRange(firstConst));
+    }
+    else if (check("ident"))
+    {
+        node->children.push_back(expect("ident"));
+    }
+    else
+    {
+        syntaxError("range or ident as array index type");
+    }
+
+    node->children.push_back(expect("rbrack"));
+    node->children.push_back(expect("ofsy"));
+
+    // Element type, bisa nested array juga
+    node->children.push_back(parseType());
 
     return node;
 }
@@ -314,25 +456,43 @@ shared_ptr<ParseNode> Parser::parseParameterGroup()
     return node;
 }
 
-// STUB FOR TESTING
-// Fungsi-fungsi ini sementara saja supaya Parser.cpp bisa di-compile
-// sebelum bagian Orang 2, 3, dan 4 selesai.
 
 shared_ptr<ParseNode> Parser::parseTypeDeclaration()
 {
-    auto node = makeNode("<type-declaration-STUB>");
+    auto node = makeNode("<type-declaration>");
 
-    // Stub ini tidak memproses type declaration.
-    // Jangan dipakai untuk test type dulu.
+    node->children.push_back(expect("typesy"));
+
+    do
+    {
+        node->children.push_back(expect("ident"));
+        node->children.push_back(expect("eql"));
+        node->children.push_back(parseType());
+        node->children.push_back(expect("semicolon"));
+    } while (check("ident")); // lanjut selama masih ada ident berikutnya
+
     return node;
 }
 
 shared_ptr<ParseNode> Parser::parseVarDeclaration()
 {
-    auto node = makeNode("<var-declaration-STUB>");
+    auto node = makeNode("<var-declaration>");
 
-    // Stub ini tidak memproses var declaration.
-    // Jangan dipakai untuk test var dulu.
+    node->children.push_back(expect("varsy"));
+
+    if (!check("ident"))
+    {
+        syntaxError("ident (expected at least one variable declaration after 'var')");
+    }
+
+    while (check("ident"))
+    {
+        node->children.push_back(parseIdentifierList());
+        node->children.push_back(expect("colon"));
+        node->children.push_back(parseType());
+        node->children.push_back(expect("semicolon"));
+    }
+
     return node;
 }
 
