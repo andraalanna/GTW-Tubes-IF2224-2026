@@ -92,7 +92,7 @@ shared_ptr<ParseNode> Parser::parseProgram()
     auto node = makeNode("<program>");
     node->children.push_back(parseProgramHeader());
     node->children.push_back(parseDeclarationPart());
-    node->children.push_back(parseCompoundStatement()); 
+    node->children.push_back(parseCompoundStatement());
     node->children.push_back(expect("period"));
 
     if (!isAtEnd())
@@ -347,7 +347,8 @@ shared_ptr<ParseNode> Parser::parseCompoundStatement()
     return node;
 }
 
-shared_ptr<ParseNode> Parser::parseStatementList(){
+shared_ptr<ParseNode> Parser::parseStatementList()
+{
     auto node = makeNode("<statement-list>");
     if (check("endsy") || check("untilsy") || isAtEnd())
         return node;
@@ -356,7 +357,6 @@ shared_ptr<ParseNode> Parser::parseStatementList(){
     {
         node->children.push_back(expect("semicolon"));
 
-      
         if (check("endsy") || check("untilsy") || isAtEnd())
             break;
 
@@ -364,24 +364,86 @@ shared_ptr<ParseNode> Parser::parseStatementList(){
     }
     return node;
 }
+
+shared_ptr<ParseNode> Parser::parseVariable()
+{
+    auto node = makeNode("<variable>");
+    node->children.push_back(expect("ident"));
+
+    if (check("lbrack") || check("period"))
+    {
+        auto componentNode = makeNode("<component-variable>");
+
+        componentNode->children.push_back(node);
+
+        while (check("lbrack") || check("period"))
+        {
+
+            if (check("lbrack"))
+            {
+                componentNode->children.push_back(expect("lbrack"));
+                componentNode->children.push_back(parseIndexList());
+                componentNode->children.push_back(expect("rbrack"));
+            }
+            else
+            {
+                componentNode->children.push_back(expect("period"));
+                componentNode->children.push_back(expect("ident"));
+            }
+        }
+        return componentNode;
+    }
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseIndexList()
+{
+    auto node = makeNode("<index-list>");
+
+    if (check("intcon") || check("charcon") || check("ident"))
+        node->children.push_back(consume());
+    else
+        syntaxError("intcon, charcon, or ident as index");
+
+    while (check("comma"))
+    {
+        node->children.push_back(expect("comma"));
+        if (check("intcon") || check("charcon") || check("ident"))
+            node->children.push_back(consume());
+        else
+            syntaxError("intcon, charcon, or ident as index");
+    }
+
+    return node;
+}
+
 shared_ptr<ParseNode> Parser::parseStatement()
 {
     auto node = makeNode("<statement>");
-    if(check("ifsy")){
+    if (check("ifsy"))
+    {
         node->children.push_back(parseIfStatement());
     }
-    else if(check("casesy")){
+    else if (check("casesy"))
+    {
         node->children.push_back(parseCaseStatement());
     }
-    else if(check("whilesy")){
+    else if (check("whilesy"))
+    {
         node->children.push_back(parseWhileStatement());
-    } else if(check("repeatsy")){
+    }
+    else if (check("repeatsy"))
+    {
         node->children.push_back(parseRepeatStatement());
-    } else if(check("forsy")){
+    }
+    else if (check("forsy"))
+    {
         node->children.push_back(parseForStatement());
-    } else if(check("ident")){
-        auto identLeaf = makeLeaf(current().type, current().value);
-        consume(); 
+    }
+    else if (check("ident"))
+    {
+
+        auto identLeaf = parseVariable();
 
         if (check("becomes"))
             node->children.push_back(parseAssignmentStatement(identLeaf));
@@ -391,27 +453,31 @@ shared_ptr<ParseNode> Parser::parseStatement()
 
     return node;
 }
-shared_ptr<ParseNode> Parser::parseAssignmentStatement(shared_ptr<ParseNode> identLeaf){
+shared_ptr<ParseNode> Parser::parseAssignmentStatement(shared_ptr<ParseNode> identLeaf)
+{
     auto node = makeNode("<assignment-statement>");
     node->children.push_back(identLeaf);
     node->children.push_back(expect("becomes"));
     node->children.push_back(parseExpression());
     return node;
 }
-shared_ptr<ParseNode> Parser::parseIfStatement(){
+shared_ptr<ParseNode> Parser::parseIfStatement()
+{
     auto node = makeNode("<if-statement>");
     node->children.push_back(expect("ifsy"));
     node->children.push_back(parseExpression());
     node->children.push_back(expect("thensy"));
     node->children.push_back(parseStatement());
-    if(check("elsesy")){
+    if (check("elsesy"))
+    {
         node->children.push_back(expect("elsesy"));
 
         node->children.push_back(parseStatement());
     }
     return node;
 }
-shared_ptr<ParseNode> Parser::parseCaseStatement(){
+shared_ptr<ParseNode> Parser::parseCaseStatement()
+{
     auto node = makeNode("<case-statement>");
     node->children.push_back(expect("casesy"));
     node->children.push_back(parseExpression());
@@ -422,17 +488,19 @@ shared_ptr<ParseNode> Parser::parseCaseStatement(){
     {
         node->children.push_back(expect("semicolon"));
         if (check("endsy"))
-            break; 
+            break;
         node->children.push_back(parseCaseBlock());
     }
 
     node->children.push_back(expect("endsy"));
     return node;
 }
-shared_ptr<ParseNode> Parser::parseCaseBlock(){
+shared_ptr<ParseNode> Parser::parseCaseBlock()
+{
     auto node = makeNode("<case-block>");
     node->children.push_back(parseConstant());
-    while(check("comma")){
+    while (check("comma"))
+    {
         node->children.push_back(expect("comma"));
 
         node->children.push_back(parseConstant());
@@ -441,7 +509,8 @@ shared_ptr<ParseNode> Parser::parseCaseBlock(){
     node->children.push_back(parseStatement());
     return node;
 }
-shared_ptr<ParseNode> Parser::parseWhileStatement(){
+shared_ptr<ParseNode> Parser::parseWhileStatement()
+{
     auto node = makeNode("<while-statement>");
     node->children.push_back(expect("whilesy"));
     node->children.push_back(parseExpression());
@@ -449,15 +518,17 @@ shared_ptr<ParseNode> Parser::parseWhileStatement(){
     node->children.push_back(parseStatement());
     return node;
 }
-shared_ptr<ParseNode> Parser::parseRepeatStatement(){
+shared_ptr<ParseNode> Parser::parseRepeatStatement()
+{
     auto node = makeNode("<repeat-statement>");
-    node->children.push_back(expect("repeatsy"));   
+    node->children.push_back(expect("repeatsy"));
     node->children.push_back(parseStatementList());
     node->children.push_back(expect("untilsy"));
     node->children.push_back(parseExpression());
     return node;
 }
-shared_ptr<ParseNode> Parser::parseForStatement(){
+shared_ptr<ParseNode> Parser::parseForStatement()
+{
     auto node = makeNode("<for-statement>");
     node->children.push_back(expect("forsy"));
     node->children.push_back(expect("ident")); 
@@ -476,21 +547,27 @@ shared_ptr<ParseNode> Parser::parseForStatement(){
     node->children.push_back(parseStatement());
     return node;
 }
-shared_ptr<ParseNode> Parser::parseProcedureFunctionCall(shared_ptr<ParseNode> identLeaf){
+shared_ptr<ParseNode> Parser::parseProcedureFunctionCall(shared_ptr<ParseNode> identLeaf)
+{
     auto node = makeNode("<procedure/function-call>");
     node->children.push_back(identLeaf);
     if (check("lparent"))
     {
         node->children.push_back(expect("lparent"));
-        node->children.push_back(parseParameterList());
+        if (!check("rparent"))
+        {
+            node->children.push_back(parseParameterList());
+        }
         node->children.push_back(expect("rparent"));
     }
     return node;
 }
-shared_ptr<ParseNode> Parser::parseParameterList(){
+shared_ptr<ParseNode> Parser::parseParameterList()
+{
     auto node = makeNode("<parameter-list>");
     node->children.push_back(parseExpression());
-    while(check("comma")){
+    while (check("comma"))
+    {
         node->children.push_back(expect("comma"));
         node->children.push_back(parseExpression());
     }
@@ -502,7 +579,7 @@ shared_ptr<ParseNode> Parser::parseExpression()
     auto node = makeNode("<expression-STUB>");
 
     // Consume token sampai ketemu delimiter
-    while (!isAtEnd() && !check("thensy") && !check("dosy") && !check("untilsy") && !check("ofsy") && !check("endsy") && !check("semicolon") && !check("period") && !check("rparent") && !check("comma") && !check("elsesy") && !check("tosy") && !check("downtosy"))
+    while (!isAtEnd() && !check("thensy") && !check("dosy") && !check("untilsy") && !check("ofsy") && !check("endsy") && !check("semicolon") && !check("period") && !check("rparent") && !check("comma") && !check("elsesy") && !check("tosy") && !check("downtosy") && !check("rbrack") )
     {
         node->children.push_back(consume());
     }

@@ -1,0 +1,6 @@
+program Test;
+begin
+  rec.name := 'hello';
+  rec.age := 25;
+  rec.address.city := 'Bandung'
+end.
