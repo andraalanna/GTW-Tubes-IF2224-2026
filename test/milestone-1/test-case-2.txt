@@ -16,7 +16,7 @@ begin
     check := x <> y;
     check := x <= y;
     { == error test operator }
-    check := a >- b
-    check := a >< b
-    check := a = b
+    check := a >- b; 
+    check := a >< b;
+    check := a = b;
 end.

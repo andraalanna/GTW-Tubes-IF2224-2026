@@ -586,3 +586,146 @@ shared_ptr<ParseNode> Parser::parseExpression()
 
     return node;
 }
+
+// Expression
+
+/**
+ * simple-expression (relational-operator + simple-expression)?
+ * 
+ * Must contain simple-expression
+ * Check trailing relational-operator + simple-expression 
+ */
+shared_ptr<ParseNode> Parser::parseExpression()
+{
+    auto node = makeNode("<expression>");
+
+    node->children.push_back(parseSimpleExpression());
+
+    if (check("eql") || check("neq") || check("gtr") || check("geq") || check("lss") || check("leq"))
+    {
+        node->children.push_back(parseRelationalOperator());
+        node->children.push_back(parseSimpleExpression());
+    }
+
+    return node;
+}
+
+/**
+ * (plus | minus)? term (additive-operator + term)*
+ * 
+ * Check any + or - sign
+ * Must contain a term
+ * Check if trailed by other additive-operator + term
+ */
+shared_ptr<ParseNode> Parser::parseSimpleExpression()
+{
+    auto node = makeNode("<simple-expression>");
+
+    if (check("plus") || check("minus"))
+    {
+        node->children.push_back(consume());
+    }
+
+    node->children.push_back(parseTerm());
+    
+    while (check("plus") || check("minus") || check("orsy"))
+    {
+        node->children.push_back(parseAdditiveOperator());
+        node->children.push_back(parseTerm());
+    }
+
+    return node;
+}
+
+/**
+ * factor (multiplicative-operator + factor)*
+ * 
+ * Must contain a factor
+ * Check if trailed by multiplicative-operator + factor
+ */
+shared_ptr<ParseNode> Parser::parseTerm()
+{
+    auto node = makeNode("<term>");
+
+    node->children.push_back(parseFactor());
+
+    while (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
+    {
+        node->children.push_back(parseMultiplicativeOperator());
+        node->children.push_back(parseFactor());
+    }
+
+    return node;
+}
+
+/**
+ * ident | intcon | realcon | charcon | string | 
+ * (lparent + expression + rparent) | 
+ * (notsy + factor) | 
+ * procedure/function-call | 
+ * variable
+ */
+shared_ptr<ParseNode> Parser::parseFactor()
+{
+    auto node = makeNode("<factor>");
+
+    if (check("ident") || check("intcon") || check("realcon") || check("charcon") || check("string"))
+        node->children.push_back(consume());
+    else if (check("lparent"))
+    {
+        node->children.push_back(consume());
+        node->children.push_back(parseExpression());
+        node->children.push_back(expect("rparent"));
+    }
+    else if (check("notsy"))
+    {
+        node->children.push_back(consume());
+        node->children.push_back(parseFactor());
+    }
+    else // cek apakah dia variable?
+        node->children.push_back(parseVarDeclaration()); // Asumsi pengecekan variable (other opt using ident)
+
+    return node;
+}
+
+/**
+ * eql | neq | gtr | geq | lss | leq
+ */
+shared_ptr<ParseNode> Parser::parseRelationalOperator()
+{
+    auto node = makeNode("<relational-operator>");
+
+    if (check("eql") || check("neq") || check("gtr") || check("geq") || check("lss") || check("leq"))
+        node->children.push_back(consume());
+    else 
+        syntaxError("relational-operator");
+    return node;
+}
+
+/**
+ * plus | minus | orsy
+ */
+shared_ptr<ParseNode> Parser::parseAdditiveOperator()
+{
+    auto node = makeNode("<additive-operator>");
+
+    if (check("plus") || check("minus") || check("orsy")) 
+        node->children.push_back(consume());
+    else
+        syntaxError("additive-operator");
+    return node;
+}
+
+/**
+ * times | rdiv | idiv | imod | andsy
+ */
+shared_ptr<ParseNode> Parser::parseMultiplicativeOperator()
+{
+    auto node = makeNode("<multiplicative-operator>");
+
+    if(check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
+        node->children.push_back(consume());
+    else
+        syntaxError("multiplicative-operator");
+    return node;
+}
