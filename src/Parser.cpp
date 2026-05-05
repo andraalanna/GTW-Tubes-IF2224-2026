@@ -734,18 +734,18 @@ shared_ptr<ParseNode> Parser::parseParameterList()
     return node;
 }
 
-shared_ptr<ParseNode> Parser::parseExpression()
-{
-    auto node = makeNode("<expression-STUB>");
+// shared_ptr<ParseNode> Parser::parseExpression()
+// {
+//     auto node = makeNode("<expression-STUB>");
 
-    // Consume token sampai ketemu delimiter
-    while (!isAtEnd() && !check("thensy") && !check("dosy") && !check("untilsy") && !check("ofsy") && !check("endsy") && !check("semicolon") && !check("period") && !check("rparent") && !check("comma") && !check("elsesy") && !check("tosy") && !check("downtosy") && !check("rbrack") )
-    {
-        node->children.push_back(consume());
-    }
+//     // Consume token sampai ketemu delimiter
+//     while (!isAtEnd() && !check("thensy") && !check("dosy") && !check("untilsy") && !check("ofsy") && !check("endsy") && !check("semicolon") && !check("period") && !check("rparent") && !check("comma") && !check("elsesy") && !check("tosy") && !check("downtosy") && !check("rbrack") )
+//     {
+//         node->children.push_back(consume());
+//     }
 
-    return node;
-}
+//     return node;
+// }
 
 // Expression
 
@@ -842,8 +842,8 @@ shared_ptr<ParseNode> Parser::parseFactor()
         node->children.push_back(consume());
         node->children.push_back(parseFactor());
     }
-    else // cek apakah dia variable?
-        node->children.push_back(parseVarDeclaration()); // Asumsi pengecekan variable (other opt using ident)
+    else // cek apakah dia variable? or function-call
+        node->children.push_back(parseVariable()); // Asumsi pengecekan variable (other opt using ident)
 
     return node;
 }
