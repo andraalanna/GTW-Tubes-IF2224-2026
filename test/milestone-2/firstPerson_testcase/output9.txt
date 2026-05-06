@@ -1,0 +1,1 @@
+Syntax error: unexpected token 'semicolon(;)', expected ident, intcon, or realcon adter sign in constant

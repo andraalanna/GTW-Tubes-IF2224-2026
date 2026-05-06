@@ -1,0 +1,6 @@
+{ ERROR: const tanpa nilai setelah == }
+program Test;
+const
+    X ==;
+begin
+end.

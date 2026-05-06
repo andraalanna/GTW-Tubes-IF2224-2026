@@ -58,7 +58,7 @@ Token Lexer::readNumber()
             
             return Token({"intcon", val, currentLine, currentCol});
         }
-        if (isdigit(isdigit(afterDot)))
+        if (isdigit(afterDot))
         {
             currentState = S_REAL_DOT;
             val += advance();

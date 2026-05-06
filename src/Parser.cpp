@@ -183,7 +183,7 @@ shared_ptr<ParseNode> Parser::parseConstant()
         }
         else
         {
-            syntaxError("ident, intcon, or realcon adter sign in constant");
+            syntaxError("ident, intcon, or realcon after sign in constant");
         }
     }
     else if (check("intcon") || check("realcon") || check("ident"))

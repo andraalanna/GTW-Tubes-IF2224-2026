@@ -1,0 +1,4 @@
+{ ERROR: tidak ada period di akhir program }
+program Test;
+begin
+end

@@ -1,0 +1,6 @@
+{ ERROR: tanda + tanpa nilai setelahnya }
+program Test;
+const
+    X == +;
+begin
+end.
