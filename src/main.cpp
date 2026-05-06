@@ -74,6 +74,21 @@ int main(int argc, char *argv[])
     {
         Parser parser(tokens);
         shared_ptr<ParseNode> root = parser.parse();
+        const vector<string> &errors = parser.getErrors();
+
+        if (!errors.empty())
+        {
+            ofstream outFile(argv[2]);
+            for (const string &err : errors)
+            {
+                cerr << err << endl;
+                if (outFile)
+                    outFile << err << endl;
+            }
+            if (outFile)
+                outFile.close();
+            return 1;
+        }
 
         ofstream outFile(argv[2]);
         if (!outFile)
@@ -90,7 +105,7 @@ int main(int argc, char *argv[])
 
         outFile.close();
     }
-    catch (const exception &e)
+    catch (const SyntaxError &e)
     {
         cerr << e.what() << endl;
 
@@ -101,6 +116,11 @@ int main(int argc, char *argv[])
             outFile.close();
         }
 
+        return 1;
+    }
+    catch (const exception &e)
+    {
+        cerr << "Unrecoverable error: " << e.what() << endl;
         return 1;
     }
 

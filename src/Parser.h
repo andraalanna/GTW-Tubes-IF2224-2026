@@ -2,7 +2,17 @@
 #include "lexer.h"
 #include <stdexcept>
 #include <iostream>
+#include <vector>
+#include <string>
+#include <memory>
+
 using namespace std;
+
+class SyntaxError : public runtime_error
+{
+public:
+    SyntaxError(const string &msg) : runtime_error(msg) {}
+};
 
 class Parser
 {
@@ -11,6 +21,9 @@ public:
 
     // Entry point, kembalikan root ParseNode "<program>"
     shared_ptr<ParseNode> parse();
+
+    // Dapatkan semua error yang ditemukan
+    const vector<string> &getErrors() const { return errors; }
 
     shared_ptr<ParseNode> parseProgram();
     shared_ptr<ParseNode> parseProgramHeader();
@@ -28,8 +41,6 @@ public:
     shared_ptr<ParseNode> parseRecordType();
     shared_ptr<ParseNode> parseFieldList();
     shared_ptr<ParseNode> parseFieldPart();
-
-
 
     shared_ptr<ParseNode> parseSubProgramDeclaration();
     shared_ptr<ParseNode> parseProcedureDeclaration();
@@ -65,6 +76,7 @@ public:
 private:
     vector<Token> tokens;
     int pos;
+    vector<string> errors;
 
     // Lihat token sekarang
     const Token &current();
@@ -89,5 +101,8 @@ private:
     bool isAtEnd();
 
     // Format pesan error syntax
-    [[noreturn]] void syntaxError(const string &expected);
+    void syntaxError(const string &expected);
+
+    // Error recovery: skip tokens until a synchronization point
+    void synchronize();
 };

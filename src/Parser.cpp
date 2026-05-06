@@ -62,7 +62,32 @@ void Parser::syntaxError(const string &expected)
     if (!tok.value.empty())
         oss << "(" << tok.value << ")";
     oss << "', expected " << expected;
-    throw runtime_error(oss.str());
+    throw SyntaxError(oss.str());
+}
+
+void Parser::synchronize()
+{
+    while (!isAtEnd())
+    {
+        if (current().type == "semicolon")
+        {
+            pos++; // consume semicolon
+            return;
+        }
+
+        if (check("endsy") ||
+            check("beginsy") ||
+            check("constsy") ||
+            check("typesy") ||
+            check("varsy") ||
+            check("proceduresy") ||
+            check("functionsy") ||
+            check("programsy"))
+        {
+            return;
+        }
+        pos++;
+    }
 }
 
 shared_ptr<ParseNode> Parser::consume()
@@ -93,14 +118,29 @@ shared_ptr<ParseNode> Parser::expectVal(const string &type, const string &val)
 shared_ptr<ParseNode> Parser::parseProgram()
 {
     auto node = makeNode("<program>");
-    node->children.push_back(parseProgramHeader());
+    try {
+        node->children.push_back(parseProgramHeader());
+    } catch (const SyntaxError &e) {
+        errors.push_back(e.what());
+        synchronize();
+    }
+    
     node->children.push_back(parseDeclarationPart());
     node->children.push_back(parseCompoundStatement());
-    node->children.push_back(expect("period"));
+    
+    try {
+        node->children.push_back(expect("period"));
+    } catch (const SyntaxError &e) {
+        errors.push_back(e.what());
+    }
 
     if (!isAtEnd())
     {
-        syntaxError("end of program");
+        // syntaxError("end of program"); // Don't throw here if we want to just collect
+        const Token &tok = current();
+        ostringstream oss;
+        oss << "Syntax error at line " << tok.line << ", col " << tok.col << ": unexpected token '" << tok.type << "', expected end of program";
+        errors.push_back(oss.str());
     }
 
     return node;
@@ -156,10 +196,15 @@ shared_ptr<ParseNode> Parser::parseConstDeclaration()
     node->children.push_back(expect("constsy"));
     while (check("ident"))
     {
-        node->children.push_back(expect("ident"));
-        node->children.push_back(expect("eql"));
-        node->children.push_back(parseConstant());
-        node->children.push_back(expect("semicolon"));
+        try {
+            node->children.push_back(expect("ident"));
+            node->children.push_back(expect("eql"));
+            node->children.push_back(parseConstant());
+            node->children.push_back(expect("semicolon"));
+        } catch (const SyntaxError &e) {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
     return node;
 }
@@ -213,10 +258,15 @@ shared_ptr<ParseNode> Parser::parseTypeDeclaration()
 
     while (check("ident")) // lanjut selama masih ada ident berikutnya
     {
-        node->children.push_back(expect("ident"));
-        node->children.push_back(expect("eql"));
-        node->children.push_back(parseType());
-        node->children.push_back(expect("semicolon"));
+        try {
+            node->children.push_back(expect("ident"));
+            node->children.push_back(expect("eql"));
+            node->children.push_back(parseType());
+            node->children.push_back(expect("semicolon"));
+        } catch (const SyntaxError &e) {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
 
     return node;
@@ -238,10 +288,15 @@ shared_ptr<ParseNode> Parser::parseVarDeclaration()
 
     while (check("ident"))
     {
-        node->children.push_back(parseIdentifierList());
-        node->children.push_back(expect("colon"));
-        node->children.push_back(parseType());
-        node->children.push_back(expect("semicolon"));
+        try {
+            node->children.push_back(parseIdentifierList());
+            node->children.push_back(expect("colon"));
+            node->children.push_back(parseType());
+            node->children.push_back(expect("semicolon"));
+        } catch (const SyntaxError &e) {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
 
     return node;
@@ -587,11 +642,22 @@ shared_ptr<ParseNode> Parser::parseCompoundStatement()
 shared_ptr<ParseNode> Parser::parseStatementList()
 {
     auto node = makeNode("<statement-list>");
-    node->children.push_back(parseStatement());
+    try {
+        node->children.push_back(parseStatement());
+    } catch (const SyntaxError &e) {
+        errors.push_back(e.what());
+        synchronize();
+    }
+
     while (check("semicolon"))
     {
-        node->children.push_back(expect("semicolon"));
-        node->children.push_back(parseStatement());
+        try {
+            node->children.push_back(expect("semicolon"));
+            node->children.push_back(parseStatement());
+        } catch (const SyntaxError &e) {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
     return node;
 }

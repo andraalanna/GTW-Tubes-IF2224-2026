@@ -1,1 +1,2 @@
-Syntax error: unexpected token 'semicolon(;)', expected constant (charcon, string, intcon, realcon, or signed value)
+Syntax error at line 4, col 10: unexpected token 'semicolon(;)', expected constant (charcon, string, intcon, realcon, or signed value)
+Syntax error at line 5, col 10: unexpected token 'intcon(100)', expected eql

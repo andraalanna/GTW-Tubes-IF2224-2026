@@ -1,1 +1,1 @@
-Syntax error: unexpected token 'ident(Test)', expected programsy
+Syntax error at line 2, col 5: unexpected token 'ident(Test)', expected programsy

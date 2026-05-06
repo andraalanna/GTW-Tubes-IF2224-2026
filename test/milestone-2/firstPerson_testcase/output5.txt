@@ -1,1 +1,1 @@
-Syntax error: unexpected token 'eof', expected beginsy
+Syntax error at line 0, col 0: unexpected token 'eof', expected beginsy

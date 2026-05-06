@@ -2,5 +2,6 @@
 program Test;
 const
     X ==;
+    X 100;
 begin
 end.
