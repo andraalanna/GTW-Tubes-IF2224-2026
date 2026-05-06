@@ -505,3 +505,61 @@ shared_ptr<ParseNode> Parser::parseCompoundStatement()
 
     return node;
 }
+
+shared_ptr<ParseNode> Parser::parseVariable()
+{
+    auto node = makeNode("<variable>");
+    node->children.push_back(expect("ident"));
+
+    while (check("lbrack") || check("period"))
+    {
+        node->children.push_back(parseComponentVariable());
+    }
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseComponentVariable()
+{
+    auto node = makeNode("<component-variable>");
+
+    if (check("lbrack"))
+    {
+        node->children.push_back(expect("lbrack"));
+        node->children.push_back(parseIndexList());
+        node->children.push_back(expect("rbrack"));
+    }
+    else if (check("period"))
+    {
+        node->children.push_back(expect("period"));
+        node->children.push_back(expect("ident"));
+    }
+    else
+    {
+        syntaxError("'[' or '.' in component-variable");
+    }
+
+    return node;
+}
+
+shared_ptr<ParseNode> Parser::parseIndexList()
+{
+    auto node = makeNode("<index-list>");
+
+    if (check("intcon") || check("charcon") || check("ident"))
+    {
+        node->children.push_back(consume());
+    }
+    else
+    {
+        syntaxError("intcon, charcon, or ident in index-list");
+    }
+
+    while (check("comma"))
+    {
+        node->children.push_back(expect("comma"));
+        node->children.push_back(parseIndexList());
+    }
+
+    return node;
+}

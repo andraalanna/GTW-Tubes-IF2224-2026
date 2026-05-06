@@ -27,6 +27,10 @@ public:
     shared_ptr<ParseNode> parseRecordType();
     shared_ptr<ParseNode> parseFieldList();
     shared_ptr<ParseNode> parseFieldPart();
+    shared_ptr<ParseNode> parseVariable();
+    shared_ptr<ParseNode> parseComponentVariable();
+    shared_ptr<ParseNode> parseIndexList();
+
 
     shared_ptr<ParseNode> parseSubProgramDeclaration();
     shared_ptr<ParseNode> parseProcedureDeclaration();
