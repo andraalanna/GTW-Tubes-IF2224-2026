@@ -1,0 +1,13 @@
+program TestRecord2;
+type
+    Student == record
+        name: string;
+        age: integer;
+        gpa: real;
+        initial: char
+    end;
+var
+    s: Student;
+begin
+    s.age := 20
+end.

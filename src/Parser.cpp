@@ -581,18 +581,18 @@ shared_ptr<ParseNode> Parser::parseCompoundStatement()
 /**
  * statement (semicolon + statement)*
  */
+
+// harusnya grammarnya statement (semicolon + statement)*, izin perbaikin dikit yak 
+// - yavie 
 shared_ptr<ParseNode> Parser::parseStatementList()
 {
     auto node = makeNode("<statement-list>");
-    if (check("endsy") || check("untilsy") || isAtEnd())
-        return node;
-    while(true){
-        node->children.push_back(parseStatement());
+    node->children.push_back(parseStatement());
+    while (check("semicolon"))
+    {
         node->children.push_back(expect("semicolon"));
-        if(check("endsy") || check("untilsy") || isAtEnd()){
-            break;
-        }
-   }
+        node->children.push_back(parseStatement());
+    }
     return node;
 }
 
@@ -636,6 +636,29 @@ shared_ptr<ParseNode> Parser::parseStatement()
     return node;
 }
 
+shared_ptr<ParseNode> Parser::parseComponentVariable()
+{
+    auto node = makeNode("<component-variable>");
+
+    if (check("lbrack"))
+    {
+        node->children.push_back(expect("lbrack"));
+        node->children.push_back(parseIndexList());
+        node->children.push_back(expect("rbrack"));
+    }
+    else if (check("period"))
+    {
+        node->children.push_back(expect("period"));
+        node->children.push_back(expect("ident"));
+    }
+    else
+    {
+        syntaxError("'[' or '.' in component-variable");
+    }
+
+    return node;
+}
+
 /**
  * ident + (component-variable)*
  */
@@ -644,34 +667,13 @@ shared_ptr<ParseNode> Parser::parseVariable()
     auto node = makeNode("<variable>");
     node->children.push_back(expect("ident"));
 
-    /**
-     * (lbrack + index-list + rbrack) | (period + ident)
-     */
-    if (check("lbrack") || check("period"))
+    while (check("lbrack") || check("period"))
     {
-        auto componentNode = makeNode("<component-variable>");
-
-        componentNode->children.push_back(node);
-
-        while (check("lbrack") || check("period"))
-        {
-
-            if (check("lbrack"))
-            {
-                componentNode->children.push_back(expect("lbrack"));
-                componentNode->children.push_back(parseIndexList());
-                componentNode->children.push_back(expect("rbrack"));
-            }
-            else
-            {
-                componentNode->children.push_back(expect("period"));
-                componentNode->children.push_back(expect("ident"));
-            }
-        }
-        return componentNode;
+        node->children.push_back(parseComponentVariable());
     }
     return node;
 }
+
 
 /**
  * ( intcon | charcon | ident ) + ( comma + index-list )*
@@ -950,11 +952,6 @@ shared_ptr<ParseNode> Parser::parseFactor()
     {
         node->children.push_back(consume());
         node->children.push_back(parseFactor());
-    }
-    else if (check("ident") && lookahead().type == "lparent")
-    {
-        auto identLeaf = parseVariable();
-        node->children.push_back(parseProcedureFunctionCall(identLeaf));
     }
     else // cek apakah dia variable? or function-call
         node->children.push_back(parseVariable()); // Asumsi pengecekan variable (other opt using ident)

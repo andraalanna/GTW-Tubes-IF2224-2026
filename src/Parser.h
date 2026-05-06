@@ -29,6 +29,8 @@ public:
     shared_ptr<ParseNode> parseFieldList();
     shared_ptr<ParseNode> parseFieldPart();
 
+
+
     shared_ptr<ParseNode> parseSubProgramDeclaration();
     shared_ptr<ParseNode> parseProcedureDeclaration();
     shared_ptr<ParseNode> parseFunctionDeclaration();
@@ -40,6 +42,7 @@ public:
     shared_ptr<ParseNode> parseStatementList();
     shared_ptr<ParseNode> parseIndexList();
     shared_ptr<ParseNode> parseVariable();
+    shared_ptr<ParseNode> parseComponentVariable();
     shared_ptr<ParseNode> parseStatement();
     shared_ptr<ParseNode> parseAssignmentStatement(shared_ptr<ParseNode> identLeaf);
     shared_ptr<ParseNode> parseIfStatement();

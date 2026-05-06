@@ -1,0 +1,11 @@
+program TestRecord3;
+type
+    Rectangle == record
+        width, height: integer;
+        x, y: real
+    end;
+var
+    r: Rectangle;
+begin
+    r.width := 5
+end.
