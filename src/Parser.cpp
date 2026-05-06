@@ -951,6 +951,11 @@ shared_ptr<ParseNode> Parser::parseFactor()
         node->children.push_back(consume());
         node->children.push_back(parseFactor());
     }
+    else if (check("ident") && lookahead().type == "lparent")
+    {
+        auto identLeaf = parseVariable();
+        node->children.push_back(parseProcedureFunctionCall(identLeaf));
+    }
     else // cek apakah dia variable? or function-call
         node->children.push_back(parseVariable()); // Asumsi pengecekan variable (other opt using ident)
 
