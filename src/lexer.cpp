@@ -414,7 +414,7 @@ vector<Token> Lexer::tokenize()
         {
             char next = (static_cast<size_t>(pos + 1) < source.size()) ? source[pos + 1] : '\0';
             // kasus valid
-            if (next == '.' || next == '\0' || isspace(next) || isdigit(next) || next == ';' || next == ')' || next == ']' || isalpha(next))
+            if (next == '.' || next == '\0' || isspace(next) || isdigit(next) || next == ';' || next == ')' || next == ']' || isalpha(next) || next == '\'')
             {
                 advance();
                 tokens.push_back(readPunctuation(ch));
