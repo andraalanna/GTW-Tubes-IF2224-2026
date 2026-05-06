@@ -4,9 +4,10 @@
 #include <iostream>
 using namespace std;
 
-class Parser {
+class Parser
+{
 public:
-    Parser(const vector<Token>& tokens);
+    Parser(const vector<Token> &tokens);
 
     // Entry point, kembalikan root ParseNode "<program>"
     shared_ptr<ParseNode> parse();
@@ -27,9 +28,7 @@ public:
     shared_ptr<ParseNode> parseRecordType();
     shared_ptr<ParseNode> parseFieldList();
     shared_ptr<ParseNode> parseFieldPart();
-    shared_ptr<ParseNode> parseVariable();
-    shared_ptr<ParseNode> parseComponentVariable();
-    shared_ptr<ParseNode> parseIndexList();
+
 
 
     shared_ptr<ParseNode> parseSubProgramDeclaration();
@@ -41,6 +40,9 @@ public:
 
     shared_ptr<ParseNode> parseCompoundStatement();
     shared_ptr<ParseNode> parseStatementList();
+    shared_ptr<ParseNode> parseIndexList();
+    shared_ptr<ParseNode> parseVariable();
+    shared_ptr<ParseNode> parseComponentVariable();
     shared_ptr<ParseNode> parseStatement();
     shared_ptr<ParseNode> parseAssignmentStatement(shared_ptr<ParseNode> identLeaf);
     shared_ptr<ParseNode> parseIfStatement();
@@ -62,23 +64,23 @@ public:
 
 private:
     vector<Token> tokens;
-    int pos;  
+    int pos;
 
     // Lihat token sekarang
-    const Token& current();
+    const Token &current();
 
     // Lihat token selanjutnya, tanpa lewatin yang sekarang
-    const Token& lookahead();
+    const Token &lookahead();
 
     // Cek apakah token saat ini bertipe 'type'
-    bool check(const string& type);
+    bool check(const string &type);
 
     // Konsumsi token saat ini dan kembalikan leaf ParseNode-nya;
     // jika tipe tidak sesuai → lempar syntax error.
-    shared_ptr<ParseNode> expect(const string& type);
+    shared_ptr<ParseNode> expect(const string &type);
 
     // Seperti expect tapi juga cek value (untuk token ganda seperti "eql")
-    shared_ptr<ParseNode> expectVal(const string& type, const string& val);
+    shared_ptr<ParseNode> expectVal(const string &type, const string &val);
 
     // Konsumsi token saat ini dan kembalikan leaf-nya (tanpa cek tipe)
     shared_ptr<ParseNode> consume();
@@ -87,5 +89,5 @@ private:
     bool isAtEnd();
 
     // Format pesan error syntax
-    [[noreturn]] void syntaxError(const string& expected);
+    [[noreturn]] void syntaxError(const string &expected);
 };
