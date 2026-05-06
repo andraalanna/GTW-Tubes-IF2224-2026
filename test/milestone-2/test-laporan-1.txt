@@ -1,0 +1,50 @@
+program TestComprehensive;
+
+
+type
+    SmallInt == 1..100;
+    LowerCase == 'a'..'z';
+    Direction == (North, South, East, West);
+    IntArray == array[1..10] of integer;
+    CharArray == array['a'..'z'] of integer;
+    DirArray == array[SmallInt] of integer;
+    Point == record
+        x, y: integer
+    end;
+    Matrix == record
+        data: array[1..10] of integer;
+        size: integer
+    end;
+    Line == record
+        start, finish: Point;
+        length: real
+    end;
+    Student == record
+        name: string;
+        age: integer;
+        gpa: real;
+        initial: char;
+        grades: array[1..5] of integer
+    end;
+
+var
+    a: integer;
+    b, c, d: integer;
+    p: Point;
+    s: Student;
+    nums: array[1..10] of integer;
+    arr: array[SmallInt] of real;
+    dir: Direction;
+
+begin
+    a := 5;
+    nums[1] := 10;
+    nums[a] := 20;
+    arr[a] := 3;
+    p.x := 100;
+    p.y := 200;
+    s.age := 21;
+    s.grades[1] := 90;
+    nums[1] := nums[a]
+end.
+
