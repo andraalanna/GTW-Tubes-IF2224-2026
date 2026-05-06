@@ -10,6 +10,8 @@ Lexer::Lexer(string src)
     source = src;
     pos = 0;
     currentState = S0;
+    currentLine = 1;
+    currentCol = 1;
 };
 
 char Lexer::peek()
@@ -23,7 +25,14 @@ char Lexer::advance()
 {
     if (static_cast<unsigned long int>(pos) >= source.size())
         return '\0';
-    return source[pos++];
+    char c = source[pos++];
+    if (c == '\n') {
+        currentLine++;
+        currentCol = 1;
+    } else {
+        currentCol++;
+    }
+    return c;
 };
 
 Token Lexer::readNumber()
@@ -47,7 +56,7 @@ Token Lexer::readNumber()
         if (afterDot == '.')
         {
             
-            return Token({"intcon", val});
+            return Token({"intcon", val, currentLine, currentCol});
         }
         if (isdigit(isdigit(afterDot)))
         {
@@ -57,26 +66,26 @@ Token Lexer::readNumber()
             if (!isdigit(peek()))
             {
                 currentState = S_ERROR;
-                return Token{"unknown", val};
+                return Token{"unknown", val, currentLine, currentCol};
             }
             while (isdigit(peek()))
             {
                 val += advance();
             }
             currentState = S_REAL;
-            return Token({"realcon", val});
+            return Token({"realcon", val, currentLine, currentCol});
         }
-        return Token({"intcon", val});
+        return Token({"intcon", val, currentLine, currentCol});
     }
 
     if (!isalnum(peek()))
-        return Token({"intcon", val});
+        return Token({"intcon", val, currentLine, currentCol});
 
     while (isalnum(peek()))
     {
         val += advance();
     }
-    return Token({"unknown", val});
+    return Token({"unknown", val, currentLine, currentCol});
 }
 
 Token Lexer::readComment(char ch)
@@ -94,11 +103,11 @@ Token Lexer::readComment(char ch)
         if (peek() == '\0')
         {
             currentState = S_ERROR;
-            return Token{"unknown", "unterminated comment"};
+            return Token{"unknown", "unterminated comment", currentLine, currentCol};
         }
         currentState = S_CMT1;
         advance();
-        return Token{"comment", val};
+        return Token{"comment", val, currentLine, currentCol};
     }
     else
     {
@@ -114,7 +123,7 @@ Token Lexer::readComment(char ch)
                 {
                     currentState = S_CMT2;
                     advance();
-                    return Token{"comment", val};
+                    return Token{"comment", val, currentLine, currentCol};
                 }
                 val += '*';
                 if (peek() != '\0')
@@ -185,7 +194,7 @@ Token Lexer::readOperator(char ch)
     {
     case '+':
         currentState = S_PLUS;
-        return Token{"plus", val};
+        return Token{"plus", val, currentLine, currentCol};
     case '-':
         if (isdigit(peek()) && (currentState != S_INT && currentState != S_REAL))
         {
@@ -195,50 +204,50 @@ Token Lexer::readOperator(char ch)
         }
         currentState = S_MINUS;
 
-        return Token{"minus", val};
+        return Token{"minus", val, currentLine, currentCol};
     case '*':
         currentState = S_TIMES;
-        return Token{"times", val};
+        return Token{"times", val, currentLine, currentCol};
     case '/':
         currentState = S_RDIV;
-        return Token{"rdiv", val};
+        return Token{"rdiv", val, currentLine, currentCol};
     case '=':
         currentState = S_EQL1;
         if (peek() == '=')
         {
             val += advance(); // Consume '=' yang kedua
             currentState = S_EQL2;
-            return Token{"eql", val};
+            return Token{"eql", val, currentLine, currentCol};
         }
         currentState = S_ERROR;
-        return Token{"unknown", val};
+        return Token{"unknown", val, currentLine, currentCol};
     case '<':
         currentState = S_LESS;
         if (peek() == '>')
         {
             val += advance();
             currentState = S_NOTEQUAL;
-            return Token{"neq", val};
+            return Token{"neq", val, currentLine, currentCol};
         }
         else if (peek() == '=')
         {
             val += advance(); // Consume '='
             currentState = S_LESSEQUAL;
-            return Token{"leq", val};
+            return Token{"leq", val, currentLine, currentCol};
         }
-        return Token{"lss", val};
+        return Token{"lss", val, currentLine, currentCol};
     case '>':
         currentState = S_GREATER;
         if (peek() == '=')
         {
             val += advance(); // Consume '='
             currentState = S_GREATEREQUAL;
-            return Token{"geq", val};
+            return Token{"geq", val, currentLine, currentCol};
         }
-        return Token{"gtr", val};
+        return Token{"gtr", val, currentLine, currentCol};
     default:
         currentState = S_ERROR;
-        return Token{"unknown", val};
+        return Token{"unknown", val, currentLine, currentCol};
     }
 };
 
@@ -250,35 +259,35 @@ Token Lexer::readPunctuation(char ch)
     {
     case ',':
         currentState = S_COMMA;
-        return Token{"comma", val};
+        return Token{"comma", val, currentLine, currentCol};
     case ';':
         currentState = S_SEMICOLON;
-        return Token{"semicolon", val};
+        return Token{"semicolon", val, currentLine, currentCol};
     case '.':
         currentState = S_PERIOD;
-        return Token{"period", val};
+        return Token{"period", val, currentLine, currentCol};
     case ':':
         currentState = S_COLON;
         if (peek() == '=')
         {
             val += advance();
             currentState = S_BECOMES;
-            return Token{"becomes", val};
+            return Token{"becomes", val, currentLine, currentCol};
         }
-        return Token{"colon", val};
+        return Token{"colon", val, currentLine, currentCol};
 
     case ')':
         currentState = S_RPAR;
-        return Token{"rparent", val};
+        return Token{"rparent", val, currentLine, currentCol};
     case '[':
         currentState = S_LBRACK;
-        return Token{"lbrack", val};
+        return Token{"lbrack", val, currentLine, currentCol};
     case ']':
         currentState = S_RBRACK;
-        return Token{"rbrack", val};
+        return Token{"rbrack", val, currentLine, currentCol};
     default:
         currentState = S_ERROR;
-        return Token{"unknown", val};
+        return Token{"unknown", val, currentLine, currentCol};
     }
 };
 
@@ -321,10 +330,10 @@ Token Lexer::readIdentOrKeyword(char ch)
 
     if (type == "ident")
     {
-        return Token{type, val};
+        return Token{type, val, currentLine, currentCol};
     }
 
-    return Token{classifyKeyword(val), lower};
+    return Token{classifyKeyword(val), lower, currentLine, currentCol};
 };
 
 Token Lexer::readUnknown(char ch)
@@ -338,7 +347,7 @@ Token Lexer::readUnknown(char ch)
         advance();
     }
 
-    return Token{"unknown", val};
+    return Token{"unknown", val, currentLine, currentCol};
 }
 
 vector<Token> Lexer::tokenize()
@@ -361,6 +370,9 @@ vector<Token> Lexer::tokenize()
         // }
 
         char ch = peek();
+        int startLine = this->currentLine;
+        int startCol = this->currentCol;
+        size_t tokensBefore = tokens.size();
 
         // if (isspace(ch))
         // {

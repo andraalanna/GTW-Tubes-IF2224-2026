@@ -58,7 +58,7 @@ void Parser::syntaxError(const string &expected)
 {
     const Token &tok = current();
     ostringstream oss;
-    oss << "Syntax error: unexpected token '" << tok.type;
+    oss << "Syntax error at line " << tok.line << ", col " << tok.col << ": unexpected token '" << tok.type;
     if (!tok.value.empty())
         oss << "(" << tok.value << ")";
     oss << "', expected " << expected;
