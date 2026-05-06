@@ -43,7 +43,13 @@ Token Lexer::readNumber()
 
     if (peek() == '.')
     {
-        if (isdigit(source[pos + 1]))
+        char afterDot = (static_cast<size_t>(pos + 1) < source.size()) ? source[pos + 1] : '\0';
+        if (afterDot == '.')
+        {
+            
+            return Token({"intcon", val});
+        }
+        if (isdigit(isdigit(afterDot)))
         {
             currentState = S_REAL_DOT;
             val += advance();
@@ -408,7 +414,7 @@ vector<Token> Lexer::tokenize()
         {
             char next = (static_cast<size_t>(pos + 1) < source.size()) ? source[pos + 1] : '\0';
             // kasus valid
-            if (next == '.' || next == '\0' || isspace(next))
+            if (next == '.' || next == '\0' || isspace(next) || isdigit(next) || next == ';' || next == ')' || next == ']')
             {
                 advance();
                 tokens.push_back(readPunctuation(ch));
