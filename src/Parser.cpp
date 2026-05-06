@@ -409,7 +409,7 @@ shared_ptr<ParseNode> Parser::parseFieldList()
 
     node->children.push_back(parseFieldPart());
 
-    while (check("semicolon") && lookahead().type == "ident")
+    while (check("semicolon") && lookahead().type != "endsy")
     {
         node->children.push_back(expect("semicolon"));
         node->children.push_back(parseFieldPart());
@@ -940,8 +940,30 @@ shared_ptr<ParseNode> Parser::parseFactor()
 {
     auto node = makeNode("<factor>");
 
-    if (check("ident") || check("intcon") || check("realcon") || check("charcon") || check("string"))
+    if (check("intcon") || check("realcon") || check("charcon") || check("string"))
         node->children.push_back(consume());
+    else if (check("ident"))
+    {
+        auto identLeaf = consume();
+        if (check("lbrack") || check("period"))
+        {
+            auto varNode = makeNode("<variable>");
+            varNode->children.push_back(identLeaf);
+            while (check("lbrack") || check("period"))
+                varNode->children.push_back(parseComponentVariable());
+            node->children.push_back(varNode);
+        }
+        else if (check("lparent"))
+        {
+            node->children.push_back(parseProcedureFunctionCall(identLeaf));
+        }
+        else
+        {
+            auto varNode = makeNode("<variable>");
+            varNode->children.push_back(identLeaf);
+            node->children.push_back(varNode);
+        }
+    }
     else if (check("lparent"))
     {
         node->children.push_back(consume());
