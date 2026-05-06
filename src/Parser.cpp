@@ -87,6 +87,9 @@ shared_ptr<ParseNode> Parser::expectVal(const string &type, const string &val)
     return consume();
 }
 
+/**
+ * program → program-header + declaration-part + compound-statement + period
+ */
 shared_ptr<ParseNode> Parser::parseProgram()
 {
     auto node = makeNode("<program>");
@@ -103,6 +106,9 @@ shared_ptr<ParseNode> Parser::parseProgram()
     return node;
 }
 
+/**
+ * programsy + ident + semicolon
+ */
 shared_ptr<ParseNode> Parser::parseProgramHeader()
 {
     auto node = makeNode("<program-header>");
@@ -111,6 +117,10 @@ shared_ptr<ParseNode> Parser::parseProgramHeader()
     node->children.push_back(expect("semicolon"));
     return node;
 }
+
+/**
+ * (const-declaration)* + (type-declaration)* + (var-declaration)* + (subprogram-declaration)*
+ */
 shared_ptr<ParseNode> Parser::parseDeclarationPart()
 {
     auto node = makeNode("<declaration-part>");
@@ -136,6 +146,10 @@ shared_ptr<ParseNode> Parser::parseDeclarationPart()
 
     return node;
 }
+
+/**
+ * constsy + (ident + eql + constant + semicolon)+
+ */
 shared_ptr<ParseNode> Parser::parseConstDeclaration()
 {
     auto node = makeNode("<const-declaration>");
@@ -149,6 +163,10 @@ shared_ptr<ParseNode> Parser::parseConstDeclaration()
     }
     return node;
 }
+
+/**
+ * charcon | string | [(plus | minus)? + (ident | intcon | realcon)]
+ */
 shared_ptr<ParseNode> Parser::parseConstant()
 {
     auto node = makeNode("<constant>");
@@ -180,49 +198,74 @@ shared_ptr<ParseNode> Parser::parseConstant()
     return node;
 }
 
-shared_ptr<ParseNode> Parser::parseEnumerated()
+/**
+ * typesy + (ident + eql + type + semicolon)+
+ */
+shared_ptr<ParseNode> Parser::parseTypeDeclaration()
 {
-    auto node = makeNode("<enumerated>");
+    auto node = makeNode("<type-declaration>");
 
-    node->children.push_back(expect("lparent"));
+    node->children.push_back(expect("typesy"));
+    if (!check("ident"))
+    {
+        syntaxError("ident (expected at least one type declaration after 'type')");
+    }
+
+    while (check("ident")) // lanjut selama masih ada ident berikutnya
+    {
+        node->children.push_back(expect("ident"));
+        node->children.push_back(expect("eql"));
+        node->children.push_back(parseType());
+        node->children.push_back(expect("semicolon"));
+    }
+
+    return node;
+}
+
+/**
+ * varsy + (identifier-list + colon + type + semicolon)+
+ */
+shared_ptr<ParseNode> Parser::parseVarDeclaration()
+{
+    auto node = makeNode("<var-declaration>");
+
+    node->children.push_back(expect("varsy"));
+
+    if (!check("ident"))
+    {
+        syntaxError("ident (expected at least one variable declaration after 'var')");
+    }
+
+    while (check("ident"))
+    {
+        node->children.push_back(parseIdentifierList());
+        node->children.push_back(expect("colon"));
+        node->children.push_back(parseType());
+        node->children.push_back(expect("semicolon"));
+    }
+
+    return node;
+}
+
+/**
+ * ident (comma + ident)*
+ */
+shared_ptr<ParseNode> Parser::parseIdentifierList()
+{
+    auto node = makeNode("<identifier-list>");
     node->children.push_back(expect("ident"));
 
-    while (check("comma"))
-    {
+    while (check("comma") && lookahead().type == "ident") {
         node->children.push_back(expect("comma"));
         node->children.push_back(expect("ident"));
     }
 
-    node->children.push_back(expect("rparent"));
-
     return node;
 }
 
-shared_ptr<ParseNode> Parser::parseRange(shared_ptr<ParseNode> firstConst)
-{
-    auto node = makeNode("<range>");
-    node->children.push_back(firstConst);
-
-    node->children.push_back(expect("period"));
-    node->children.push_back(expect("period"));
-
-    node->children.push_back(parseConstant());
-
-    return node;
-}
-
-shared_ptr<ParseNode> Parser::parseRecordType()
-{
-    auto node = makeNode("<record-type>");
-
-    node->children.push_back(expect("recordsy"));
-    node->children.push_back(parseFieldList());
-    node->children.push_back(expect("endsy"));
-
-    return node;
-}
-
-
+/**
+ * ident | array-type | range | enumerated | record-type
+ */
 shared_ptr<ParseNode> Parser::parseType()
 {
     auto node = makeNode("<type>");
@@ -264,45 +307,9 @@ shared_ptr<ParseNode> Parser::parseType()
     return node;
 }
 
-shared_ptr<ParseNode> Parser::parseIdentifierList()
-{
-    auto node = makeNode("<identifier-list>");
-    node->children.push_back(expect("ident"));
-
-    while (check("comma") && lookahead().type == "ident") {
-        node->children.push_back(expect("comma"));
-        node->children.push_back(expect("ident"));
-    }
-
-    return node;
-}
-
-shared_ptr<ParseNode> Parser::parseFieldPart()
-{
-    auto node = makeNode("<field-part>");
-
-    node->children.push_back(parseIdentifierList());
-    node->children.push_back(expect("colon"));
-    node->children.push_back(parseType());
-
-    return node;
-}
-
-shared_ptr<ParseNode> Parser::parseFieldList()
-{
-    auto node = makeNode("<field-list>");
-
-    node->children.push_back(parseFieldPart());
-
-    while (check("semicolon") && lookahead().type == "ident")
-    {
-        node->children.push_back(expect("semicolon"));
-        node->children.push_back(parseFieldPart());
-    }
-
-    return node;
-}
-
+/**
+ * arraysy + lbrack + (range | ident) + rbrack + ofsy + type
+ */
 shared_ptr<ParseNode> Parser::parseArrayType()
 {
     auto node = makeNode("<array-type>");
@@ -342,6 +349,92 @@ shared_ptr<ParseNode> Parser::parseArrayType()
     return node;
 }
 
+/**
+ * constant + period + period + constant
+ */
+shared_ptr<ParseNode> Parser::parseRange(shared_ptr<ParseNode> firstConst)
+{
+    auto node = makeNode("<range>");
+    node->children.push_back(firstConst);
+
+    node->children.push_back(expect("period"));
+    node->children.push_back(expect("period"));
+
+    node->children.push_back(parseConstant());
+
+    return node;
+}
+
+/**
+ * lparent + ident + (comma + ident)* + rparent
+ */
+shared_ptr<ParseNode> Parser::parseEnumerated()
+{
+    auto node = makeNode("<enumerated>");
+
+    node->children.push_back(expect("lparent"));
+    node->children.push_back(expect("ident"));
+
+    while (check("comma"))
+    {
+        node->children.push_back(expect("comma"));
+        node->children.push_back(expect("ident"));
+    }
+
+    node->children.push_back(expect("rparent"));
+
+    return node;
+}
+
+/**
+ * recordsy + field-list + endsy
+ */
+shared_ptr<ParseNode> Parser::parseRecordType()
+{
+    auto node = makeNode("<record-type>");
+
+    node->children.push_back(expect("recordsy"));
+    node->children.push_back(parseFieldList());
+    node->children.push_back(expect("endsy"));
+
+    return node;
+}
+
+/**
+ * field-part + (semicolon + field-part)*
+ */
+shared_ptr<ParseNode> Parser::parseFieldList()
+{
+    auto node = makeNode("<field-list>");
+
+    node->children.push_back(parseFieldPart());
+
+    while (check("semicolon") && lookahead().type == "ident")
+    {
+        node->children.push_back(expect("semicolon"));
+        node->children.push_back(parseFieldPart());
+    }
+
+    return node;
+}
+
+/**
+ * identifier-list + colon + type
+ */
+shared_ptr<ParseNode> Parser::parseFieldPart()
+{
+    auto node = makeNode("<field-part>");
+
+    node->children.push_back(parseIdentifierList());
+    node->children.push_back(expect("colon"));
+    node->children.push_back(parseType());
+
+    return node;
+}
+
+/**
+ * procedure-declaration | function-declaration
+ */
 shared_ptr<ParseNode> Parser::parseSubProgramDeclaration()
 {
     auto node = makeNode("<subprogram-declaration>");
@@ -356,12 +449,15 @@ shared_ptr<ParseNode> Parser::parseSubProgramDeclaration()
     }
     else
     {
-        syntaxError("proceduresy or functionsy");
+        syntaxError("proceduresy or functionsy after subprogram declaration.");
     }
 
     return node;
 }
 
+/**
+ * proceduresy + ident + (formal-parameter-list)? + semicolon + block + semicolon
+ */
 shared_ptr<ParseNode> Parser::parseProcedureDeclaration()
 {
     auto node = makeNode("<procedure-declaration>");
@@ -381,6 +477,9 @@ shared_ptr<ParseNode> Parser::parseProcedureDeclaration()
     return node;
 }
 
+/**
+ * functionsy + ident + (formal-parameter-list)? + colon + ident + semicolon + block + semicolon
+ */
 shared_ptr<ParseNode> Parser::parseFunctionDeclaration()
 {
     auto node = makeNode("<function-declaration>");
@@ -404,6 +503,9 @@ shared_ptr<ParseNode> Parser::parseFunctionDeclaration()
     return node;
 }
 
+/**
+ * declaration-part + compound-statement
+ */
 shared_ptr<ParseNode> Parser::parseBlock()
 {
     auto node = makeNode("<block>");
@@ -414,6 +516,9 @@ shared_ptr<ParseNode> Parser::parseBlock()
     return node;
 }
 
+/**
+ * lparent + parameter-group + (semicolon + parameter-group)* + rparent
+ */
 shared_ptr<ParseNode> Parser::parseFormalParameterList()
 {
     auto node = makeNode("<formal-parameter-list>");
@@ -432,6 +537,9 @@ shared_ptr<ParseNode> Parser::parseFormalParameterList()
     return node;
 }
 
+/**
+ * identifier-list + colon + (ident | array-type)
+ */
 shared_ptr<ParseNode> Parser::parseParameterGroup()
 {
     auto node = makeNode("<parameter-group>");
@@ -456,46 +564,9 @@ shared_ptr<ParseNode> Parser::parseParameterGroup()
     return node;
 }
 
-
-shared_ptr<ParseNode> Parser::parseTypeDeclaration()
-{
-    auto node = makeNode("<type-declaration>");
-
-    node->children.push_back(expect("typesy"));
-
-    do
-    {
-        node->children.push_back(expect("ident"));
-        node->children.push_back(expect("eql"));
-        node->children.push_back(parseType());
-        node->children.push_back(expect("semicolon"));
-    } while (check("ident")); // lanjut selama masih ada ident berikutnya
-
-    return node;
-}
-
-shared_ptr<ParseNode> Parser::parseVarDeclaration()
-{
-    auto node = makeNode("<var-declaration>");
-
-    node->children.push_back(expect("varsy"));
-
-    if (!check("ident"))
-    {
-        syntaxError("ident (expected at least one variable declaration after 'var')");
-    }
-
-    while (check("ident"))
-    {
-        node->children.push_back(parseIdentifierList());
-        node->children.push_back(expect("colon"));
-        node->children.push_back(parseType());
-        node->children.push_back(expect("semicolon"));
-    }
-
-    return node;
-}
-
+/**
+ * beginsy + statement-list + endsy
+ */
 shared_ptr<ParseNode> Parser::parseCompoundStatement()
 {
     auto node = makeNode("<compound-statement>");
@@ -507,76 +578,27 @@ shared_ptr<ParseNode> Parser::parseCompoundStatement()
     return node;
 }
 
+/**
+ * statement (semicolon + statement)*
+ */
 shared_ptr<ParseNode> Parser::parseStatementList()
 {
     auto node = makeNode("<statement-list>");
     if (check("endsy") || check("untilsy") || isAtEnd())
         return node;
-    node->children.push_back(parseStatement());
-    while (check("semicolon"))
-    {
-        node->children.push_back(expect("semicolon"));
-
-        if (check("endsy") || check("untilsy") || isAtEnd())
-            break;
-
+    while(true){
         node->children.push_back(parseStatement());
-    }
-    return node;
-}
-
-shared_ptr<ParseNode> Parser::parseVariable()
-{
-    auto node = makeNode("<variable>");
-    node->children.push_back(expect("ident"));
-
-    if (check("lbrack") || check("period"))
-    {
-        auto componentNode = makeNode("<component-variable>");
-
-        componentNode->children.push_back(node);
-
-        while (check("lbrack") || check("period"))
-        {
-
-            if (check("lbrack"))
-            {
-                componentNode->children.push_back(expect("lbrack"));
-                componentNode->children.push_back(parseIndexList());
-                componentNode->children.push_back(expect("rbrack"));
-            }
-            else
-            {
-                componentNode->children.push_back(expect("period"));
-                componentNode->children.push_back(expect("ident"));
-            }
+        node->children.push_back(expect("semicolon"));
+        if(check("endsy") || check("untilsy") || isAtEnd()){
+            break;
         }
-        return componentNode;
-    }
+   }
     return node;
 }
 
-shared_ptr<ParseNode> Parser::parseIndexList()
-{
-    auto node = makeNode("<index-list>");
-
-    if (check("intcon") || check("charcon") || check("ident"))
-        node->children.push_back(consume());
-    else
-        syntaxError("intcon, charcon, or ident as index");
-
-    while (check("comma"))
-    {
-        node->children.push_back(expect("comma"));
-        if (check("intcon") || check("charcon") || check("ident"))
-            node->children.push_back(consume());
-        else
-            syntaxError("intcon, charcon, or ident as index");
-    }
-
-    return node;
-}
-
+/**
+ * (assignment-statement | if-statement | case-statement | while-statement | repeat-statement | for-statement | procedure/function-call )?
+ */
 shared_ptr<ParseNode> Parser::parseStatement()
 {
     auto node = makeNode("<statement>");
@@ -613,6 +635,71 @@ shared_ptr<ParseNode> Parser::parseStatement()
 
     return node;
 }
+
+/**
+ * ident + (component-variable)*
+ */
+shared_ptr<ParseNode> Parser::parseVariable()
+{
+    auto node = makeNode("<variable>");
+    node->children.push_back(expect("ident"));
+
+    /**
+     * (lbrack + index-list + rbrack) | (period + ident)
+     */
+    if (check("lbrack") || check("period"))
+    {
+        auto componentNode = makeNode("<component-variable>");
+
+        componentNode->children.push_back(node);
+
+        while (check("lbrack") || check("period"))
+        {
+
+            if (check("lbrack"))
+            {
+                componentNode->children.push_back(expect("lbrack"));
+                componentNode->children.push_back(parseIndexList());
+                componentNode->children.push_back(expect("rbrack"));
+            }
+            else
+            {
+                componentNode->children.push_back(expect("period"));
+                componentNode->children.push_back(expect("ident"));
+            }
+        }
+        return componentNode;
+    }
+    return node;
+}
+
+/**
+ * ( intcon | charcon | ident ) + ( comma + index-list )*
+ */
+shared_ptr<ParseNode> Parser::parseIndexList()
+{
+    auto node = makeNode("<index-list>");
+
+    if (check("intcon") || check("charcon") || check("ident"))
+        node->children.push_back(consume());
+    else
+        syntaxError("intcon, charcon, or ident as index");
+
+    while (check("comma"))
+    {
+        node->children.push_back(expect("comma"));
+        if (check("intcon") || check("charcon") || check("ident"))
+            node->children.push_back(consume());
+        else
+            syntaxError("intcon, charcon, or ident as index");
+    }
+
+    return node;
+}
+
+/**
+ * variable + becomes + expression
+ */
 shared_ptr<ParseNode> Parser::parseAssignmentStatement(shared_ptr<ParseNode> identLeaf)
 {
     auto node = makeNode("<assignment-statement>");
@@ -621,6 +708,10 @@ shared_ptr<ParseNode> Parser::parseAssignmentStatement(shared_ptr<ParseNode> ide
     node->children.push_back(parseExpression());
     return node;
 }
+
+/**
+ * ifsy + expression + thensy + statement + (elsy + statement)?
+ */
 shared_ptr<ParseNode> Parser::parseIfStatement()
 {
     auto node = makeNode("<if-statement>");
@@ -636,6 +727,10 @@ shared_ptr<ParseNode> Parser::parseIfStatement()
     }
     return node;
 }
+
+/**
+ * casesy + expression + ofsy + case-block + endsy
+ */
 shared_ptr<ParseNode> Parser::parseCaseStatement()
 {
     auto node = makeNode("<case-statement>");
@@ -655,6 +750,10 @@ shared_ptr<ParseNode> Parser::parseCaseStatement()
     node->children.push_back(expect("endsy"));
     return node;
 }
+
+/**
+ * constant + (comma + constant)* + colon + statement + (semicolon + case-block?)*
+ */
 shared_ptr<ParseNode> Parser::parseCaseBlock()
 {
     auto node = makeNode("<case-block>");
@@ -669,6 +768,10 @@ shared_ptr<ParseNode> Parser::parseCaseBlock()
     node->children.push_back(parseStatement());
     return node;
 }
+
+/**
+ * whilesy + expression + dosy + statement
+ */
 shared_ptr<ParseNode> Parser::parseWhileStatement()
 {
     auto node = makeNode("<while-statement>");
@@ -678,6 +781,10 @@ shared_ptr<ParseNode> Parser::parseWhileStatement()
     node->children.push_back(parseStatement());
     return node;
 }
+
+/**
+ * repeatsy + statement-list + untilsy + expression
+ */
 shared_ptr<ParseNode> Parser::parseRepeatStatement()
 {
     auto node = makeNode("<repeat-statement>");
@@ -687,6 +794,10 @@ shared_ptr<ParseNode> Parser::parseRepeatStatement()
     node->children.push_back(parseExpression());
     return node;
 }
+
+/**
+ * forsy + ident + becomes + expression + ( tosy | downtosy) + expression + dosy + statement
+ */
 shared_ptr<ParseNode> Parser::parseForStatement()
 {
     auto node = makeNode("<for-statement>");
@@ -707,6 +818,10 @@ shared_ptr<ParseNode> Parser::parseForStatement()
     node->children.push_back(parseStatement());
     return node;
 }
+
+/**
+ * ident + (lparent + parameter-list? + rparent)
+ */
 shared_ptr<ParseNode> Parser::parseProcedureFunctionCall(shared_ptr<ParseNode> identLeaf)
 {
     auto node = makeNode("<procedure/function-call>");
@@ -720,8 +835,17 @@ shared_ptr<ParseNode> Parser::parseProcedureFunctionCall(shared_ptr<ParseNode> i
         }
         node->children.push_back(expect("rparent"));
     }
+    else 
+    {
+        syntaxError("lparent on procedure/function-call");
+    }
+
     return node;
 }
+
+/**
+ * expression (comma + expression)*
+ */
 shared_ptr<ParseNode> Parser::parseParameterList()
 {
     auto node = makeNode("<parameter-list>");
@@ -733,21 +857,6 @@ shared_ptr<ParseNode> Parser::parseParameterList()
     }
     return node;
 }
-
-// shared_ptr<ParseNode> Parser::parseExpression()
-// {
-//     auto node = makeNode("<expression-STUB>");
-
-//     // Consume token sampai ketemu delimiter
-//     while (!isAtEnd() && !check("thensy") && !check("dosy") && !check("untilsy") && !check("ofsy") && !check("endsy") && !check("semicolon") && !check("period") && !check("rparent") && !check("comma") && !check("elsesy") && !check("tosy") && !check("downtosy") && !check("rbrack") )
-//     {
-//         node->children.push_back(consume());
-//     }
-
-//     return node;
-// }
-
-// Expression
 
 /**
  * simple-expression (relational-operator + simple-expression)?
