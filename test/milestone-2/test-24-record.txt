@@ -1,0 +1,16 @@
+program TestRecord5;
+type
+    Address == record
+        city: string;
+        zip: integer
+    end;
+    Person == record
+        name: string;
+        age: integer;
+        addr: Address
+    end;
+var
+    prs: Person;
+begin
+    prs.age := 25
+end.

@@ -8,4 +8,6 @@ var a, b: integer;
 var num: array [1..10] of integer;
 
 begin
+    a := 5
+    num[1] := 10
 end.

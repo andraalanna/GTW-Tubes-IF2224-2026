@@ -1,0 +1,5 @@
+program Test;
+begin
+  arr[1] := 10;
+  i := arr[1];
+end.

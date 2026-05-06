@@ -1,0 +1,10 @@
+program TestRecord6;
+type
+    Broken == record
+        x: integer;
+        y: integer;
+var
+    b: Broken;
+begin
+    b.x := 1
+end.
