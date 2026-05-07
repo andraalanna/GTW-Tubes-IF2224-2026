@@ -1,0 +1,8 @@
+program TestWhile;
+var
+  x, y, i : integer;
+  arr : array[1..10] of integer;
+begin
+  while x > 0 do
+    x := compute(x, y + 1, arr[i])
+end.

@@ -1,0 +1,9 @@
+program TestCaseMissingSemicolon;
+var
+  x, y : integer;
+begin
+  case y of
+    1: x := 1
+    2: x := 2
+  end
+end.
