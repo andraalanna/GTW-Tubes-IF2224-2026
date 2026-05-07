@@ -1,0 +1,4 @@
+program TestPrintInvalid2;
+begin
+    print;
+end.
