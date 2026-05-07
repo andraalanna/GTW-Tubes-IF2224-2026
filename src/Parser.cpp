@@ -69,23 +69,28 @@ void Parser::synchronize()
 {
     while (!isAtEnd())
     {
-        if (current().type == "semicolon")
+        if (check("semicolon"))
         {
-            pos++; // consume semicolon
+            pos++;
             return;
         }
 
-        if (check("endsy") ||
-            check("beginsy") ||
-            check("constsy") ||
+        if (check("constsy") ||
             check("typesy") ||
             check("varsy") ||
             check("proceduresy") ||
             check("functionsy") ||
-            check("programsy"))
+            check("beginsy") ||
+            check("endsy") ||
+            check("ifsy") ||
+            check("whilesy") ||
+            check("repeatsy") ||
+            check("forsy") ||
+            check("casesy"))
         {
             return;
         }
+
         pos++;
     }
 }
@@ -118,6 +123,7 @@ shared_ptr<ParseNode> Parser::expectVal(const string &type, const string &val)
 shared_ptr<ParseNode> Parser::parseProgram()
 {
     auto node = makeNode("<program>");
+
     try
     {
         node->children.push_back(parseProgramHeader());
@@ -128,8 +134,25 @@ shared_ptr<ParseNode> Parser::parseProgram()
         synchronize();
     }
 
-    node->children.push_back(parseDeclarationPart());
-    node->children.push_back(parseCompoundStatement());
+    try
+    {
+        node->children.push_back(parseDeclarationPart());
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
+
+    try
+    {
+        node->children.push_back(parseCompoundStatement());
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
 
     try
     {
@@ -142,10 +165,11 @@ shared_ptr<ParseNode> Parser::parseProgram()
 
     if (!isAtEnd())
     {
-        // syntaxError("end of program"); // Don't throw here if we want to just collect
         const Token &tok = current();
         ostringstream oss;
-        oss << "Syntax error at line " << tok.line << ", col " << tok.col << ": unexpected token '" << tok.type << "', expected end of program";
+        oss << "Syntax error at line " << tok.line << ", col " << tok.col
+            << ": unexpected token '" << tok.type
+            << "', expected end of program";
         errors.push_back(oss.str());
     }
 
@@ -194,10 +218,9 @@ shared_ptr<ParseNode> Parser::parseDeclarationPart()
         catch (const SyntaxError &e)
         {
             errors.push_back(e.what());
-            synchronize();
+            synchronizeSubprogram();
         }
     }
-
     return node;
 }
 
@@ -518,6 +541,26 @@ shared_ptr<ParseNode> Parser::parseFieldPart()
     return node;
 }
 
+void Parser::synchronizeSubprogram()
+{
+    while (!isAtEnd())
+    {
+        if (check("proceduresy") || check("functionsy"))
+        {
+            return;
+        }
+
+        if (check("endsy") && lookahead().type == "semicolon")
+        {
+            pos++;
+            pos++;
+            return;
+        }
+
+        pos++;
+    }
+}
+
 /**
  * procedure-declaration | function-declaration
  */
@@ -596,25 +639,8 @@ shared_ptr<ParseNode> Parser::parseBlock()
 {
     auto node = makeNode("<block>");
 
-    try
-    {
-        node->children.push_back(parseDeclarationPart());
-    }
-    catch (const SyntaxError &e)
-    {
-        errors.push_back(e.what());
-        synchronize();
-    }
-
-    try
-    {
-        node->children.push_back(parseCompoundStatement());
-    }
-    catch (const SyntaxError &e)
-    {
-        errors.push_back(e.what());
-        synchronize();
-    }
+    node->children.push_back(parseDeclarationPart());
+    node->children.push_back(parseCompoundStatement());
 
     return node;
 }
