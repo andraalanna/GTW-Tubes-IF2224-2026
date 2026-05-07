@@ -1,0 +1,14 @@
+program ValidTest;
+
+const
+    INTVAL == 100;
+    REALVAL == 3.14;
+    CHARVAL == 'a';
+    STRVAL == 'hello world';
+    POSVAL == +99;
+    NEGVAL == -42;
+    ALIAS == INTVAL;
+    EMPTY == '';
+
+begin
+end.

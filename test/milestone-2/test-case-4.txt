@@ -1,0 +1,2 @@
+{ ERROR: tidak ada compound statement sama sekali }
+program Test;

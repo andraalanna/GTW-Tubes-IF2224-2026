@@ -1,0 +1,10 @@
+program TestProcedureOneParam;
+
+procedure PrintNumber(x: integer);
+begin
+    print(x);
+end;
+
+begin
+    PrintNumber(10);
+end.

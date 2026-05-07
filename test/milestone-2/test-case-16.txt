@@ -1,0 +1,9 @@
+program TestFor;
+var
+  i : integer;
+  arr : array[1..10] of integer;
+begin
+  for i := 1 to 10 do
+      arr[i] := i * 2;
+      writeln(arr[i])
+end.

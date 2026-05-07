@@ -1,0 +1,20 @@
+program TestInvalidSubprogram;
+
+procedure PrintNumber(x integer);
+begin
+    print(x);
+end;
+
+function Add(a, b: integer) integer;
+begin
+    Add := a + b;
+end;
+
+procedure BrokenBlock;
+    print('Hello');
+end;
+
+begin
+    PrintNumber(10);
+    print(Add(1, 2));
+end.

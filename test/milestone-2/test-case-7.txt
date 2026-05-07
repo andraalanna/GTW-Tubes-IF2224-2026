@@ -1,0 +1,9 @@
+program TestError1;
+{ Error: parseRange - hanya satu period, seharusnya '..' }
+type
+	BadRange == 'a'.'z';
+var
+	x: integer;
+begin
+	x := 1
+end.

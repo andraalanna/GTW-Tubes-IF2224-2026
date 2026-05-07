@@ -1,0 +1,7 @@
+program TestError4;
+{ Error: parseVarDeclaration - colon antara identifier dan tipe hilang }
+var
+    x, y integer;
+begin
+    x := 1
+end.

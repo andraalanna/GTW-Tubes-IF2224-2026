@@ -1,5 +1,7 @@
 program IntRealTest;
 var a, b, c, d: real;
+program IntRealTest;
+var a, b, c, d: real;
 begin
   a := 42;
   b := 3.14;

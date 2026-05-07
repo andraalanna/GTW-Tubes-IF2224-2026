@@ -1,0 +1,10 @@
+program TestProcedureMultiParam;
+
+procedure ShowData(x, y: integer; name: string);
+begin
+    print(name);
+end;
+
+begin
+    ShowData(1, 2, 'Nabila');
+end.

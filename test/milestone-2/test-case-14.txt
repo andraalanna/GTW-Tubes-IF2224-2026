@@ -1,0 +1,13 @@
+program TestFunctionWithLocalBlock;
+
+function Add(a, b: integer): integer;
+var
+    result: integer;
+begin
+    result := a + b;
+    Add := result;
+end;
+
+begin
+    print(Add(2, 3));
+end.

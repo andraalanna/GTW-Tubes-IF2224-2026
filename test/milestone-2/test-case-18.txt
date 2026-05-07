@@ -1,0 +1,12 @@
+program TestRepeat;
+var
+  x, y : integer;
+begin
+  repeat
+    x := x + 1;
+    if x > 10 then
+      y := 0
+    else
+      y := 1
+  until x == 20
+end.

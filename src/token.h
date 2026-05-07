@@ -8,6 +8,8 @@ struct Token
 {
     string type;
     string value;
+    int line;
+    int col;
 };
 
 inline bool tokenHasValue(const string &type)

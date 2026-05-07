@@ -1,0 +1,9 @@
+program TestError2;
+{ Error: parseArrayType - keyword 'of' hilang }
+type
+	BadArray == array[1..10] integer;
+var
+	x: integer;
+begin
+    x := 1
+end.

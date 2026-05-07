@@ -38,7 +38,7 @@ realcon (7.2)
 semicolon
 ident (c)
 becomes
-error (12abc)
+unknown (12abc)
 semicolon
 endsy
 period
