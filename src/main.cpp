@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         const vector<string> &errors = parser.getErrors();
 
         if (!errors.empty())
-        {
+        {   
             ofstream outFile(argv[2]);
             for (const string &err : errors)
             {
@@ -118,11 +118,13 @@ int main(int argc, char *argv[])
 
         return 1;
     }
+    
     catch (const exception &e)
     {
         cerr << "Unrecoverable error: " << e.what() << endl;
         return 1;
     }
+    
 
     return 0;
 }

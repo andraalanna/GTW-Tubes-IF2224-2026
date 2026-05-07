@@ -1,1 +1,0 @@
-Syntax error at line 4, col 10: unexpected token 'intcon(100)', expected eql

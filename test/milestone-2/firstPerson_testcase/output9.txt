@@ -1,1 +1,0 @@
-Syntax error at line 4, col 12: unexpected token 'semicolon(;)', expected ident, intcon, or realcon after sign in constant

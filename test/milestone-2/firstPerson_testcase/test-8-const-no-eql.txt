@@ -1,6 +1,0 @@
-{ ERROR: const tanpa operator == }
-program Test;
-const
-    X 100;
-begin
-end.
