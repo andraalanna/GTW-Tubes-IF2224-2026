@@ -233,7 +233,8 @@ shared_ptr<ParseNode> Parser::parseConstDeclaration()
     node->children.push_back(expect("constsy"));
 
     // Harus ada minimal satu ident
-    if (!check("ident")) throw SyntaxError("Expected at least one constant declaration after 'const'");
+    if (!check("ident"))
+        throw SyntaxError("Expected at least one constant declaration after 'const'");
     while (check("ident"))
     {
         try
@@ -394,7 +395,7 @@ shared_ptr<ParseNode> Parser::parseType()
         node->children.push_back(parseRange(firstConst));
     }
     else if (check("intcon") || check("charcon") ||
-            check("plus") || check("minus"))
+             check("plus") || check("minus"))
     {
         auto firstConst = parseConstant();
         if (check("period"))
@@ -678,7 +679,6 @@ shared_ptr<ParseNode> Parser::parseParameterGroup()
     node->children.push_back(parseIdentifierList());
     node->children.push_back(expect("colon"));
 
-    // Sesuai spek: parameter-group -> identifier-list colon (ident | array-type)
     if (check("ident"))
     {
         node->children.push_back(expect("ident"));
