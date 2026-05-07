@@ -370,9 +370,9 @@ vector<Token> Lexer::tokenize()
         // }
 
         char ch = peek();
-        int startLine = this->currentLine;
-        int startCol = this->currentCol;
-        size_t tokensBefore = tokens.size();
+        // int startLine = this->currentLine;
+        // int startCol = this->currentCol;
+        // size_t tokensBefore = tokens.size();
 
         // if (isspace(ch))
         // {

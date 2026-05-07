@@ -1,10 +1,10 @@
-program TestProcedureNoParam;
+program TestProcedureOneParam;
 
-procedure Hello;
+procedure PrintNumber(x: integer);
 begin
-    print('Hello');
+    print(x);
 end;
 
 begin
-    print('Main Program');
+    PrintNumber(10);
 end.
