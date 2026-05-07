@@ -1,8 +1,11 @@
-program TestFunctionDeclaration;
+program TestFunctionWithLocalBlock;
 
 function Add(a, b: integer): integer;
+var
+    result: integer;
 begin
-    Add := a + b;
+    result := a + b;
+    Add := result;
 end;
 
 begin

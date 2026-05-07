@@ -1,4 +1,0 @@
-{ ERROR: tidak ada nama program }
-program ;
-begin
-end.

@@ -1,8 +1,4 @@
-program TestProcedureNoParam;
-
-procedure Hello;
-begin
-end;
-
+{ ERROR: tidak ada keyword program }
+Test;
 begin
 end.

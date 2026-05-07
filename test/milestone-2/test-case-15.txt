@@ -1,26 +1,20 @@
-program TestInvalidBlockRecovery;
+program TestInvalidSubprogram;
 
-procedure GoodProcedure;
+procedure PrintNumber(x integer);
 begin
-    print('Good');
+    print(x);
 end;
 
-procedure BrokenBlockOne;
-    print('Missing begin');
-end;
-
-function BrokenFunction(x: integer) integer;
+function Add(a, b: integer) integer;
 begin
-    BrokenFunction := x;
+    Add := a + b;
 end;
 
-procedure BrokenBlockTwo;
-var
-    y: integer;
-    y := 10;
+procedure BrokenBlock;
+    print('Hello');
 end;
 
 begin
-    GoodProcedure();
-    print(BrokenFunction(5));
+    PrintNumber(10);
+    print(Add(1, 2));
 end.

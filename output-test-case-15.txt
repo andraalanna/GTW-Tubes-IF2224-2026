@@ -1,8 +1,0 @@
-Syntax error at line 9, col 10: unexpected token 'ident(print)', expected beginsy
-Syntax error at line 12, col 44: unexpected token 'ident(integer)', expected colon
-Syntax error at line 20, col 9: unexpected token 'becomes(:=)', expected colon
-Syntax error at line 21, col 4: unexpected token 'endsy(end)', expected beginsy
-Syntax error at line 24, col 20: unexpected token 'rparent())', expected ident
-Syntax error at line 25, col 10: unexpected token 'ident(print)', expected endsy
-Syntax error at line 26, col 4: unexpected token 'endsy(end)', expected period
-Syntax error at line 26, col 4: unexpected token 'endsy', expected end of program
