@@ -231,6 +231,9 @@ shared_ptr<ParseNode> Parser::parseConstDeclaration()
 {
     auto node = makeNode("<const-declaration>");
     node->children.push_back(expect("constsy"));
+
+    // Harus ada minimal satu ident
+    if (!check("ident")) throw SyntaxError("Expected at least one constant declaration after 'const'");
     while (check("ident"))
     {
         try
