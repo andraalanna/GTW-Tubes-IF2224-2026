@@ -1,0 +1,10 @@
+program TestProcedureNoParam;
+
+procedure Hello;
+begin
+    print('Hello');
+end;
+
+begin
+    print('Main Program');
+end.

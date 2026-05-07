@@ -1,0 +1,8 @@
+{ ERROR: const tanpa nilai setelah ==, const tidak diisi nilai, const hanya diisi }
+program Test;
+const
+    X ==;
+    X 100;
+    X == +;
+begin
+end.

@@ -1,0 +1,65 @@
+programsy
+ident (ValidTestOrang1)
+semicolon
+comment ( CASE 1: komentar gaya blok )
+comment ( CASE 2: komentar gaya (* *) )
+comment ( kedua gaya komentar harus diabaikan parser )
+constsy
+comment ( CASE 3: const intcon )
+ident (INT)
+
+ident (VAL)
+eql
+intcon (100)
+semicolon
+comment ( CASE 4: const realcon )
+ident (REAL)
+
+ident (VAL)
+eql
+realcon (3.14)
+semicolon
+comment ( CASE 5: const charcon )
+ident (CHAR)
+
+ident (VAL)
+eql
+charcon ('a')
+semicolon
+comment ( CASE 6: const string )
+ident (STR)
+
+ident (VAL)
+eql
+string ('hello world')
+semicolon
+comment ( CASE 7: const dengan tanda plus )
+ident (POS)
+
+ident (VAL)
+eql
+plus
+intcon (99)
+semicolon
+comment ( CASE 8: const dengan tanda minus )
+ident (NEG)
+
+ident (VAL)
+eql
+intcon (-42)
+semicolon
+comment ( CASE 9: const alias ke identifier lain )
+ident (ALIAS)
+eql
+ident (INT)
+
+ident (VAL)
+semicolon
+comment ( CASE 10: const string kosong )
+ident (EMPTY)
+eql
+string ('')
+semicolon
+beginsy
+endsy
+period

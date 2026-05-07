@@ -58,11 +58,36 @@ void Parser::syntaxError(const string &expected)
 {
     const Token &tok = current();
     ostringstream oss;
-    oss << "Syntax error: unexpected token '" << tok.type;
+    oss << "Syntax error at line " << tok.line << ", col " << tok.col << ": unexpected token '" << tok.type;
     if (!tok.value.empty())
         oss << "(" << tok.value << ")";
     oss << "', expected " << expected;
-    throw runtime_error(oss.str());
+    throw SyntaxError(oss.str());
+}
+
+void Parser::synchronize()
+{
+    while (!isAtEnd())
+    {
+        if (current().type == "semicolon")
+        {
+            pos++; // consume semicolon
+            return;
+        }
+
+        if (check("endsy") ||
+            check("beginsy") ||
+            check("constsy") ||
+            check("typesy") ||
+            check("varsy") ||
+            check("proceduresy") ||
+            check("functionsy") ||
+            check("programsy"))
+        {
+            return;
+        }
+        pos++;
+    }
 }
 
 shared_ptr<ParseNode> Parser::consume()
@@ -93,14 +118,35 @@ shared_ptr<ParseNode> Parser::expectVal(const string &type, const string &val)
 shared_ptr<ParseNode> Parser::parseProgram()
 {
     auto node = makeNode("<program>");
-    node->children.push_back(parseProgramHeader());
+    try
+    {
+        node->children.push_back(parseProgramHeader());
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
+
     node->children.push_back(parseDeclarationPart());
     node->children.push_back(parseCompoundStatement());
-    node->children.push_back(expect("period"));
+
+    try
+    {
+        node->children.push_back(expect("period"));
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+    }
 
     if (!isAtEnd())
     {
-        syntaxError("end of program");
+        // syntaxError("end of program"); // Don't throw here if we want to just collect
+        const Token &tok = current();
+        ostringstream oss;
+        oss << "Syntax error at line " << tok.line << ", col " << tok.col << ": unexpected token '" << tok.type << "', expected end of program";
+        errors.push_back(oss.str());
     }
 
     return node;
@@ -141,7 +187,15 @@ shared_ptr<ParseNode> Parser::parseDeclarationPart()
 
     while (check("proceduresy") || check("functionsy"))
     {
-        node->children.push_back(parseSubProgramDeclaration());
+        try
+        {
+            node->children.push_back(parseSubProgramDeclaration());
+        }
+        catch (const SyntaxError &e)
+        {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
 
     return node;
@@ -156,10 +210,18 @@ shared_ptr<ParseNode> Parser::parseConstDeclaration()
     node->children.push_back(expect("constsy"));
     while (check("ident"))
     {
-        node->children.push_back(expect("ident"));
-        node->children.push_back(expect("eql"));
-        node->children.push_back(parseConstant());
-        node->children.push_back(expect("semicolon"));
+        try
+        {
+            node->children.push_back(expect("ident"));
+            node->children.push_back(expect("eql"));
+            node->children.push_back(parseConstant());
+            node->children.push_back(expect("semicolon"));
+        }
+        catch (const SyntaxError &e)
+        {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
     return node;
 }
@@ -183,7 +245,7 @@ shared_ptr<ParseNode> Parser::parseConstant()
         }
         else
         {
-            syntaxError("ident, intcon, or realcon adter sign in constant");
+            syntaxError("ident, intcon, or realcon after sign in constant");
         }
     }
     else if (check("intcon") || check("realcon") || check("ident"))
@@ -213,10 +275,18 @@ shared_ptr<ParseNode> Parser::parseTypeDeclaration()
 
     while (check("ident")) // lanjut selama masih ada ident berikutnya
     {
-        node->children.push_back(expect("ident"));
-        node->children.push_back(expect("eql"));
-        node->children.push_back(parseType());
-        node->children.push_back(expect("semicolon"));
+        try
+        {
+            node->children.push_back(expect("ident"));
+            node->children.push_back(expect("eql"));
+            node->children.push_back(parseType());
+            node->children.push_back(expect("semicolon"));
+        }
+        catch (const SyntaxError &e)
+        {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
 
     return node;
@@ -238,10 +308,18 @@ shared_ptr<ParseNode> Parser::parseVarDeclaration()
 
     while (check("ident"))
     {
-        node->children.push_back(parseIdentifierList());
-        node->children.push_back(expect("colon"));
-        node->children.push_back(parseType());
-        node->children.push_back(expect("semicolon"));
+        try
+        {
+            node->children.push_back(parseIdentifierList());
+            node->children.push_back(expect("colon"));
+            node->children.push_back(parseType());
+            node->children.push_back(expect("semicolon"));
+        }
+        catch (const SyntaxError &e)
+        {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
 
     return node;
@@ -255,7 +333,8 @@ shared_ptr<ParseNode> Parser::parseIdentifierList()
     auto node = makeNode("<identifier-list>");
     node->children.push_back(expect("ident"));
 
-    while (check("comma") && lookahead().type == "ident") {
+    while (check("comma") && lookahead().type == "ident")
+    {
         node->children.push_back(expect("comma"));
         node->children.push_back(expect("ident"));
     }
@@ -270,16 +349,20 @@ shared_ptr<ParseNode> Parser::parseType()
 {
     auto node = makeNode("<type>");
 
-    if (check("arraysy")) {
+    if (check("arraysy"))
+    {
         node->children.push_back(parseArrayType());
     }
-    else if (check("lparent")) {
+    else if (check("lparent"))
+    {
         node->children.push_back(parseEnumerated());
     }
-    else if (check("recordsy")) {
+    else if (check("recordsy"))
+    {
         node->children.push_back(parseRecordType());
     }
-    else if (check("ident") && lookahead().type == "period") {
+    else if (check("ident") && lookahead().type == "period")
+    {
         auto firstConst = makeNode("<constant>");
         firstConst->children.push_back(consume()); // consume ident
         node->children.push_back(parseRange(firstConst));
@@ -288,15 +371,18 @@ shared_ptr<ParseNode> Parser::parseType()
              check("string") || check("plus") || check("minus"))
     {
         auto firstConst = parseConstant();
-        if (check("period")) {
+        if (check("period"))
+        {
             node->children.push_back(parseRange(firstConst));
         }
-        else {
+        else
+        {
             // Standalone constant (jarang, tapi valid secara grammar)
             node->children.push_back(firstConst);
         }
     }
-    else if (check("ident")) {
+    else if (check("ident"))
+    {
         node->children.push_back(expect("ident"));
     }
     else
@@ -510,8 +596,25 @@ shared_ptr<ParseNode> Parser::parseBlock()
 {
     auto node = makeNode("<block>");
 
-    node->children.push_back(parseDeclarationPart());
-    node->children.push_back(parseCompoundStatement());
+    try
+    {
+        node->children.push_back(parseDeclarationPart());
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
+
+    try
+    {
+        node->children.push_back(parseCompoundStatement());
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
 
     return node;
 }
@@ -582,16 +685,33 @@ shared_ptr<ParseNode> Parser::parseCompoundStatement()
  * statement (semicolon + statement)*
  */
 
-// harusnya grammarnya statement (semicolon + statement)*, izin perbaikin dikit yak 
-// - yavie 
+// harusnya grammarnya statement (semicolon + statement)*, izin perbaikin dikit yak
+// - yavie
 shared_ptr<ParseNode> Parser::parseStatementList()
 {
     auto node = makeNode("<statement-list>");
-    node->children.push_back(parseStatement());
+    try
+    {
+        node->children.push_back(parseStatement());
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
+
     while (check("semicolon"))
     {
-        node->children.push_back(expect("semicolon"));
-        node->children.push_back(parseStatement());
+        try
+        {
+            node->children.push_back(expect("semicolon"));
+            node->children.push_back(parseStatement());
+        }
+        catch (const SyntaxError &e)
+        {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
     return node;
 }
@@ -673,7 +793,6 @@ shared_ptr<ParseNode> Parser::parseVariable()
     }
     return node;
 }
-
 
 /**
  * ( intcon | charcon | ident ) + ( comma + index-list )*
@@ -804,7 +923,7 @@ shared_ptr<ParseNode> Parser::parseForStatement()
 {
     auto node = makeNode("<for-statement>");
     node->children.push_back(expect("forsy"));
-    node->children.push_back(expect("ident")); 
+    node->children.push_back(expect("ident"));
     node->children.push_back(expect("becomes"));
     node->children.push_back(parseExpression());
 
@@ -828,19 +947,10 @@ shared_ptr<ParseNode> Parser::parseProcedureFunctionCall(shared_ptr<ParseNode> i
 {
     auto node = makeNode("<procedure/function-call>");
     node->children.push_back(identLeaf);
-    if (check("lparent"))
-    {
-        node->children.push_back(expect("lparent"));
-        if (!check("rparent"))
-        {
-            node->children.push_back(parseParameterList());
-        }
-        node->children.push_back(expect("rparent"));
-    }
-    else 
-    {
-        syntaxError("lparent on procedure/function-call");
-    }
+
+    node->children.push_back(expect("lparent"));
+    node->children.push_back(parseParameterList());
+    node->children.push_back(expect("rparent"));
 
     return node;
 }
@@ -862,9 +972,9 @@ shared_ptr<ParseNode> Parser::parseParameterList()
 
 /**
  * simple-expression (relational-operator + simple-expression)?
- * 
+ *
  * Must contain simple-expression
- * Check trailing relational-operator + simple-expression 
+ * Check trailing relational-operator + simple-expression
  */
 shared_ptr<ParseNode> Parser::parseExpression()
 {
@@ -883,7 +993,7 @@ shared_ptr<ParseNode> Parser::parseExpression()
 
 /**
  * (plus | minus)? term (additive-operator + term)*
- * 
+ *
  * Check any + or - sign
  * Must contain a term
  * Check if trailed by other additive-operator + term
@@ -898,7 +1008,7 @@ shared_ptr<ParseNode> Parser::parseSimpleExpression()
     }
 
     node->children.push_back(parseTerm());
-    
+
     while (check("plus") || check("minus") || check("orsy"))
     {
         node->children.push_back(parseAdditiveOperator());
@@ -910,7 +1020,7 @@ shared_ptr<ParseNode> Parser::parseSimpleExpression()
 
 /**
  * factor (multiplicative-operator + factor)*
- * 
+ *
  * Must contain a factor
  * Check if trailed by multiplicative-operator + factor
  */
@@ -930,10 +1040,10 @@ shared_ptr<ParseNode> Parser::parseTerm()
 }
 
 /**
- * ident | intcon | realcon | charcon | string | 
- * (lparent + expression + rparent) | 
- * (notsy + factor) | 
- * procedure/function-call | 
+ * ident | intcon | realcon | charcon | string |
+ * (lparent + expression + rparent) |
+ * (notsy + factor) |
+ * procedure/function-call |
  * variable
  */
 shared_ptr<ParseNode> Parser::parseFactor()
@@ -975,7 +1085,7 @@ shared_ptr<ParseNode> Parser::parseFactor()
         node->children.push_back(consume());
         node->children.push_back(parseFactor());
     }
-    else // cek apakah dia variable? or function-call
+    else                                           // cek apakah dia variable? or function-call
         node->children.push_back(parseVariable()); // Asumsi pengecekan variable (other opt using ident)
 
     return node;
@@ -990,7 +1100,7 @@ shared_ptr<ParseNode> Parser::parseRelationalOperator()
 
     if (check("eql") || check("neq") || check("gtr") || check("geq") || check("lss") || check("leq"))
         node->children.push_back(consume());
-    else 
+    else
         syntaxError("relational-operator");
     return node;
 }
@@ -1002,7 +1112,7 @@ shared_ptr<ParseNode> Parser::parseAdditiveOperator()
 {
     auto node = makeNode("<additive-operator>");
 
-    if (check("plus") || check("minus") || check("orsy")) 
+    if (check("plus") || check("minus") || check("orsy"))
         node->children.push_back(consume());
     else
         syntaxError("additive-operator");
@@ -1016,7 +1126,7 @@ shared_ptr<ParseNode> Parser::parseMultiplicativeOperator()
 {
     auto node = makeNode("<multiplicative-operator>");
 
-    if(check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
+    if (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
         node->children.push_back(consume());
     else
         syntaxError("multiplicative-operator");

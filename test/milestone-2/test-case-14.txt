@@ -1,0 +1,10 @@
+program TestFunctionDeclaration;
+
+function Add(a, b: integer): integer;
+begin
+    Add := a + b;
+end;
+
+begin
+    print(Add(2, 3));
+end.

@@ -19,6 +19,8 @@ private:
     string source;      // Nyimpan seluruh isi source code
     int pos;            // Posisi karakter yang sedang dibaca
     State currentState; // State DFA saat ini
+    int currentLine;    // Baris saat ini
+    int currentCol;     // Kolom saat ini
 
     // Melihat karakter di posisi sekarang TANPA MAJU,
     // dipakai untuk cek karakter berikutnya.

@@ -1,0 +1,3 @@
+Syntax error at line 3, col 32: unexpected token 'ident(integer)', expected colon
+Syntax error at line 6, col 5: unexpected token 'semicolon(;)', expected period
+Syntax error at line 6, col 5: unexpected token 'semicolon', expected end of program

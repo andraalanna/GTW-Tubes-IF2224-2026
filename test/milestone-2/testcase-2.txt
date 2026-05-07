@@ -1,0 +1,4 @@
+{ ERROR: tidak ada keyword program }
+Test;
+begin
+end.
