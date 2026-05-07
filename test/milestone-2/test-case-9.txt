@@ -1,0 +1,9 @@
+program TestError3;
+{ Error: parseEnumerated - rparent penutup hilang }
+type
+    BadEnum == (Red, Green, Blue;
+var
+    x: integer;
+begin
+    x := 1
+end.
