@@ -1,7 +1,0 @@
-program Test;
-begin
-  repeat
-    x := 1;
-    y := 2
-  until z
-end.

@@ -1,5 +1,0 @@
-program Test;
-begin
-  while x do
-    if y then z := 1
-end.

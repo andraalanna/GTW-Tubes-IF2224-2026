@@ -1,4 +1,0 @@
-program Test;
-begin
-  if x then y := 1
-end.

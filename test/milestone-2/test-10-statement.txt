@@ -1,4 +1,0 @@
-program Test;
-begin
-  for i := 10 downto 1 do x := 1
-end.

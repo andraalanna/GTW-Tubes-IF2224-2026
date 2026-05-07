@@ -1,4 +1,0 @@
-program Test;
-begin
-  while x do x := 1
-end.

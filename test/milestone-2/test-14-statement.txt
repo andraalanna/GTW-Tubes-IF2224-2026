@@ -1,4 +1,0 @@
-program Test;
-begin
-  print(x, y)
-end.
