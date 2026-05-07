@@ -42,6 +42,7 @@ public:
     shared_ptr<ParseNode> parseFieldList();
     shared_ptr<ParseNode> parseFieldPart();
 
+    void synchronizeSubprogram();
     shared_ptr<ParseNode> parseSubProgramDeclaration();
     shared_ptr<ParseNode> parseProcedureDeclaration();
     shared_ptr<ParseNode> parseFunctionDeclaration();
