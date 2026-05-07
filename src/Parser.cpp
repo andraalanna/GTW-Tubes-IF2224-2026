@@ -1007,16 +1007,19 @@ shared_ptr<ParseNode> Parser::parseParameterList()
 shared_ptr<ParseNode> Parser::parseExpression()
 {
     auto node = makeNode("<expression>");
-
-    node->children.push_back(parseSimpleExpression());
-
-    if (check("eql") || check("neq") || check("gtr") || check("geq") || check("lss") || check("leq"))
-    {
-        node->children.push_back(parseRelationalOperator());
+    try {
         node->children.push_back(parseSimpleExpression());
-    }
 
-    return node;
+        if (check("eql") || check("neq") || check("gtr") || check("geq") || check("lss") || check("leq"))
+        {
+            node->children.push_back(parseRelationalOperator());
+            node->children.push_back(parseSimpleExpression());
+        }
+    } catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    } return node;
 }
 
 /**
@@ -1030,19 +1033,24 @@ shared_ptr<ParseNode> Parser::parseSimpleExpression()
 {
     auto node = makeNode("<simple-expression>");
 
-    if (check("plus") || check("minus"))
-    {
-        node->children.push_back(consume());
-    }
+    try {
+        if (check("plus") || check("minus"))
+        {
+            node->children.push_back(consume());
+        }
 
-    node->children.push_back(parseTerm());
-
-    while (check("plus") || check("minus") || check("orsy"))
-    {
-        node->children.push_back(parseAdditiveOperator());
         node->children.push_back(parseTerm());
-    }
 
+        while (check("plus") || check("minus") || check("orsy"))
+        {
+            node->children.push_back(parseAdditiveOperator());
+            node->children.push_back(parseTerm());
+        }
+    } catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
     return node;
 }
 
@@ -1055,13 +1063,18 @@ shared_ptr<ParseNode> Parser::parseSimpleExpression()
 shared_ptr<ParseNode> Parser::parseTerm()
 {
     auto node = makeNode("<term>");
-
-    node->children.push_back(parseFactor());
-
-    while (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
-    {
-        node->children.push_back(parseMultiplicativeOperator());
+    try {
         node->children.push_back(parseFactor());
+
+        while (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
+        {
+            node->children.push_back(parseMultiplicativeOperator());
+            node->children.push_back(parseFactor());
+        }
+    } catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
     }
 
     return node;
@@ -1077,45 +1090,55 @@ shared_ptr<ParseNode> Parser::parseTerm()
 shared_ptr<ParseNode> Parser::parseFactor()
 {
     auto node = makeNode("<factor>");
-
-    if (check("intcon") || check("realcon") || check("charcon") || check("string"))
-        node->children.push_back(consume());
-    else if (check("ident"))
-    {
-        auto identLeaf = consume();
-        if (check("lbrack") || check("period"))
+    try{
+        if (check("intcon") || check("realcon") || check("charcon") || check("string"))
+            node->children.push_back(consume());
+        else if (check("ident"))
         {
-            auto varNode = makeNode("<variable>");
-            varNode->children.push_back(identLeaf);
-            while (check("lbrack") || check("period"))
-                varNode->children.push_back(parseComponentVariable());
-            node->children.push_back(varNode);
+            auto identLeaf = consume();
+            if (check("lbrack") || check("period"))
+            {
+                auto varNode = makeNode("<variable>");
+                varNode->children.push_back(identLeaf);
+                while (check("lbrack") || check("period"))
+                    varNode->children.push_back(parseComponentVariable());
+                node->children.push_back(varNode);
+            }
+            else if (check("lparent"))
+            {
+                node->children.push_back(parseProcedureFunctionCall(identLeaf));
+            }
+            else
+            {
+                auto varNode = makeNode("<variable>");
+                varNode->children.push_back(identLeaf);
+                node->children.push_back(varNode);
+            }
         }
         else if (check("lparent"))
         {
-            node->children.push_back(parseProcedureFunctionCall(identLeaf));
+            node->children.push_back(consume());
+            node->children.push_back(parseExpression());
+            node->children.push_back(expect("rparent"));
         }
-        else
+        else if (check("notsy"))
         {
-            auto varNode = makeNode("<variable>");
-            varNode->children.push_back(identLeaf);
-            node->children.push_back(varNode);
+            node->children.push_back(consume());
+            node->children.push_back(parseFactor());
         }
+        else {                                         // cek apakah dia variable? or function-call
+            try {
+                node->children.push_back(parseVariable()); // Asumsi pengecekan variable (other opt using ident)
+            } catch (const SyntaxError &e) {
+                errors.push_back(e.what());
+                // syntaxError("factor");
+                synchronize();
+            }
+        }
+    } catch (const SyntaxError &e) {
+        errors.push_back(e.what());
+        synchronize();
     }
-    else if (check("lparent"))
-    {
-        node->children.push_back(consume());
-        node->children.push_back(parseExpression());
-        node->children.push_back(expect("rparent"));
-    }
-    else if (check("notsy"))
-    {
-        node->children.push_back(consume());
-        node->children.push_back(parseFactor());
-    }
-    else                                           // cek apakah dia variable? or function-call
-        node->children.push_back(parseVariable()); // Asumsi pengecekan variable (other opt using ident)
-
     return node;
 }
 
