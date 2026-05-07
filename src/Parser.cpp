@@ -231,6 +231,9 @@ shared_ptr<ParseNode> Parser::parseConstDeclaration()
 {
     auto node = makeNode("<const-declaration>");
     node->children.push_back(expect("constsy"));
+
+    // Harus ada minimal satu ident
+    if (!check("ident")) throw SyntaxError("Expected at least one constant declaration after 'const'");
     while (check("ident"))
     {
         try
@@ -390,8 +393,8 @@ shared_ptr<ParseNode> Parser::parseType()
         firstConst->children.push_back(consume()); // consume ident
         node->children.push_back(parseRange(firstConst));
     }
-    else if (check("intcon") || check("realcon") || check("charcon") ||
-             check("string") || check("plus") || check("minus"))
+    else if (check("intcon") || check("charcon") ||
+            check("plus") || check("minus"))
     {
         auto firstConst = parseConstant();
         if (check("period"))
@@ -400,8 +403,7 @@ shared_ptr<ParseNode> Parser::parseType()
         }
         else
         {
-            // Standalone constant (jarang, tapi valid secara grammar)
-            node->children.push_back(firstConst);
+            syntaxError("'..' expected after constant in range type");
         }
     }
     else if (check("ident"))
