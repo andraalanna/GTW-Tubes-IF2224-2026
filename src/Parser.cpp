@@ -187,7 +187,15 @@ shared_ptr<ParseNode> Parser::parseDeclarationPart()
 
     while (check("proceduresy") || check("functionsy"))
     {
-        node->children.push_back(parseSubProgramDeclaration());
+        try
+        {
+            node->children.push_back(parseSubProgramDeclaration());
+        }
+        catch (const SyntaxError &e)
+        {
+            errors.push_back(e.what());
+            synchronize();
+        }
     }
 
     return node;
@@ -588,8 +596,25 @@ shared_ptr<ParseNode> Parser::parseBlock()
 {
     auto node = makeNode("<block>");
 
-    node->children.push_back(parseDeclarationPart());
-    node->children.push_back(parseCompoundStatement());
+    try
+    {
+        node->children.push_back(parseDeclarationPart());
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
+
+    try
+    {
+        node->children.push_back(parseCompoundStatement());
+    }
+    catch (const SyntaxError &e)
+    {
+        errors.push_back(e.what());
+        synchronize();
+    }
 
     return node;
 }
