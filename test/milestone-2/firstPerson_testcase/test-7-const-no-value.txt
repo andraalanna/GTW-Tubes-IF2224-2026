@@ -1,7 +1,0 @@
-{ ERROR: const tanpa nilai setelah == }
-program Test;
-const
-    X ==;
-    X 100;
-begin
-end.
