@@ -118,7 +118,7 @@ shared_ptr<ParseNode> Parser::expectVal(const string &type, const string &val)
 }
 
 /**
- * program → program-header + declaration-part + compound-statement + period
+ * program -> program-header + declaration-part + compound-statement + period
  */
 shared_ptr<ParseNode> Parser::parseProgram()
 {

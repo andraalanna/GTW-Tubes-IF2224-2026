@@ -89,7 +89,7 @@ private:
     bool check(const string &type);
 
     // Konsumsi token saat ini dan kembalikan leaf ParseNode-nya;
-    // jika tipe tidak sesuai → lempar syntax error.
+    // jika tipe tidak sesuai -> lempar syntax error.
     shared_ptr<ParseNode> expect(const string &type);
 
     // Seperti expect tapi juga cek value (untuk token ganda seperti "eql")
