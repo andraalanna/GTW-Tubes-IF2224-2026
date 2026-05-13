@@ -9,7 +9,7 @@ FLAGS = -std=c++17 -Wall
 SRC_DIR = src
 BIN_DIR = bin
 TARGET = $(BIN_DIR)/program
-SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/lexer.cpp $(SRC_DIR)/Parser.cpp
+SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/lexer.cpp $(SRC_DIR)/Parser.cpp $(SRC_DIR)/symbolTable.cpp
 
 # Target default yang dijalankan saat ketik 'make'
 all: $(TARGET)
