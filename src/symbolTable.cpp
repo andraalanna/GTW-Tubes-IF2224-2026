@@ -93,7 +93,6 @@ int SymbolTable::lookupCurrentScope(const string& name) const {
     while (i > 0) {
         if (tab[i].name == name) return i;
         i = tab[i].link;
-        if (i > 0 && tab[i].lev < currentLevel) break;
     }
     return -1;
 }
