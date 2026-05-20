@@ -1,6 +1,7 @@
 #include "semanticAnalyzer.h"
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 
 SemanticAnalyzer::SemanticAnalyzer(SymbolTable &symbolTable) : st(symbolTable) {}
@@ -329,16 +330,18 @@ void SemanticAnalyzer::visitStatement(ASTNode *node)
     if (auto *n = dynamic_cast<FuncDeclNode *>(node))  { visitFuncDecl(n);  return; }
 
     // --- Statement & Ekspresi (Orang 5) ---
-    // Tambahkan branch berikut saat Orang 5 mengimplementasikan visit-nya:
-    //
-    // if (auto *n = dynamic_cast<AssignNode *>(node))   { visitAssign(n);   return; }
-    // if (auto *n = dynamic_cast<IfNode *>(node))       { visitIf(n);       return; }
-    // if (auto *n = dynamic_cast<WhileNode *>(node))    { visitWhile(n);    return; }
-    // if (auto *n = dynamic_cast<ForNode *>(node))      { visitFor(n);      return; }
-    // if (auto *n = dynamic_cast<RepeatNode *>(node))   { visitRepeat(n);   return; }
-    // if (auto *n = dynamic_cast<CaseNode *>(node))     { visitCase(n);     return; }
-    // if (auto *n = dynamic_cast<ProcCallNode *>(node)) { visitProcCall(n); return; }
-    // if (auto *n = dynamic_cast<CompoundStmtNode *>(node)) { visitCompoundStmt(n); return; }
+    if (auto *n = dynamic_cast<AssignNode *>(node))   { visitAssign(n);   return; }
+    if (auto *n = dynamic_cast<IfNode *>(node))       { visitIf(n);       return; }
+    if (auto *n = dynamic_cast<WhileNode *>(node))    { visitWhile(n);    return; }
+    if (auto *n = dynamic_cast<ForNode *>(node))      { visitFor(n);      return; }
+    if (auto *n = dynamic_cast<RepeatNode *>(node))   { visitRepeat(n);   return; }
+    if (auto *n = dynamic_cast<CaseNode *>(node))     { visitCase(n);     return; }
+    if (auto *n = dynamic_cast<ProcCallNode *>(node)) { visitProcCall(n); return; }
+    if (auto *n = dynamic_cast<CompoundStmtNode *>(node)) { visitCompoundStmt(n); return; }
+
+    // --- Expressions ---
+    if (auto *n = dynamic_cast<VarNode *>(node))      { visitVar(n);      return; }
+    if (auto *n = dynamic_cast<BinOpNode *>(node))    { visitBinOp(n);    return; }
 }
 
 DataType SemanticAnalyzer::resolveTypeName(const std::string &typeName, int &outRef)
@@ -388,4 +391,252 @@ int SemanticAnalyzer::elementSize(DataType t, int ref) const
     default:
         return 1;
     }
+}
+
+void SemanticAnalyzer::visitAssign(AssignNode *node)
+{
+    if (node->target) visitStatement(node->target.get());
+    if (node->value) visitStatement(node->value.get());
+
+    if (node->target && node->value)
+    {
+        if (!isAssignCompatible(node->target->dtype, node->value->dtype))
+        {
+            assignIncompatibleError(node->target->dtype, node->value->dtype);
+        }
+    }
+    node->dtype = DataType::VOID;
+}
+
+void SemanticAnalyzer::visitBinOp(BinOpNode *node)
+{
+    if (node->left) visitStatement(node->left.get());
+    if (node->right) visitStatement(node->right.get());
+
+    if (node->left && node->right)
+    {
+        DataType inferredType = inferBinOpType(node->op, node->left->dtype, node->right->dtype);
+        if (inferredType == DataType::UNKNOWN)
+        {
+            if (node->left->dtype != DataType::UNKNOWN && node->right->dtype != DataType::UNKNOWN)
+            {
+                invalidOperandError(node->op, node->left->dtype, node->right->dtype);
+            }
+        }
+        node->dtype = inferredType;
+    }
+    else
+    {
+        node->dtype = DataType::UNKNOWN;
+    }
+}
+
+void SemanticAnalyzer::visitVar(VarNode *node)
+{
+    int idx = st.lookup(node->varName);
+    if (idx == -1)
+    {
+        undeclaredError(node->varName);
+        node->dtype = DataType::UNKNOWN;
+        return;
+    }
+
+    AllowedObj obj = st.tab[idx].obj;
+    if (obj != AllowedObj::VARIABLE && obj != AllowedObj::CONSTANT && obj != AllowedObj::FUNCTION)
+    {
+        wrongObjectKindError(node->varName, AllowedObj::VARIABLE, obj);
+        node->dtype = DataType::UNKNOWN;
+        return;
+    }
+
+    node->tabIndex = idx;
+    node->lexLevel = st.tab[idx].lev;
+    node->dtype = st.tab[idx].type;
+}
+
+void SemanticAnalyzer::visitIf(IfNode *node)
+{
+    if (node->condition)
+    {
+        visitStatement(node->condition.get());
+        if (node->condition->dtype != DataType::BOOLEAN && node->condition->dtype != DataType::UNKNOWN)
+        {
+            nonBooleanConditionError("if", node->condition->dtype);
+        }
+    }
+
+    if (node->thenBranch) visitStatement(node->thenBranch.get());
+    if (node->elseBranch) visitStatement(node->elseBranch.get());
+
+    node->dtype = DataType::VOID;
+}
+
+void SemanticAnalyzer::visitWhile(WhileNode *node)
+{
+    if (node->condition)
+    {
+        visitStatement(node->condition.get());
+        if (node->condition->dtype != DataType::BOOLEAN && node->condition->dtype != DataType::UNKNOWN)
+        {
+            nonBooleanConditionError("while", node->condition->dtype);
+        }
+    }
+
+    if (node->body) visitStatement(node->body.get());
+
+    node->dtype = DataType::VOID;
+}
+
+void SemanticAnalyzer::visitFor(ForNode *node)
+{
+    int idx = st.lookup(node->varName);
+    DataType controlType = DataType::UNKNOWN;
+    
+    if (idx == -1) undeclaredError(node->varName);
+    else
+    {
+        if (st.tab[idx].obj != AllowedObj::VARIABLE)
+        {
+            wrongObjectKindError(node->varName, AllowedObj::VARIABLE, st.tab[idx].obj);
+        }
+        else
+        {
+            controlType = st.tab[idx].type;
+        }
+    }
+
+    if (node->fromExpr) 
+    {
+        visitStatement(node->fromExpr.get());
+        if (controlType != DataType::UNKNOWN && node->fromExpr->dtype != DataType::UNKNOWN)
+        {
+            if (!isAssignCompatible(controlType, node->fromExpr->dtype))
+            {
+                assignIncompatibleError(controlType, node->fromExpr->dtype, node->varName);
+            }
+        }
+    }
+
+    if (node->toExpr)
+    {
+        visitStatement(node->toExpr.get());
+        if (controlType != DataType::UNKNOWN && node->toExpr->dtype != DataType::UNKNOWN)
+        {
+            if (!isAssignCompatible(controlType, node->toExpr->dtype))
+            {
+                assignIncompatibleError(controlType, node->toExpr->dtype, node->varName);
+            }
+        }
+    }
+
+    if (node->body) visitStatement(node->body.get());
+
+    node->dtype = DataType::VOID;
+}
+
+void SemanticAnalyzer::visitRepeat(RepeatNode *node)
+{
+    for (auto &stmt : node->statements)
+    {
+        if (stmt) visitStatement(stmt.get());
+    }
+
+    if (node->condition)
+    {
+        visitStatement(node->condition.get());
+        if (node->condition->dtype != DataType::BOOLEAN && node->condition->dtype != DataType::UNKNOWN)
+        {
+            nonBooleanConditionError("repeat", node->condition->dtype);
+        }
+    }
+
+    node->dtype = DataType::VOID;
+}
+
+void SemanticAnalyzer::visitCase(CaseNode *node)
+{
+    if (node->selector)
+    {
+        visitStatement(node->selector.get());
+        if (node->selector->dtype != DataType::UNKNOWN && !isSimpleType(node->selector->dtype) && node->selector->dtype != DataType::BOOLEAN)
+        {
+            if (node->selector->dtype == DataType::REAL || node->selector->dtype == DataType::STRING || 
+                node->selector->dtype == DataType::ARRAY || node->selector->dtype == DataType::RECORD)
+            {
+                semanticError("Case selector must be of ordinal type.");
+            }
+        }
+    }
+
+    for (auto &branch : node->branches)
+    {
+        if (branch.second) visitStatement(branch.second.get());
+    }
+
+    node->dtype = DataType::VOID;
+}
+
+void SemanticAnalyzer::visitProcCall(ProcCallNode *node)
+{
+    int idx = st.lookup(node->procName);
+    if (idx == -1)
+    {
+        undeclaredError(node->procName);
+        node->dtype = DataType::UNKNOWN;
+        return;
+    }
+
+    AllowedObj obj = st.tab[idx].obj;
+    if (obj != AllowedObj::PROCEDURE && obj != AllowedObj::FUNCTION)
+    {
+        wrongObjectKindError(node->procName, AllowedObj::PROCEDURE, obj);
+        node->dtype = DataType::UNKNOWN;
+        return;
+    }
+
+    for (auto &arg : node->args)
+    {
+        if (arg) visitStatement(arg.get());
+    }
+
+    if (idx == PredefinedIdx::PROC_WRITELN || idx == PredefinedIdx::PROC_READLN)
+    {
+        node->dtype = DataType::VOID;
+        return;
+    }
+
+    int ref = st.tab[idx].ref;
+    int paramCount = 0;
+    int p = st.btab[ref].lpar;
+    
+    std::vector<int> params;
+    while (p > 0)
+    {
+        params.push_back(p);
+        p = st.tab[p].link;
+    }
+    
+    std::reverse(params.begin(), params.end());
+    paramCount = params.size();
+
+    if ((int)node->args.size() != paramCount)
+    {
+        wrongArgCountError(node->procName, paramCount, node->args.size());
+    }
+    else
+    {
+        for (size_t i = 0; i < node->args.size(); i++)
+        {
+            if (node->args[i] && node->args[i]->dtype != DataType::UNKNOWN)
+            {
+                DataType expectedType = st.tab[params[i]].type;
+                if (!isAssignCompatible(expectedType, node->args[i]->dtype))
+                {
+                    assignIncompatibleError(expectedType, node->args[i]->dtype);
+                }
+            }
+        }
+    }
+
+    node->dtype = DataType::VOID;
 }

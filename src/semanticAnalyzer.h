@@ -26,6 +26,16 @@ public:
     void visitCompoundStmt(CompoundStmtNode *node);
     void visitStatement(ASTNode *node);
 
+    void visitAssign(AssignNode *node);
+    void visitBinOp(BinOpNode *node);
+    void visitVar(VarNode *node);
+    void visitIf(IfNode *node);
+    void visitWhile(WhileNode *node);
+    void visitFor(ForNode *node);
+    void visitRepeat(RepeatNode *node);
+    void visitCase(CaseNode *node);
+    void visitProcCall(ProcCallNode *node);
+
     DataType resolveTypeName(const std::string &typeName, int &outRef);
 
 private:
