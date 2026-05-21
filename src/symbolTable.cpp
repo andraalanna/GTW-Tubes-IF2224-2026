@@ -21,22 +21,39 @@ void SymbolTable::init(){
     // slot 0 i tab dikosongin, krn link = 0 dipakai sebagai tanda sudah habis saat nelusurin linked list.
     tab.push_back({"", 0, AllowedObj::VARIABLE, DataType::UNKNOWN, 0, 0, 0, 0});
 
-    // tambahin predefined ident (indeks 1 - 5)
-    addPredefined("Integer", AllowedObj::TYPE, DataType::INTEGER, 0, 1, 0, 0);  // idx 1
-    addPredefined("Real",    AllowedObj::TYPE, DataType::REAL,    0, 1, 0, 0);  // idx 2
-    addPredefined("Char",    AllowedObj::TYPE, DataType::CHAR,    0, 1, 0, 0);  // idx 3
-    addPredefined("Boolean", AllowedObj::TYPE, DataType::BOOLEAN, 0, 1, 0, 0);  // idx 4
-    addPredefined("String",  AllowedObj::TYPE, DataType::STRING,  0, 1, 0, 0);  // idx 5
+    // tambahin 32 reserved words (indeks 1 - 32)
+    const vector<string> reservedWords = {
+        "AND", "ARRAY", "BEGIN", "CASE", "CONST", "DIV", "DOWNTO", "DO",
+        "ELSE", "END", "FOR", "FUNCTION", "IF", "MOD", "NOT", "OF",
+        "OR", "PROCEDURE", "PROGRAM", "RECORD", "REPEAT",
+        "INTEGER", "REAL", "BOOLEAN", "CHAR", "STRING",
+        "THEN", "TO", "TYPE", "UNTIL", "VAR", "WHILE"
+    };
+
+    for (int i = 0; i < (int)reservedWords.size(); i++) {
+        string w = reservedWords[i];
+        if (i >= 21 && i <= 25) {
+            DataType dt = DataType::UNKNOWN;
+            if (w == "INTEGER") dt = DataType::INTEGER;
+            else if (w == "REAL") dt = DataType::REAL;
+            else if (w == "BOOLEAN") dt = DataType::BOOLEAN;
+            else if (w == "CHAR") dt = DataType::CHAR;
+            else if (w == "STRING") dt = DataType::STRING;
+            addPredefined(w, AllowedObj::TYPE, dt, 0, 1, 0, 0);
+        } else {
+            addPredefined(w, AllowedObj::KEYWORD, DataType::UNKNOWN, 0, 1, 0, 0);
+        }
+    }
 
     // constant
-    addPredefined("True", AllowedObj::CONSTANT, DataType::BOOLEAN, 0, 1, 0, 1); // adr 1 -> true;
-    addPredefined("False", AllowedObj::CONSTANT, DataType::BOOLEAN, 0, 1, 0, 0); // adr 0 -> false;
+    addPredefined("True", AllowedObj::CONSTANT, DataType::BOOLEAN, 0, 1, 0, 1); // idx 33
+    addPredefined("False", AllowedObj::CONSTANT, DataType::BOOLEAN, 0, 1, 0, 0); // idx 34
 
     // procedure
-    addPredefined("writeln", AllowedObj::PROCEDURE, DataType::VOID, 0, 1, 0, 0);
-    addPredefined("readln", AllowedObj::PROCEDURE, DataType::VOID, 0, 1, 0, 0);
+    addPredefined("writeln", AllowedObj::PROCEDURE, DataType::VOID, 0, 1, 0, 0); // idx 35
+    addPredefined("readln", AllowedObj::PROCEDURE, DataType::VOID, 0, 1, 0, 0); // idx 36
     
-    // slot kosong dulu
+    // slot kosong dulu sampe USER_START
     for (int i = (int)tab.size(); i < PredefinedIdx::USER_START; i++) {
         tab.push_back({"", 0, AllowedObj::VARIABLE, DataType::UNKNOWN, 0, 0, 0, 0});
     }
@@ -88,9 +105,11 @@ int SymbolTable::lookup(const string& name) const {
 }
 
 int SymbolTable::lookupCurrentScope(const string& name) const {
-    // Hanya cari di blok aktif saat ini
+    // Hanya cari di blok aktif saat ini.
+    // Hentikan traversal begitu menyentuh entry dari scope luar (lev < currentLevel).
     int i = btab[currentBlock].last;
     while (i > 0) {
+        if (tab[i].lev < currentLevel) break; // keluar dari scope saat ini
         if (tab[i].name == name) return i;
         i = tab[i].link;
     }
@@ -131,6 +150,7 @@ int SymbolTable::pushScope() {
  
     // Buat blok baru di btab
     int newBlock = enterBtab(btab[currentBlock].last, 0, 0, 0);
+    int newBlock = enterBtab(0, 0, 0, 0);
     currentBlock = newBlock;
  
     // Update display
@@ -179,7 +199,8 @@ string SymbolTable::AllowedObjToString(AllowedObj o) {
         case AllowedObj::PROCEDURE: return "procedure";
         case AllowedObj::FUNCTION:  return "function";
         case AllowedObj::PROGRAM:   return "program";
-        default:                 return "?";
+        case AllowedObj::KEYWORD:   return "keyword";
+        default:                    return "?";
     }
 }
  

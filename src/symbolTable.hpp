@@ -11,7 +11,8 @@ enum class AllowedObj{
     TYPE,
     FUNCTION,
     PROCEDURE,
-    PROGRAM // nama program
+    PROGRAM, // nama program
+    KEYWORD  // reserved words
 };
 
 // jenis tipe data
@@ -60,17 +61,18 @@ struct ATabEntry{
 };
 
 namespace PredefinedIdx {
-    constexpr int TYPE_INTEGER  = 1;
-    constexpr int TYPE_REAL     = 2;
-    constexpr int TYPE_CHAR     = 3;
-    constexpr int TYPE_BOOLEAN  = 4;
-    constexpr int TYPE_STRING   = 5;
-    constexpr int CONST_TRUE    = 6;
-    constexpr int CONST_FALSE   = 7;
-    constexpr int PROC_WRITELN  = 8;
-    constexpr int PROC_READLN   = 9;
-    // Identifier user mulai dari indeks 33
-    constexpr int USER_START    = 33;
+    constexpr int TYPE_INTEGER  = 22;
+    constexpr int TYPE_REAL     = 23;
+    constexpr int TYPE_BOOLEAN  = 24;
+    constexpr int TYPE_CHAR     = 25;
+    constexpr int TYPE_STRING   = 26;
+    // built-in constants and procedures
+    constexpr int CONST_TRUE    = 33;
+    constexpr int CONST_FALSE   = 34;
+    constexpr int PROC_WRITELN  = 35;
+    constexpr int PROC_READLN   = 36;
+    // Identifier user mulai dari indeks 37
+    constexpr int USER_START    = 37;
 }
 
 class SymbolTable{
