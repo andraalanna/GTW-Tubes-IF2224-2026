@@ -4,6 +4,10 @@
 #include "lexer.h"
 #include "Parser.h"
 #include "symbolTable.hpp"
+#include "ASTNode.h"
+#include "semanticAnalyzer.h"
+#include "ErrorHandler.h"
+#include "ASTBuilder.h"
 using namespace std;
 
 void printTree(shared_ptr<ParseNode> node, ostream &out, string prefix = "", bool isLast = true, bool isRoot = true)
@@ -160,9 +164,21 @@ int main(int argc, char *argv[])
         // Simpan ke file output
         printTree(root, outFile);
 
-        outFile.close();
+        // Build AST and run Semantic Analyzer
+        SymbolTable symTable;
+        ASTBuilder builder(symTable);
+        auto astRoot = builder.build(root);
+        
+        SemanticAnalyzer analyzer(symTable);
+        analyzer.analyze(astRoot);
 
-        testSymbolTable(root);
+        symTable.printTables();
+
+        if (astRoot) astRoot->print(cout);
+        
+        printErrorSummary();
+
+        outFile.close();
     }
 
     catch (const SyntaxError &e)
