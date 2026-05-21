@@ -3,10 +3,12 @@
 
 string ASTNode::annotation() const
 {
-    string s = " [type:" + SymbolTable::DataTypeToString(dtype);
+    string tStr = SymbolTable::DataTypeToString(dtype);
+    for (char &c : tStr) c = tolower(c); // Lowercase type
+
+    string s = "\t\t→ type:" + tStr;
     if (tabIndex >= 0)
-        s += ", tab:" + to_string(tabIndex) + ", lev:" + to_string(lexLevel);
-    s += "]";
+        s = "\t\t→ tab_index:" + to_string(tabIndex) + ", type:" + tStr + ", lev:" + to_string(lexLevel);
     return s;
 }
 
@@ -52,11 +54,17 @@ void ProgramNode::print(ostream &out, const string &prefix, bool isLast, bool is
     printHeader(out, prefix, isLast, isRoot);
     string childPrefix = prefix + (isRoot ? "" : (isLast ? "    " : "│   "));
 
-    for (size_t i = 0; i < declarations.size(); i++)
+    if (!declarations.empty())
     {
-        bool last = (i == declarations.size() - 1) && !body;
-        if (declarations[i])
-            declarations[i]->print(out, childPrefix, last, false);
+        bool hasBody = (body != nullptr);
+        out << childPrefix << (hasBody ? "├── " : "└── ") << "Declarations\n";
+        string declPrefix = childPrefix + (hasBody ? "│   " : "    ");
+        for (size_t i = 0; i < declarations.size(); i++)
+        {
+            bool last = (i == declarations.size() - 1);
+            if (declarations[i])
+                declarations[i]->print(out, declPrefix, last, false);
+        }
     }
     if (body)
         body->print(out, childPrefix, true, false);
@@ -257,4 +265,47 @@ void FieldAccessNode::print(ostream &out, const string &prefix, bool isLast, boo
     string childPrefix = prefix + (isRoot ? "" : (isLast ? "    " : "│   "));
     if (record)
         record->print(out, childPrefix, true, false);
+}
+
+string BinOpNode::toSource() const
+{
+    string lStr = left ? left->toSource() : "";
+    string rStr = right ? right->toSource() : "";
+    string opStr = op;
+    if (op == "plus") opStr = " + ";
+    else if (op == "minus") opStr = " - ";
+    else if (op == "star") opStr = " * ";
+    else if (op == "slash") opStr = " / ";
+    else if (op == "equal") opStr = " = ";
+    else if (op == "less") opStr = " < ";
+    else if (op == "greater") opStr = " > ";
+    else if (op == "lessequal") opStr = " <= ";
+    else if (op == "greaterequal") opStr = " >= ";
+    else if (op == "notequal") opStr = " <> ";
+    return lStr + opStr + rStr;
+}
+
+string UnaryOpNode::toSource() const
+{
+    string opStr = op;
+    if (op == "plus") opStr = " +";
+    else if (op == "minus") opStr = " -";
+    return opStr + (operand ? operand->toSource() : "");
+}
+
+string ArrayAccessNode::toSource() const
+{
+    string s = array ? array->toSource() : "";
+    s += "[";
+    for (size_t i = 0; i < indices.size(); i++) {
+        if (indices[i]) s += indices[i]->toSource();
+        if (i < indices.size() - 1) s += ",";
+    }
+    s += "]";
+    return s;
+}
+
+string FieldAccessNode::toSource() const
+{
+    return (record ? record->toSource() : "") + "." + fieldName;
 }

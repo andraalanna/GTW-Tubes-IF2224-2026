@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
         printTree(root, cout);
 
         // Simpan ke file output
-        printTree(root, outFile);
+        // printTree(root, outFile);
 
         // Build AST and run Semantic Analyzer
         SymbolTable symTable;
@@ -174,7 +174,8 @@ int main(int argc, char *argv[])
 
         symTable.printTables();
 
-        if (astRoot) astRoot->print(cout);
+        // if (astRoot) astRoot->print(cout);
+        if (astRoot) astRoot->print(outFile);
         
         printErrorSummary();
 
