@@ -31,7 +31,7 @@ bool isValidIndexType(DataType t)
 bool isCompatible(DataType t1, DataType t2, int t1ref, int t2ref)
 {
     if (t1 == DataType::UNKNOWN || t2 == DataType::UNKNOWN)
-        return false;
+        return true;
 
     if (t1 == t2)
     {
@@ -68,7 +68,7 @@ bool isCompatible(DataType t1, DataType t2, int t1ref, int t2ref)
 bool isAssignCompatible(DataType t1, DataType t2, int t1ref, int t2ref)
 {
     if (t1 == DataType::UNKNOWN || t2 == DataType::UNKNOWN)
-        return false;
+        return true;
     if (t1 == DataType::REAL && t2 == DataType::INTEGER)
         return true;
 
