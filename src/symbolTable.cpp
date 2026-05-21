@@ -149,7 +149,6 @@ int SymbolTable::pushScope() {
     currentLevel++;
  
     // Buat blok baru di btab
-    int newBlock = enterBtab(btab[currentBlock].last, 0, 0, 0);
     int newBlock = enterBtab(0, 0, 0, 0);
     currentBlock = newBlock;
  
