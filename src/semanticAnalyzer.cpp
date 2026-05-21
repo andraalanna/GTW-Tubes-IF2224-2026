@@ -44,14 +44,17 @@ void SemanticAnalyzer::visitProgram(ProgramNode *node)
     node->lexLevel = st.currentLevel; // = 0
     node->dtype    = DataType::VOID;
 
+    int bodyBlock = st.pushScope();
+    st.tab[idx].ref = bodyBlock;
+
     for (auto &decl : node->declarations)
     {
         if (decl) visitStatement(decl.get());
     }
-
-    int bodyBlock = st.pushScope();
-    st.tab[idx].ref = bodyBlock; 
-
+    
+    // int bodyBlock = st.pushScope();
+    // st.tab[idx].ref = bodyBlock; 
+    
     if (node->body)
         visitCompoundStmt(dynamic_cast<CompoundStmtNode *>(node->body.get()));
 
