@@ -175,10 +175,17 @@ int main(int argc, char *argv[])
         symTable.printTables();
 
         // if (astRoot) astRoot->print(cout);
-        if (astRoot) astRoot->print(outFile);
-        
-        printErrorSummary();
+        // Print summary ke outFile
+        outFile << "\n=== Semantic Analysis ===" << endl;
+        outFile << "  Errors  : " << getErrorCount() << endl;
+        outFile << "  Warnings: " << getWarningCount() << endl;
+        if (getErrorCount() == 0 && !hasFatalError())
+            outFile << "  Status  : OK" << endl;
+        else
+            outFile << "  Status  : FAILED" << endl;
 
+        if (astRoot) astRoot->print(outFile);
+        printErrorSummary(); // tetap print ke cerr juga
         outFile.close();
     }
 

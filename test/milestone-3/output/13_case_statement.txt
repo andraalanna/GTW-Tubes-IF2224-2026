@@ -1,0 +1,29 @@
+
+=== Semantic Analysis ===
+  Errors  : 0
+  Warnings: 0
+  Status  : OK
+ProgramNode(name: 'TC13')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   └── VarDecl('day')		→ tab_index:38, type:integer, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(day := 3)		→ type:void
+    │   ├── Var(day)		→ tab_index:38, type:integer, lev:1
+    │   └── Num(3)		→ type:integer
+    └── Case		→ type:void
+        ├── Var(day)		→ tab_index:38, type:integer, lev:1
+        ├── CaseBranch(1)
+        │   └── ProcedureCall(name: 'writeln')		→ type:void
+        │       └── Str('Senin')		→ type:string
+        ├── CaseBranch(2)
+        │   └── ProcedureCall(name: 'writeln')		→ type:void
+        │       └── Str('Selasa')		→ type:string
+        ├── CaseBranch(3)
+        │   └── ProcedureCall(name: 'writeln')		→ type:void
+        │       └── Str('Rabu')		→ type:string
+        ├── CaseBranch(4)
+        │   └── ProcedureCall(name: 'writeln')		→ type:void
+        │       └── Str('Kamis')		→ type:string
+        └── CaseBranch(5)
+            └── ProcedureCall(name: 'writeln')		→ type:void
+                └── Str('Jumat')		→ type:string

@@ -770,6 +770,9 @@ shared_ptr<ParseNode> Parser::parseStatement()
     {
         node->children.push_back(parseForStatement());
     }
+    else if (check("beginsy")){
+        node->children.push_back(parseCompoundStatement());
+    }
     else if (check("ident"))
     {
 
@@ -977,7 +980,10 @@ shared_ptr<ParseNode> Parser::parseProcedureFunctionCall(shared_ptr<ParseNode> i
     node->children.push_back(identLeaf);
 
     node->children.push_back(expect("lparent"));
-    node->children.push_back(parseParameterList());
+    if (!check("rparent"))
+    {
+        node->children.push_back(parseParameterList());
+    }
     node->children.push_back(expect("rparent"));
 
     return node;
@@ -1041,7 +1047,7 @@ shared_ptr<ParseNode> Parser::parseSimpleExpression()
 
         node->children.push_back(parseTerm());
 
-        while (check("plus") || check("minus") || check("orsy"))
+        while (check("plus") || check("minus"))
         {
             node->children.push_back(parseAdditiveOperator());
             node->children.push_back(parseTerm());
@@ -1066,7 +1072,7 @@ shared_ptr<ParseNode> Parser::parseTerm()
     try {
         node->children.push_back(parseFactor());
 
-        while (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
+        while (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy") || check("orsy"))
         {
             node->children.push_back(parseMultiplicativeOperator());
             node->children.push_back(parseFactor());
@@ -1163,7 +1169,7 @@ shared_ptr<ParseNode> Parser::parseAdditiveOperator()
 {
     auto node = makeNode("<additive-operator>");
 
-    if (check("plus") || check("minus") || check("orsy"))
+    if (check("plus") || check("minus"))
         node->children.push_back(consume());
     else
         syntaxError("additive-operator");
@@ -1177,7 +1183,7 @@ shared_ptr<ParseNode> Parser::parseMultiplicativeOperator()
 {
     auto node = makeNode("<multiplicative-operator>");
 
-    if (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
+    if (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy") || check("orsy"))
         node->children.push_back(consume());
     else
         syntaxError("multiplicative-operator");

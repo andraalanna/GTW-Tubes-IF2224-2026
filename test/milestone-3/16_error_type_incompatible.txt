@@ -1,0 +1,9 @@
+{ TC16: ERROR - assignment type incompatible }
+program TC16;
+var
+  a: Integer;
+  s: String;
+begin
+  a := 5;
+  s := a;
+end.

@@ -1,0 +1,33 @@
+
+=== Semantic Analysis ===
+  Errors  : 0
+  Warnings: 0
+  Status  : OK
+ProgramNode(name: 'TC08')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('x')		→ tab_index:38, type:integer, lev:1
+│   ├── VarDecl('y')		→ tab_index:39, type:integer, lev:1
+│   └── ProcDecl(swap)		→ tab_index:40, type:void, lev:1
+│       ├── VarDecl('a')		→ tab_index:41, type:integer, lev:2
+│       ├── VarDecl('b')		→ tab_index:42, type:integer, lev:2
+│       └── CompoundStmt		→ type:void
+│           ├── VarDecl('tmp')		→ tab_index:43, type:integer, lev:2
+│           ├── Assign(tmp := a)		→ type:void
+│           │   ├── Var(tmp)		→ tab_index:43, type:integer, lev:2
+│           │   └── Var(a)		→ tab_index:41, type:integer, lev:2
+│           ├── Assign(a := b)		→ type:void
+│           │   ├── Var(a)		→ tab_index:41, type:integer, lev:2
+│           │   └── Var(b)		→ tab_index:42, type:integer, lev:2
+│           └── Assign(b := tmp)		→ type:void
+│               ├── Var(b)		→ tab_index:42, type:integer, lev:2
+│               └── Var(tmp)		→ tab_index:43, type:integer, lev:2
+└── CompoundStmt		→ type:void
+    ├── Assign(x := 5)		→ type:void
+    │   ├── Var(x)		→ tab_index:38, type:integer, lev:1
+    │   └── Num(5)		→ type:integer
+    ├── Assign(y := 10)		→ type:void
+    │   ├── Var(y)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(10)		→ type:integer
+    └── ProcedureCall(name: 'swap')		→ type:void
+        ├── Var(x)		→ tab_index:38, type:integer, lev:1
+        └── Var(y)		→ tab_index:39, type:integer, lev:1

@@ -1,0 +1,9 @@
+{ TC03: Type compatibility - Integer ke Real (valid) }
+program TC03;
+var
+  i: Integer;
+  r: Real;
+begin
+  i := 42;
+  r := i;
+end.

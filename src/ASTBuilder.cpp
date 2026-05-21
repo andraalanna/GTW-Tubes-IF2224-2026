@@ -328,12 +328,24 @@ ASTNodePtr ASTBuilder::buildCaseStatement(shared_ptr<ParseNode> n) {
 }
 
 ASTNodePtr ASTBuilder::buildProcFuncCall(shared_ptr<ParseNode> n) {
-    auto ident = child(n, "<variable>");
     string name = "";
-    if (ident) {
-        auto id = child(ident, "ident");
+    
+    // Coba ambil nama dari <variable> dulu
+    auto varNode = child(n, "<variable>");
+    if (varNode) {
+        auto id = child(varNode, "ident");
         if (id) name = id->value;
     }
+    // Kalau tidak ada <variable>, ambil langsung dari ident leaf
+    if (name.empty()) {
+        for (auto &c : n->children) {
+            if (c && c->type == "ident") {
+                name = c->value;
+                break;
+            }
+        }
+    }
+
     auto pNode = make_shared<ProcCallNode>(name);
     
     auto plist = child(n, "<parameter-list>");
@@ -345,7 +357,6 @@ ASTNodePtr ASTBuilder::buildProcFuncCall(shared_ptr<ParseNode> n) {
     }
     return pNode;
 }
-
 ASTNodePtr ASTBuilder::buildExpression(shared_ptr<ParseNode> n) {
     if (!n) return nullptr;
     auto simples = children(n, "<simple-expression>");

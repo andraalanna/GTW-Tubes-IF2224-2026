@@ -1,0 +1,31 @@
+
+=== Semantic Analysis ===
+  Errors  : 0
+  Warnings: 0
+  Status  : OK
+ProgramNode(name: 'TC09')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('result')		→ tab_index:38, type:integer, lev:1
+│   ├── FuncDecl(add)		→ tab_index:39, type:integer, lev:1
+│   │   ├── VarDecl('a')		→ tab_index:40, type:integer, lev:2
+│   │   ├── VarDecl('b')		→ tab_index:41, type:integer, lev:2
+│   │   └── CompoundStmt		→ type:void
+│   │       └── Assign(add := a + b)		→ type:void
+│   │           ├── Var(add)		→ tab_index:39, type:integer, lev:1
+│   │           └── BinOp(plus)		→ type:integer
+│   │               ├── Var(a)		→ tab_index:40, type:integer, lev:2
+│   │               └── Var(b)		→ tab_index:41, type:integer, lev:2
+│   └── FuncDecl(isPositive)		→ tab_index:42, type:boolean, lev:1
+│       ├── VarDecl('n')		→ tab_index:43, type:integer, lev:2
+│       └── CompoundStmt		→ type:void
+│           └── Assign(isPositive := ngtr0)		→ type:void
+│               ├── Var(isPositive)		→ tab_index:42, type:boolean, lev:1
+│               └── BinOp(gtr)		→ type:boolean
+│                   ├── Var(n)		→ tab_index:43, type:integer, lev:2
+│                   └── Num(0)		→ type:integer
+└── CompoundStmt		→ type:void
+    └── Assign		→ type:void
+        ├── Var(result)		→ tab_index:38, type:integer, lev:1
+        └── ProcedureCall(name: 'add')		→ type:void
+            ├── Num(3)		→ type:integer
+            └── Num(4)		→ type:integer

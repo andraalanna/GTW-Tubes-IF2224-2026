@@ -42,7 +42,7 @@ void SemanticAnalyzer::visitProgram(ProgramNode *node)
 
     node->tabIndex = idx;
     node->lexLevel = st.currentLevel; // = 0
-    node->dtype    = DataType::VOID;
+    node->dtype    = st.tab[idx].type;
 
     int bodyBlock = st.pushScope();
     st.tab[idx].ref = bodyBlock;
@@ -403,14 +403,17 @@ void SemanticAnalyzer::visitAssign(AssignNode *node)
 
     if (node->target && node->value)
     {
-        if (!isAssignCompatible(node->target->dtype, node->value->dtype))
+        // Skip check kalau value adalah VOID (procedure call bukan function)
+        if (node->value->dtype != DataType::VOID)
         {
-            assignIncompatibleError(node->target->dtype, node->value->dtype);
+            if (!isAssignCompatible(node->target->dtype, node->value->dtype))
+            {
+                assignIncompatibleError(node->target->dtype, node->value->dtype);
+            }
         }
     }
     node->dtype = DataType::VOID;
 }
-
 void SemanticAnalyzer::visitBinOp(BinOpNode *node)
 {
     if (node->left) visitStatement(node->left.get());

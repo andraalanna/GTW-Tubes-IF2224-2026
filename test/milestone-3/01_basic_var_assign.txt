@@ -1,0 +1,16 @@
+{ TC01: Deklarasi variabel dasar dan assignment sederhana }
+program TC01;
+var
+  a, b: Integer;
+  x: Real;
+  c: Char;
+  s: String;
+  flag: Boolean;
+begin
+  a := 5;
+  b := 10;
+  x := 3.14;
+  c := 'A';
+  s := 'hello';
+  flag := True;
+end.

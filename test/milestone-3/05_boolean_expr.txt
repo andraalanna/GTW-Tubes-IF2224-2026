@@ -1,0 +1,18 @@
+{ TC05: Ekspresi boolean - relational dan logical operator }
+program TC05;
+var
+  a, b: Integer;
+  flag: Boolean;
+begin
+  a := 5;
+  b := 10;
+  flag := a < b;
+  flag := a > b;
+  flag := a == b;
+  flag := a <> b;
+  flag := a <= b;
+  flag := a >= b;
+  flag := (a < b) and (b > 0);
+  flag := (a == 0) or (b == 0);
+  flag := not flag;
+end.

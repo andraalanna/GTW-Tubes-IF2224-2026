@@ -1,0 +1,12 @@
+{ TC12: Penggunaan writeln dan readln (predefined procedure) }
+program TC12;
+var
+  n: Integer;
+  s: String;
+begin
+  readln(n);
+  writeln(n);
+  writeln('Nilai: ', n);
+  readln(s);
+  writeln(s);
+end.

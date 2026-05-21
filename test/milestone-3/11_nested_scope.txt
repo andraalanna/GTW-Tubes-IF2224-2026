@@ -1,0 +1,23 @@
+{ TC11: Nested scope - variabel lokal prosedur tidak bentrok dengan global }
+program TC11;
+var
+  x: Integer;
+
+procedure outer;
+var
+  x: Integer;
+  procedure inner;
+  var
+    x: Integer;
+  begin
+    x := 3;
+  end;
+begin
+  x := 2;
+  inner();
+end;
+
+begin
+  x := 1;
+  outer();
+end.
