@@ -1,0 +1,26 @@
+program TC9;
+var
+  i, total: Integer;
+begin
+  total := 0;
+  i := 1;
+  while i <= 5 do
+  begin
+    total := total + i;
+    i := i + 1;
+  end;
+
+  total := 0;
+  for i := 1 to 5 do
+  begin
+    total := total + i;
+  end;
+
+  i := 10;
+  repeat
+    i := i - 1;
+  until i < 1;
+
+  writeln(total);
+  readln(i);
+end.
