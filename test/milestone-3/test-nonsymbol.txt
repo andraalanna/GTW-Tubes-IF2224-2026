@@ -1,0 +1,8 @@
+program TestNonSymbol;
+var
+  e: integer;
+  x: integer;
+begin
+  e := 5;
+  x := e;
+end.

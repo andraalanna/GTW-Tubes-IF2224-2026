@@ -46,8 +46,8 @@ void SymbolTable::init(){
     }
 
     // constant
-    addPredefined("True", AllowedObj::CONSTANT, DataType::BOOLEAN, 0, 1, 0, 1); // idx 33
-    addPredefined("False", AllowedObj::CONSTANT, DataType::BOOLEAN, 0, 1, 0, 0); // idx 34
+    addPredefined("true", AllowedObj::CONSTANT, DataType::BOOLEAN, 0, 1, 0, 1); // idx 33
+    addPredefined("false", AllowedObj::CONSTANT, DataType::BOOLEAN, 0, 1, 0, 0); // idx 34
 
     // procedure
     addPredefined("writeln", AllowedObj::PROCEDURE, DataType::VOID, 0, 1, 0, 0); // idx 35

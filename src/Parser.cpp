@@ -775,15 +775,12 @@ shared_ptr<ParseNode> Parser::parseStatement()
     }
     else if (check("ident"))
     {
-
         auto identLeaf = parseVariable();
-
         if (check("becomes"))
             node->children.push_back(parseAssignmentStatement(identLeaf));
         else
             node->children.push_back(parseProcedureFunctionCall(identLeaf));
     }
-
     return node;
 }
 
@@ -877,6 +874,7 @@ shared_ptr<ParseNode> Parser::parseIfStatement()
 
         node->children.push_back(parseStatement());
     }
+    
     return node;
 }
 
@@ -930,7 +928,9 @@ shared_ptr<ParseNode> Parser::parseWhileStatement()
     node->children.push_back(expect("whilesy"));
     node->children.push_back(parseExpression());
     node->children.push_back(expect("dosy"));
-    node->children.push_back(parseStatement());
+    if (!check("beginsy"))
+        syntaxError("beginsy");
+    node->children.push_back(parseCompoundStatement());
     return node;
 }
 
@@ -967,7 +967,9 @@ shared_ptr<ParseNode> Parser::parseForStatement()
 
     node->children.push_back(parseExpression());
     node->children.push_back(expect("dosy"));
-    node->children.push_back(parseStatement());
+  if (!check("beginsy"))
+        syntaxError("beginsy");
+    node->children.push_back(parseCompoundStatement());
     return node;
 }
 
@@ -979,12 +981,13 @@ shared_ptr<ParseNode> Parser::parseProcedureFunctionCall(shared_ptr<ParseNode> i
     auto node = makeNode("<procedure/function-call>");
     node->children.push_back(identLeaf);
 
-    node->children.push_back(expect("lparent"));
-    if (!check("rparent"))
+    if (check("lparent"))
     {
-        node->children.push_back(parseParameterList());
+        node->children.push_back(expect("lparent"));
+        if (!check("rparent"))
+            node->children.push_back(parseParameterList());
+        node->children.push_back(expect("rparent"));
     }
-    node->children.push_back(expect("rparent"));
 
     return node;
 }
@@ -1047,7 +1050,7 @@ shared_ptr<ParseNode> Parser::parseSimpleExpression()
 
         node->children.push_back(parseTerm());
 
-        while (check("plus") || check("minus"))
+        while (check("plus") || check("minus") || check("orsy"))
         {
             node->children.push_back(parseAdditiveOperator());
             node->children.push_back(parseTerm());
@@ -1072,7 +1075,7 @@ shared_ptr<ParseNode> Parser::parseTerm()
     try {
         node->children.push_back(parseFactor());
 
-        while (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy") || check("orsy"))
+        while (check("times") || check("idiv") || check("rdiv") || check("imod") || check("andsy"))
         {
             node->children.push_back(parseMultiplicativeOperator());
             node->children.push_back(parseFactor());
@@ -1169,7 +1172,7 @@ shared_ptr<ParseNode> Parser::parseAdditiveOperator()
 {
     auto node = makeNode("<additive-operator>");
 
-    if (check("plus") || check("minus"))
+    if (check("plus") || check("minus") || check("orsy"))
         node->children.push_back(consume());
     else
         syntaxError("additive-operator");

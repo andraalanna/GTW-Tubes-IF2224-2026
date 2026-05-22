@@ -1,0 +1,70 @@
+ProgramNode(name: 'TC3')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── ConstDecl(MAX = 5)		→ tab_index:38, type:integer, lev:1
+│   ├── ConstDecl(PI = 3.14)		→ tab_index:39, type:real, lev:1
+│   ├── VarDecl('counter')		→ tab_index:40, type:integer, lev:1
+│   ├── VarDecl('scores')		→ tab_index:41, type:array, lev:1
+│   ├── VarDecl('avg')		→ tab_index:42, type:real, lev:1
+│   ├── VarDecl('name')		→ tab_index:43, type:string, lev:1
+│   ├── VarDecl('found')		→ tab_index:44, type:boolean, lev:1
+│   ├── ProcDecl(Reset)		→ tab_index:45, type:void, lev:1
+│   │   └── CompoundStmt		→ type:void
+│   │       ├── VarDecl('i')		→ tab_index:46, type:integer, lev:2
+│   │       ├── Assign(i := 1)		→ type:void
+│   │       │   ├── Var(i)		→ tab_index:46, type:integer, lev:2
+│   │       │   └── Num(1)		→ type:integer
+│   │       └── While		→ type:void
+│   │           └── BinOp(gtr)		→ type:boolean
+│   │               ├── Var(i)		→ tab_index:46, type:integer, lev:2
+│   │               └── Num(0)		→ type:integer
+│   ├── ProcDecl(SetScore)		→ tab_index:47, type:void, lev:1
+│   │   ├── VarDecl('idx')		→ tab_index:48, type:integer, lev:2
+│   │   ├── VarDecl('val')		→ tab_index:49, type:integer, lev:2
+│   │   └── CompoundStmt		→ type:void
+│   │       └── Assign(scores[idx] := val)		→ type:void
+│   │           ├── ArrayAccess		→ type:unknown
+│   │           │   ├── Var(scores)		→ type:unknown
+│   │           │   └── Var(idx)		→ type:unknown
+│   │           └── Var(val)		→ tab_index:49, type:integer, lev:2
+│   └── FuncDecl(Sum)		→ tab_index:50, type:integer, lev:1
+│       ├── VarDecl('n')		→ tab_index:51, type:integer, lev:2
+│       └── CompoundStmt		→ type:void
+│           ├── VarDecl('i')		→ tab_index:52, type:integer, lev:2
+│           ├── VarDecl('total')		→ tab_index:53, type:integer, lev:2
+│           ├── Assign(total := 0)		→ type:void
+│           │   ├── Var(total)		→ tab_index:53, type:integer, lev:2
+│           │   └── Num(0)		→ type:integer
+│           ├── Assign(i := 1)		→ type:void
+│           │   ├── Var(i)		→ tab_index:52, type:integer, lev:2
+│           │   └── Num(1)		→ type:integer
+│           ├── For(i, to)		→ type:void
+│           │   ├── Num(1)		→ type:integer
+│           │   └── Var(n)		→ tab_index:51, type:integer, lev:2
+│           └── Assign(Sum := total)		→ type:void
+│               ├── Var(Sum)		→ tab_index:50, type:integer, lev:1
+│               └── Var(total)		→ tab_index:53, type:integer, lev:2
+└── CompoundStmt		→ type:void
+    ├── Assign(counter := 0)		→ type:void
+    │   ├── Var(counter)		→ tab_index:40, type:integer, lev:1
+    │   └── Num(0)		→ type:integer
+    ├── Assign(found := false)		→ type:void
+    │   ├── Var(found)		→ tab_index:44, type:boolean, lev:1
+    │   └── Var(false)		→ tab_index:34, type:boolean, lev:0
+    ├── ProcedureCall(name: 'Reset')		→ type:void
+    ├── ProcedureCall(name: 'SetScore')		→ type:void
+    │   ├── Num(1)		→ type:integer
+    │   └── Num(90)		→ type:integer
+    ├── ProcedureCall(name: 'SetScore')		→ type:void
+    │   ├── Num(2)		→ type:integer
+    │   └── Num(85)		→ type:integer
+    ├── Assign		→ type:void
+    │   ├── Var(avg)		→ tab_index:42, type:real, lev:1
+    │   └── ProcedureCall(name: 'Sum')		→ type:void
+    │       └── Var(MAX)		→ tab_index:38, type:integer, lev:1
+    └── If		→ type:void
+        ├── BinOp(gtr)		→ type:boolean
+        │   ├── Var(avg)		→ tab_index:42, type:real, lev:1
+        │   └── Num(80)		→ type:integer
+        └── Assign(found := true)		→ type:void
+            ├── Var(found)		→ tab_index:44, type:boolean, lev:1
+            └── Var(true)		→ tab_index:33, type:boolean, lev:0
