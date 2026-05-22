@@ -172,20 +172,25 @@ int main(int argc, char *argv[])
         SemanticAnalyzer analyzer(symTable);
         analyzer.analyze(astRoot);
 
+        cout << "\n=== Symbol Table ===" << endl;
         symTable.printTables();
 
         // if (astRoot) astRoot->print(cout);
         // Print summary ke outFile
-        outFile << "\n=== Semantic Analysis ===" << endl;
-        outFile << "  Errors  : " << getErrorCount() << endl;
-        outFile << "  Warnings: " << getWarningCount() << endl;
+        cout << "\n=== Semantic Analysis ===" << endl;
+        cout << "  Errors  : " << getErrorCount() << endl;
+        cout << "  Warnings: " << getWarningCount() << endl;
         if (getErrorCount() == 0 && !hasFatalError())
-            outFile << "  Status  : OK" << endl;
+            cout << "  Status  : OK" << endl;
         else
-            outFile << "  Status  : FAILED" << endl;
+            cout << "  Status  : FAILED" << endl;
+
+        cout << "\n=== Decorated AST ===" << endl;
+        if (astRoot) astRoot->print(cout);  
+        
+        printErrorSummary();
 
         if (astRoot) astRoot->print(outFile);
-        printErrorSummary(); // tetap print ke cerr juga
         outFile.close();
     }
 
