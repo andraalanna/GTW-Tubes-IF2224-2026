@@ -1,7 +1,0 @@
-
-=== Semantic Analysis ===
-  Errors  : 0
-  Warnings: 0
-  Status  : OK
-ProgramNode(name: 'TestEmpty')		→ tab_index:37, type:void, lev:0
-└── CompoundStmt		→ type:void

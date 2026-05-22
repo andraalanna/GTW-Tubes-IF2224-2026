@@ -14,17 +14,24 @@ ProgramNode(name: 'TC3')		→ tab_index:37, type:void, lev:0
 │   │       │   ├── Var(i)		→ tab_index:46, type:integer, lev:2
 │   │       │   └── Num(1)		→ type:integer
 │   │       └── While		→ type:void
-│   │           └── BinOp(gtr)		→ type:boolean
-│   │               ├── Var(i)		→ tab_index:46, type:integer, lev:2
-│   │               └── Num(0)		→ type:integer
+│   │           ├── BinOp(gtr)		→ type:boolean
+│   │           │   ├── Var(i)		→ tab_index:46, type:integer, lev:2
+│   │           │   └── Num(0)		→ type:integer
+│   │           └── CompoundStmt		→ type:void
+│   │               ├── Assign(counter := 0)		→ type:void
+│   │               │   ├── Var(counter)		→ tab_index:40, type:integer, lev:1
+│   │               │   └── Num(0)		→ type:integer
+│   │               └── Assign(i := 0)		→ type:void
+│   │                   ├── Var(i)		→ tab_index:46, type:integer, lev:2
+│   │                   └── Num(0)		→ type:integer
 │   ├── ProcDecl(SetScore)		→ tab_index:47, type:void, lev:1
 │   │   ├── VarDecl('idx')		→ tab_index:48, type:integer, lev:2
 │   │   ├── VarDecl('val')		→ tab_index:49, type:integer, lev:2
 │   │   └── CompoundStmt		→ type:void
 │   │       └── Assign(scores[idx] := val)		→ type:void
-│   │           ├── ArrayAccess		→ type:unknown
-│   │           │   ├── Var(scores)		→ type:unknown
-│   │           │   └── Var(idx)		→ type:unknown
+│   │           ├── ArrayAccess		→ type:integer
+│   │           │   ├── Var(scores)		→ tab_index:41, type:array, lev:1
+│   │           │   └── Var(idx)		→ tab_index:48, type:integer, lev:2
 │   │           └── Var(val)		→ tab_index:49, type:integer, lev:2
 │   └── FuncDecl(Sum)		→ tab_index:50, type:integer, lev:1
 │       ├── VarDecl('n')		→ tab_index:51, type:integer, lev:2
@@ -39,7 +46,15 @@ ProgramNode(name: 'TC3')		→ tab_index:37, type:void, lev:0
 │           │   └── Num(1)		→ type:integer
 │           ├── For(i, to)		→ type:void
 │           │   ├── Num(1)		→ type:integer
-│           │   └── Var(n)		→ tab_index:51, type:integer, lev:2
+│           │   ├── Var(n)		→ tab_index:51, type:integer, lev:2
+│           │   └── CompoundStmt		→ type:void
+│           │       └── Assign(total := total + scores[i])		→ type:void
+│           │           ├── Var(total)		→ tab_index:53, type:integer, lev:2
+│           │           └── BinOp(plus)		→ type:integer
+│           │               ├── Var(total)		→ tab_index:53, type:integer, lev:2
+│           │               └── ArrayAccess		→ type:integer
+│           │                   ├── Var(scores)		→ tab_index:41, type:array, lev:1
+│           │                   └── Var(i)		→ tab_index:52, type:integer, lev:2
 │           └── Assign(Sum := total)		→ type:void
 │               ├── Var(Sum)		→ tab_index:50, type:integer, lev:1
 │               └── Var(total)		→ tab_index:53, type:integer, lev:2
@@ -59,7 +74,7 @@ ProgramNode(name: 'TC3')		→ tab_index:37, type:void, lev:0
     │   └── Num(85)		→ type:integer
     ├── Assign		→ type:void
     │   ├── Var(avg)		→ tab_index:42, type:real, lev:1
-    │   └── ProcedureCall(name: 'Sum')		→ type:void
+    │   └── ProcedureCall(name: 'Sum')		→ type:integer
     │       └── Var(MAX)		→ tab_index:38, type:integer, lev:1
     └── If		→ type:void
         ├── BinOp(gtr)		→ type:boolean

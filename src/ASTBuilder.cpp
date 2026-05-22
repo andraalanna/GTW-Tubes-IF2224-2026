@@ -275,8 +275,8 @@ ASTNodePtr ASTBuilder::buildIfStatement(shared_ptr<ParseNode> n) {
 
 ASTNodePtr ASTBuilder::buildWhileStatement(shared_ptr<ParseNode> n) {
     auto expr = child(n, "<expression>");
-    auto stmt = child(n, "<statement>");
-    return make_shared<WhileNode>(buildExpression(expr), buildStatement(stmt));
+    auto compStmt = child(n, "<compound-statement>");
+    return make_shared<WhileNode>(buildExpression(expr), buildCompoundStatement(compStmt));
 }
 
 ASTNodePtr ASTBuilder::buildRepeatStatement(shared_ptr<ParseNode> n) {
@@ -297,7 +297,7 @@ ASTNodePtr ASTBuilder::buildRepeatStatement(shared_ptr<ParseNode> n) {
 ASTNodePtr ASTBuilder::buildForStatement(shared_ptr<ParseNode> n) {
     auto ident = child(n, "ident");
     auto exprs = children(n, "<expression>");
-    auto stmt = child(n, "<statement>");
+    auto compStmt = child(n, "<compound-statement>");
     
     ASTNodePtr fromExpr = nullptr;
     ASTNodePtr toExpr = nullptr;
@@ -306,7 +306,7 @@ ASTNodePtr ASTBuilder::buildForStatement(shared_ptr<ParseNode> n) {
     
     bool isDownto = child(n, "downtosy") != nullptr;
     
-    return make_shared<ForNode>(ident ? ident->value : "", fromExpr, toExpr, isDownto, buildStatement(stmt));
+    return make_shared<ForNode>(ident ? ident->value : "", fromExpr, toExpr, isDownto, buildCompoundStatement(compStmt));
 }
 
 ASTNodePtr ASTBuilder::buildCaseStatement(shared_ptr<ParseNode> n) {

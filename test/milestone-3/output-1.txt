@@ -1,8 +1,3 @@
-
-=== Semantic Analysis ===
-  Errors  : 0
-  Warnings: 0
-  Status  : OK
 ProgramNode(name: 'TC1')		→ tab_index:37, type:void, lev:0
 ├── Declarations
 │   ├── VarDecl('x')		→ tab_index:38, type:integer, lev:1
@@ -48,6 +43,6 @@ ProgramNode(name: 'TC1')		→ tab_index:37, type:void, lev:0
     │   └── Var(y)		→ tab_index:39, type:integer, lev:1
     └── Assign		→ type:void
         ├── Var(x)		→ tab_index:38, type:integer, lev:1
-        └── ProcedureCall(name: 'Max')		→ type:void
+        └── ProcedureCall(name: 'Max')		→ type:integer
             ├── Var(x)		→ tab_index:38, type:integer, lev:1
             └── Var(y)		→ tab_index:39, type:integer, lev:1

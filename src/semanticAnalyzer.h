@@ -35,7 +35,8 @@ public:
     void visitRepeat(RepeatNode *node);
     void visitCase(CaseNode *node);
     void visitProcCall(ProcCallNode *node);
-
+    void visitArrayAccess(ArrayAccessNode *node) ;
+    void visitUnaryOp(UnaryOpNode *node);
     DataType resolveTypeName(const std::string &typeName, int &outRef);
 
 private:

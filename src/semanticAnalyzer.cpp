@@ -345,6 +345,12 @@ void SemanticAnalyzer::visitStatement(ASTNode *node)
     // --- Expressions ---
     if (auto *n = dynamic_cast<VarNode *>(node))      { visitVar(n);      return; }
     if (auto *n = dynamic_cast<BinOpNode *>(node))    { visitBinOp(n);    return; }
+
+    if (auto *n = dynamic_cast<ArrayAccessNode *>(node)) { visitArrayAccess(n); return; }
+    if (auto *n = dynamic_cast<NumberNode *>(node))      { /* dtype sudah di-set saat build */ return; }
+    if (auto *n = dynamic_cast<StringNode *>(node))      { /* dtype sudah di-set saat build */ return; }
+    if (auto *n = dynamic_cast<CharNode *>(node))        { /* dtype sudah di-set saat build */ return; }
+    if (auto *n = dynamic_cast<UnaryOpNode *>(node))     { visitUnaryOp(n); return; }
 }
 
 DataType SemanticAnalyzer::resolveTypeName(const std::string &typeName, int &outRef)
@@ -644,5 +650,51 @@ void SemanticAnalyzer::visitProcCall(ProcCallNode *node)
         }
     }
 
-    node->dtype = DataType::VOID;
+    if (st.tab[idx].obj == AllowedObj::FUNCTION)
+        node->dtype = st.tab[idx].type;
+    else
+        node->dtype = DataType::VOID;
+}
+
+void SemanticAnalyzer::visitArrayAccess(ArrayAccessNode *node) {
+    if (node->array) visitStatement(node->array.get());
+    
+    for (auto &idx : node->indices)
+        if (idx) visitStatement(idx.get());
+    
+    // Ambil tipe elemen dari atab
+    if (node->array && node->array->dtype == DataType::ARRAY) {
+        VarNode *varNode = dynamic_cast<VarNode *>(node->array.get());
+        if (varNode) {
+            int tabIdx = varNode->tabIndex;
+            if (tabIdx >= 0) {
+                int ref = st.tab[tabIdx].ref;
+                if (ref >= 0 && ref < (int)st.atab.size())
+                    node->dtype = st.atab[ref].etyp;
+            }
+        }
+    } else {
+        node->dtype = DataType::UNKNOWN;
+    }
+}
+
+void SemanticAnalyzer::visitUnaryOp(UnaryOpNode *node)
+{
+    if (node->operand) visitStatement(node->operand.get());
+    
+    if (node->op == "notsy")
+    {
+        // not harus boolean
+        if (node->operand && node->operand->dtype != DataType::BOOLEAN && 
+            node->operand->dtype != DataType::UNKNOWN)
+        {
+            semanticError("Operand of 'not' must be Boolean");
+        }
+        node->dtype = DataType::BOOLEAN;
+    }
+    else
+    {
+        // unary + atau - harus integer atau real
+        node->dtype = node->operand ? node->operand->dtype : DataType::UNKNOWN;
+    }
 }
