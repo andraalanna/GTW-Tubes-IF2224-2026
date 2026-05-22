@@ -1,0 +1,10 @@
+program TestWhileValid;
+var
+  i: integer;
+begin
+  i := 5;
+  while i > 0 do
+  begin
+    i := i - 1;
+  end;
+end.

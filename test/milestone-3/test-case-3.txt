@@ -1,52 +1,20 @@
-program TC3;
-const
-  MAX == 5;
-  PI == 3.14;
-
+program TC2;
 var
-  counter: integer;
-  scores: array[1..5] of integer;
-  avg: real;
-  name: string;
-  found: boolean;
+  nums: array[1..10] of integer;
+  grid: array[1..5] of array[1..5] of real;
+  i, j: integer;
 
-procedure Reset;
+procedure FillRow(row: array[1..5] of integer; val: integer);
 var
-  i: integer;
+  k: integer;
 begin
-  i := 1;
-  while i > 0 do
-  begin
-    counter := 0;
-    i := 0;
-  end;
-end;
-
-procedure SetScore(idx, val: integer);
-begin
-  scores[idx] := val;
-end;
-
-function Sum(n: integer): integer;
-var
-  i, total: integer;
-begin
-  total := 0;
-  i := 1;
-  for i := 1 to n do
-  begin
-    total := total + scores[i];
-  end;
-  Sum := total;
+  k := 1;
 end;
 
 begin
-  counter := 0;
-  found := false;
-  Reset;
-  SetScore(1, 90);
-  SetScore(2, 85);
-  avg := Sum(MAX);
-  if avg > 80 then
-    found := true;
+  nums[1] := 100;
+  grid[1][1] := 3.14;
+  i := nums[3];
+  j := 0;
+  FillRow(nums, j);
 end.
