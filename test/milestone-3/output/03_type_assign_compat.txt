@@ -1,0 +1,16 @@
+
+=== Semantic Analysis ===
+  Errors  : 0
+  Warnings: 0
+  Status  : OK
+ProgramNode(name: 'TC03')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('i')		→ tab_index:38, type:integer, lev:1
+│   └── VarDecl('r')		→ tab_index:39, type:real, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(i := 42)		→ type:void
+    │   ├── Var(i)		→ tab_index:38, type:integer, lev:1
+    │   └── Num(42)		→ type:integer
+    └── Assign(r := i)		→ type:void
+        ├── Var(r)		→ tab_index:39, type:real, lev:1
+        └── Var(i)		→ tab_index:38, type:integer, lev:1

@@ -1,0 +1,12 @@
+{ TC06: If-then-else dengan kondisi boolean }
+program TC06;
+var
+  a, b, max: Integer;
+begin
+  a := 5;
+  b := 10;
+  if a > b then
+    max := a
+  else
+    max := b;
+end.

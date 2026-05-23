@@ -1,0 +1,6 @@
+program TestNonSymbol;
+var
+  e: integer;
+begin
+  e := 6e;
+end.

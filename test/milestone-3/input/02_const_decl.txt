@@ -1,0 +1,12 @@
+{ TC02: Deklarasi konstanta berbagai tipe }
+program TC02;
+const
+  MAX == 100;
+  PI == 3.14;
+  GREETING == 'Hello';
+  FLAG == True;
+var
+  n: Integer;
+begin
+  n := MAX;
+end.

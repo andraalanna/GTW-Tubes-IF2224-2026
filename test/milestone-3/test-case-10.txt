@@ -1,0 +1,19 @@
+program TC10;
+var
+  score: Integer;
+  grade: Integer;
+  passed: Boolean;
+begin
+  score := 85;
+  grade := score div 10;
+  passed := score >= 60;
+  case grade of
+    10: writeln('Sempurnanya');
+    9: writeln('Aku');
+    8: writeln('Untuk');
+    7: writeln('Dirimu');
+    6: writeln('Aku');
+    5: writeln('Banyak');
+    4: writeln('Gamau');
+  end;
+end.

@@ -1,0 +1,8 @@
+{ TC14: ERROR - variabel tidak dideklarasikan }
+program TC14;
+var
+  a: Integer;
+begin
+  a := 5;
+  b := 10;
+end.

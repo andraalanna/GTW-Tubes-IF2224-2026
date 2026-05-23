@@ -1,0 +1,27 @@
+
+=== Semantic Analysis ===
+  Errors  : 0
+  Warnings: 0
+  Status  : OK
+ProgramNode(name: 'TC06')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('a')		→ tab_index:38, type:integer, lev:1
+│   ├── VarDecl('b')		→ tab_index:39, type:integer, lev:1
+│   └── VarDecl('max')		→ tab_index:40, type:integer, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(a := 5)		→ type:void
+    │   ├── Var(a)		→ tab_index:38, type:integer, lev:1
+    │   └── Num(5)		→ type:integer
+    ├── Assign(b := 10)		→ type:void
+    │   ├── Var(b)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(10)		→ type:integer
+    └── If		→ type:void
+        ├── BinOp(gtr)		→ type:boolean
+        │   ├── Var(a)		→ tab_index:38, type:integer, lev:1
+        │   └── Var(b)		→ tab_index:39, type:integer, lev:1
+        ├── Assign(max := a)		→ type:void
+        │   ├── Var(max)		→ tab_index:40, type:integer, lev:1
+        │   └── Var(a)		→ tab_index:38, type:integer, lev:1
+        └── Assign(max := b)		→ type:void
+            ├── Var(max)		→ tab_index:40, type:integer, lev:1
+            └── Var(b)		→ tab_index:39, type:integer, lev:1

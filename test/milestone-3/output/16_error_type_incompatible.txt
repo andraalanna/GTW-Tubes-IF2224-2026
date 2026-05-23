@@ -1,0 +1,16 @@
+
+=== Semantic Analysis ===
+  Errors  : 1
+  Warnings: 0
+  Status  : FAILED
+ProgramNode(name: 'TC16')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('a')		→ tab_index:38, type:integer, lev:1
+│   └── VarDecl('s')		→ tab_index:39, type:string, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(a := 5)		→ type:void
+    │   ├── Var(a)		→ tab_index:38, type:integer, lev:1
+    │   └── Num(5)		→ type:integer
+    └── Assign(s := a)		→ type:void
+        ├── Var(s)		→ tab_index:39, type:string, lev:1
+        └── Var(a)		→ tab_index:38, type:integer, lev:1

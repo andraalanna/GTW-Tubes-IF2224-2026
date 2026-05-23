@@ -1,0 +1,19 @@
+program TC6;
+var
+  x, y: integer;
+  flag: boolean;
+procedure Swap(a, b: integer);
+var
+  tmp: integer;
+begin
+  tmp := a; a := b; b := tmp;
+end;
+function Max(p, q: integer): integer;
+begin
+  if p > q then Max := p else Max := q;
+end;
+begin
+  x := 10; y := 20;
+  Swap(x, y);
+  x := Max(x, y);
+end.

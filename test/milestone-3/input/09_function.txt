@@ -1,0 +1,18 @@
+{ TC09: Deklarasi dan pemanggilan function }
+program TC09;
+var
+  result: Integer;
+
+function add(a, b: Integer): Integer;
+begin
+  add := a + b;
+end;
+
+function isPositive(n: Integer): Boolean;
+begin
+  isPositive := n > 0;
+end;
+
+begin
+  result := add(3, 4);
+end.

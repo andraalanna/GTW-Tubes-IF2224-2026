@@ -1,0 +1,20 @@
+
+=== Semantic Analysis ===
+  Errors  : 0
+  Warnings: 0
+  Status  : OK
+ProgramNode(name: 'TC10')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('arr')		→ tab_index:38, type:array, lev:1
+│   └── VarDecl('i')		→ tab_index:39, type:integer, lev:1
+└── CompoundStmt		→ type:void
+    └── For(i, to)		→ type:void
+        ├── Num(1)		→ type:integer
+        ├── Num(10)		→ type:integer
+        └── Assign(arr[i] := itimes2)		→ type:void
+            ├── ArrayAccess		→ type:unknown
+            │   ├── Var(arr)		→ type:unknown
+            │   └── Var(i)		→ type:unknown
+            └── BinOp(times)		→ type:integer
+                ├── Var(i)		→ tab_index:39, type:integer, lev:1
+                └── Num(2)		→ type:integer

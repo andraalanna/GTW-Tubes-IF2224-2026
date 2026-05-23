@@ -1,0 +1,6 @@
+program TC23;
+procedure hitung(x: integer; x: real);
+begin
+end;
+begin
+end.

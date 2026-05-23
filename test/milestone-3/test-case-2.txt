@@ -1,0 +1,9 @@
+program TestComment;
+var
+  x: integer;
+begin
+  { ini komentar }
+  x := 5; { komentar inline }
+  (* komentar style 2 *)
+  x := x + 1;
+end.
