@@ -1,0 +1,5 @@
+Syntax error at line 3, col 10: unexpected token 'unknown(=)', expected eql
+Syntax error at line 5, col 7: unexpected token 'colon(:)', expected eql
+Syntax error at line 6, col 6: unexpected token 'endsy(end)', expected beginsy
+Syntax error at line 6, col 6: unexpected token 'endsy(end)', expected period
+Syntax error at line 6, col 6: unexpected token 'endsy', expected end of program

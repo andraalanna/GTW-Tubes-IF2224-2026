@@ -1,0 +1,9 @@
+ProgramNode(name: 'TypeDeclTest')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── TypeDecl(Range)		→ tab_index:38, type:unknown, lev:1
+│   ├── TypeDecl(Month)		→ tab_index:39, type:unknown, lev:1
+│   └── VarDecl('r')		→ tab_index:40, type:integer, lev:1
+└── CompoundStmt		→ type:void
+    └── Assign(r := 5)		→ type:void
+        ├── Var(r)		→ tab_index:40, type:integer, lev:1
+        └── Num(5)		→ type:integer

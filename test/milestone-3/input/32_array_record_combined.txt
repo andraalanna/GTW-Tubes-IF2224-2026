@@ -1,12 +1,12 @@
 program CombinedTest;
 type
-  Point = record
+  Point == record
     x: integer;
     y: integer;
   end;
 var
-  points: array[1..5] of Point;
+  points: array[1..5] of integer;
+  i: integer;
 begin
-  points[1].x := 10;
-  points[2].y := points[1].x;
+  points[i] := 10;
 end.
