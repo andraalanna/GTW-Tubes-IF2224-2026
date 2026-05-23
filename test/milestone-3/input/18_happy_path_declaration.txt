@@ -1,4 +1,4 @@
-program Lengkap;
+program TC18;
 const
   MAX == 100;
   PI == 3;

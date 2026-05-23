@@ -1,4 +1,4 @@
-ProgramNode(name: 'Test5')		→ tab_index:37, type:void, lev:0
+ProgramNode(name: 'TC22')		→ tab_index:37, type:void, lev:0
 ├── Declarations
 │   ├── VarDecl('x')		→ tab_index:38, type:integer, lev:1
 │   └── ProcDecl(hitung)		→ tab_index:39, type:void, lev:1

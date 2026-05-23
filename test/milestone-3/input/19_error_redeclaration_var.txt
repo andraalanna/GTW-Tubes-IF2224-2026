@@ -1,4 +1,4 @@
-program Test2;
+program TC19;
 var
   a: integer;
   a: real;

@@ -1,10 +1,10 @@
-program Test5;
-var
-  x: integer;
-procedure hitung;
-var
-  x: real;
-begin
-end;
-begin
-end.
+  program TC22;
+  var
+    x: integer;
+  procedure hitung;
+  var
+    x: real;
+  begin
+  end;
+  begin
+  end.
