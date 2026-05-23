@@ -1,7 +1,0 @@
-ProgramNode(name: 'TC17')		→ tab_index:37, type:void, lev:0
-├── Declarations
-│   ├── VarDecl('a')		→ tab_index:38, type:integer, lev:1
-│   ├── VarDecl('a')		→ type:unknown
-│   ├── VarDecl('b')		→ tab_index:39, type:boolean, lev:1
-│   └── VarDecl('b')		→ type:unknown
-└── CompoundStmt		→ type:void

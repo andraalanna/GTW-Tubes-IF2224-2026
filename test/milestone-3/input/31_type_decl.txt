@@ -1,9 +1,0 @@
-program TypeDeclTest;
-type
-  Range == 1..10;
-  Month == (Jan, Feb, Mar, Apr);
-var
-  r: integer;
-begin
-  r := 5;
-end.

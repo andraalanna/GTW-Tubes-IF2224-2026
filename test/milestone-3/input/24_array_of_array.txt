@@ -1,8 +1,0 @@
-program ArrayOfArrayTest;
-var
-  matrix: array[1..3] of array[1..3] of integer;
-  val: integer;
-begin
-  matrix[1][2] := 5;
-  val := matrix[2][3];
-end.

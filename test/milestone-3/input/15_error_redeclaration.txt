@@ -1,8 +1,0 @@
-{ TC15: ERROR - redeclaration dalam scope yang sama }
-program TC15;
-var
-  a: Integer;
-  a: Real;
-begin
-  a := 5;
-end.

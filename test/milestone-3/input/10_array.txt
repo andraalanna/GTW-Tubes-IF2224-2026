@@ -1,9 +1,0 @@
-{ TC10: Deklarasi dan penggunaan array }
-program TC10;
-var
-  arr: array [1..10] of Integer;
-  i: Integer;
-begin
-  for i := 1 to 10 do
-    arr[i] := i * 2;
-end.

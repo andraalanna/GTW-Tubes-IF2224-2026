@@ -1,8 +1,0 @@
-program TC19;
-var
-  a: integer;
-  a: real;
-  b: boolean;
-  b: char;
-begin
-end.

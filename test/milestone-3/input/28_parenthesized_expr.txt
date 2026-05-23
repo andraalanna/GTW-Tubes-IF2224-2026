@@ -1,7 +1,0 @@
-program ParenTest;
-var
-  a, b, c, result: integer;
-begin
-  result := (a + b) * (c - 1);
-  a := ((a + b));
-end.

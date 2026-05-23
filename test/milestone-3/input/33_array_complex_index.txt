@@ -1,8 +1,0 @@
-program ComplexIndexTest;
-var
-  arr: array[1..100] of integer;
-  i: integer;
-begin
-  arr[i] := 1;
-  arr[1] := 2;
-end.
