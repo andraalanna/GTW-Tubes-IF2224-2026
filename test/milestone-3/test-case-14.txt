@@ -1,0 +1,16 @@
+program TC14;
+const
+  MAX == 100;
+  PI == 3.14;
+  FLAG == true;
+var
+  a: Integer;
+  b: Real;
+  c: Boolean;
+begin
+  a := MAX;
+  b := PI;
+  c := not FLAG;
+  a := -MAX;
+  c := not a;
+end.

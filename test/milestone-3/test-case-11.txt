@@ -1,0 +1,11 @@
+program TC11;
+var
+  a: Integer;
+  b: Real;
+  flag: Boolean;
+begin
+  a := 3.14;
+  b := 'hello';
+  flag := 42;
+  a := z;
+end.
