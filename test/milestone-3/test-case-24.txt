@@ -1,0 +1,9 @@
+program ArrayVarIndexTest;
+var
+  arr: array[1..10] of integer;
+  i, j: integer;
+begin
+  i := 3;
+  arr[i] := 99;
+  arr[j] := arr[i];
+end.
