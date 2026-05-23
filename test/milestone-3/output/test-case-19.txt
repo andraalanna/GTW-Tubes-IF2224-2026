@@ -1,9 +1,0 @@
-ProgramNode(name: 'TC19')		→ tab_index:37, type:void, lev:0
-├── Declarations
-│   ├── ProcDecl(hitung)		→ tab_index:38, type:void, lev:1
-│   │   ├── VarDecl('x')		→ tab_index:39, type:integer, lev:2
-│   │   └── CompoundStmt		→ type:void
-│   └── ProcDecl(hitung)		→ type:void
-│       ├── VarDecl('y')		→ type:real
-│       └── CompoundStmt		→ type:void
-└── CompoundStmt		→ type:void

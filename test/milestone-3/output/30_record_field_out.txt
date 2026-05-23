@@ -1,9 +1,0 @@
-ProgramNode(name: 'RecordTest')		→ tab_index:37, type:void, lev:0
-├── Declarations
-│   ├── TypeDecl(Point)		→ tab_index:38, type:unknown, lev:1
-│   └── VarDecl('p')		→ tab_index:39, type:unknown, lev:1
-└── CompoundStmt		→ type:void
-    └── Assign(p.x := 10)		→ type:void
-        ├── FieldAccess(x)		→ type:unknown
-        │   └── Var(p)		→ type:unknown
-        └── Num(10)		→ type:integer

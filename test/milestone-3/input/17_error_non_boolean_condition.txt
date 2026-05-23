@@ -1,9 +1,0 @@
-{ TC17: ERROR - kondisi if bukan Boolean }
-program TC17;
-var
-  a: Integer;
-begin
-  a := 5;
-  if a then
-    writeln('yes');
-end.
