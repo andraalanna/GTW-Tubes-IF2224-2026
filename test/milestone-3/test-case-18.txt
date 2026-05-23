@@ -1,4 +1,4 @@
-program TC20;
+program TC18;
 const
   MAX == 100;
   MAX == 200;

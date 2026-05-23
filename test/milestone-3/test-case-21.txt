@@ -1,4 +1,4 @@
-program TC23;
+program TC21;
 procedure hitung(x: integer; x: real);
 begin
 end;

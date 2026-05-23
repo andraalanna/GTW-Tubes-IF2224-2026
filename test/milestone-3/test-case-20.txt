@@ -1,4 +1,4 @@
-  program TC22;
+  program TC20;
   var
     x: integer;
   procedure hitung;
