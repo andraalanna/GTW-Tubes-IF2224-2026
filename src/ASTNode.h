@@ -13,6 +13,7 @@ struct ASTNode
     DataType dtype = DataType::UNKNOWN;
     int tabIndex = -1;
     int lexLevel = 0;
+    int typeRef = 0;
 
     virtual ~ASTNode() = default;
 

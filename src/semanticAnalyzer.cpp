@@ -204,7 +204,8 @@ void SemanticAnalyzer::visitProcDecl(ProcDeclNode *node)
         VarDeclNode *p = dynamic_cast<VarDeclNode *>(param.get());
         if (!p) continue;
 
-        if (st.lookupCurrentScope(p->varName) != -1)
+        int globalIdx = st.lookup(p->varName);
+        if (globalIdx != -1 && st.tab[globalIdx].lev <= st.currentLevel)
         {
             redeclarationError(p->varName);
             continue;
@@ -273,7 +274,8 @@ void SemanticAnalyzer::visitFuncDecl(FuncDeclNode *node)
         VarDeclNode *p = dynamic_cast<VarDeclNode *>(param.get());
         if (!p) continue;
 
-        if (st.lookupCurrentScope(p->varName) != -1)
+        int globalIdx = st.lookup(p->varName);
+        if (globalIdx != -1 && st.tab[globalIdx].lev <= st.currentLevel)
         {
             redeclarationError(p->varName);
             continue;
@@ -421,15 +423,49 @@ void SemanticAnalyzer::visitAssign(AssignNode *node)
 
     if (node->target && node->value)
     {
-        if (node->value->dtype != DataType::VOID)
-        {
-            if (!isAssignCompatible(node->target->dtype, node->value->dtype))
-            {
-                // PERBAIKAN: sertakan nama variabel dari target
-                std::string varName = "";
-                if (auto *v = dynamic_cast<VarNode *>(node->target.get()))
-                    varName = v->varName;
+        std::string varName = "";
 
+        if (auto *v = dynamic_cast<VarNode *>(node->target.get()))
+        {
+            varName = v->varName;
+            if (v->tabIndex != -1)
+            {
+                AllowedObj targetObj = st.tab[v->tabIndex].obj;
+
+                // Cek: assignment ke constant tidak diizinkan
+                if (targetObj == AllowedObj::CONSTANT)
+                {
+                    semanticError("Cannot assign a value to constant '" + varName + "'.");
+                    node->dtype = DataType::VOID;
+                    return;
+                }
+
+                if (targetObj == AllowedObj::FUNCTION)
+                {
+                    int funcLev = st.tab[v->tabIndex].lev;
+                    if (funcLev != st.currentLevel - 1)
+                    {
+                        semanticError("Cannot assign to function '" + varName +
+                                      "' outside its own body.");
+                        node->dtype = DataType::VOID;
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (!isAssignCompatible(node->target->dtype, node->value->dtype))
+        {
+            if (node->value->dtype != DataType::VOID)
+            {
+                int targetRef = node->target->typeRef;
+                int valueRef  = node->value->typeRef;
+
+                if (!isAssignCompatible(node->target->dtype, node->value->dtype, targetRef, valueRef))
+                    assignIncompatibleError(node->target->dtype, node->value->dtype, varName);
+            }
+            else
+            {
                 assignIncompatibleError(node->target->dtype, node->value->dtype, varName);
             }
         }
@@ -481,6 +517,7 @@ void SemanticAnalyzer::visitVar(VarNode *node)
     node->tabIndex = idx;
     node->lexLevel = st.tab[idx].lev;
     node->dtype = st.tab[idx].type;
+    node->typeRef = st.tab[idx].ref;
 }
 
 void SemanticAnalyzer::visitIf(IfNode *node)
@@ -610,103 +647,117 @@ void SemanticAnalyzer::visitCase(CaseNode *node)
     node->dtype = DataType::VOID;
 }
 
-void SemanticAnalyzer::visitProcCall(ProcCallNode *node)
-{
-    int idx = st.lookup(node->procName);
-    if (idx == -1)
+    void SemanticAnalyzer::visitProcCall(ProcCallNode *node)
     {
-        undeclaredError(node->procName);
-        node->dtype = DataType::UNKNOWN;
-        return;
-    }
-
-    AllowedObj obj = st.tab[idx].obj;
-    if (obj != AllowedObj::PROCEDURE && obj != AllowedObj::FUNCTION)
-    {
-        wrongObjectKindError(node->procName, AllowedObj::PROCEDURE, obj);
-        node->dtype = DataType::UNKNOWN;
-        return;
-    }
-
-    for (auto &arg : node->args)
-        if (arg)
-            visitStatement(arg.get());
-
-    if (idx == PredefinedIdx::PROC_WRITELN || idx == PredefinedIdx::PROC_READLN)
-    {
-        node->dtype = DataType::VOID;
-        return;
-    }
-
-    int ref = st.tab[idx].ref;
-
-    std::vector<int> params;
-    int p = st.btab[ref].lpar;
-    while (p > 0)
-    {
-        params.push_back(p);
-        p = st.tab[p].link;
-        if (p > 0 && st.tab[p].lev < st.tab[idx].lev + 1)
-            break;
-    }
-    std::reverse(params.begin(), params.end());
-
-    int paramCount = (int)params.size();
-
-    if ((int)node->args.size() != paramCount)
-    {
-        wrongArgCountError(node->procName, paramCount, (int)node->args.size());
-    }
-    else
-    {
-        for (size_t i = 0; i < node->args.size(); i++)
+        int idx = st.lookup(node->procName);
+        if (idx == -1)
         {
-            if (!node->args[i])
-                continue;
-            if (node->args[i]->dtype == DataType::UNKNOWN)
-                continue;
+            undeclaredError(node->procName);
+            node->dtype = DataType::UNKNOWN;
+            return;
+        }
 
-            DataType expectedType = st.tab[params[i]].type;
-            int expectedRef = st.tab[params[i]].ref;
-            int argRef = 0;
+        AllowedObj obj = st.tab[idx].obj;
+        if (obj != AllowedObj::PROCEDURE && obj != AllowedObj::FUNCTION)
+        {
+            wrongObjectKindError(node->procName, AllowedObj::PROCEDURE, obj);
+            node->dtype = DataType::UNKNOWN;
+            return;
+        }
 
-            if (auto *v = dynamic_cast<VarNode *>(node->args[i].get()))
-                argRef = (v->tabIndex >= 0) ? st.tab[v->tabIndex].ref : 0;
+        for (auto &arg : node->args)
+            if (arg)
+                visitStatement(arg.get());
 
-            if (!isAssignCompatible(expectedType, node->args[i]->dtype,
-                                    expectedRef, argRef))
+        if (idx == PredefinedIdx::PROC_WRITELN || idx == PredefinedIdx::PROC_READLN)
+        {
+            node->dtype = DataType::VOID;
+            return;
+        }
+
+        int ref = st.tab[idx].ref;
+
+        std::vector<int> params;
+        int p = st.btab[ref].lpar;
+        while (p > 0)
+        {
+            params.push_back(p);
+            p = st.tab[p].link;
+        }
+        std::reverse(params.begin(), params.end());
+
+        int paramCount = (int)params.size();
+
+        if ((int)node->args.size() != paramCount)
+        {
+            wrongArgCountError(node->procName, paramCount, (int)node->args.size());
+        }
+        else
+        {
+            for (size_t i = 0; i < node->args.size(); i++)
             {
-                assignIncompatibleError(expectedType, node->args[i]->dtype,
-                                        node->procName);
+                if (!node->args[i])
+                    continue;
+                if (node->args[i]->dtype == DataType::UNKNOWN)
+                    continue;
+
+                DataType expectedType = st.tab[params[i]].type;
+                int expectedRef = st.tab[params[i]].ref;
+
+                int argRef = node->args[i]->typeRef;
+                if (auto *v = dynamic_cast<VarNode *>(node->args[i].get()))
+                    argRef = (v->tabIndex >= 0) ? st.tab[v->tabIndex].ref : 0;
+
+                if (!isAssignCompatible(expectedType, node->args[i]->dtype,
+                                        expectedRef, argRef))
+                {
+                    assignIncompatibleError(expectedType, node->args[i]->dtype,
+                                            node->procName);
+                }
             }
         }
-    }
 
-    node->dtype = (st.tab[idx].obj == AllowedObj::FUNCTION)
-                      ? st.tab[idx].type
-                      : DataType::VOID;
-}
+        node->dtype = (st.tab[idx].obj == AllowedObj::FUNCTION)
+                        ? st.tab[idx].type
+                        : DataType::VOID;
+    }
 
 void SemanticAnalyzer::visitArrayAccess(ArrayAccessNode *node) {
     if (node->array) visitStatement(node->array.get());
     
     for (auto &idx : node->indices)
         if (idx) visitStatement(idx.get());
+
+    DataType currentType = node->array ? node->array->dtype : DataType::UNKNOWN;
+    int currentRef = node->array ? node->array->typeRef : 0;
     
-    // Ambil tipe elemen dari atab
-    if (node->array && node->array->dtype == DataType::ARRAY) {
-        VarNode *varNode = dynamic_cast<VarNode *>(node->array.get());
-        if (varNode) {
-            int tabIdx = varNode->tabIndex;
-            if (tabIdx >= 0) {
-                int ref = st.tab[tabIdx].ref;
-                if (ref >= 0 && ref < (int)st.atab.size())
-                    node->dtype = st.atab[ref].etyp;
+    for (size_t i = 0; i < node->indices.size(); i++)
+    {
+        if (currentType == DataType::ARRAY && currentRef >= 0 && currentRef < (int)st.atab.size())
+        {
+            // Validasi tipe indeks
+            if (node->indices[i])
+            {
+                DataType idxType = node->indices[i]->dtype;
+                if (idxType != DataType::UNKNOWN && !isValidIndexType(idxType))
+                    invalidIndexTypeError(idxType);
             }
+
+            currentType = st.atab[currentRef].etyp;
+            currentRef  = st.atab[currentRef].eref;
         }
-    } else {
-        node->dtype = DataType::UNKNOWN;
+        else
+        {
+            if (currentType != DataType::UNKNOWN)
+                semanticError("Cannot index a non-array type.");
+            currentType = DataType::UNKNOWN;
+            currentRef  = 0;
+            break;
+        }
     }
+
+    node->dtype = currentType;
+    node->typeRef = currentRef;
 }
 
 
@@ -715,31 +766,12 @@ void SemanticAnalyzer::visitUnaryOp(UnaryOpNode *node)
     if (node->operand)
         visitStatement(node->operand.get());
 
-    if (node->op == "notsy")
-    {
-        if (node->operand && node->operand->dtype != DataType::BOOLEAN &&
-            node->operand->dtype != DataType::UNKNOWN)
-        {
-            invalidUnaryOperandError("not", node->operand->dtype);
-        }
-        if (node->operand && node->operand->dtype != DataType::BOOLEAN)
-            node->dtype = DataType::UNKNOWN;
-        else
-            node->dtype = DataType::BOOLEAN;
-    }
-    else 
-    {
-        if (node->operand &&
-            node->operand->dtype != DataType::INTEGER &&
-            node->operand->dtype != DataType::REAL &&
-            node->operand->dtype != DataType::UNKNOWN)
-        {
-            invalidUnaryOperandError(node->op, node->operand->dtype);
-            node->dtype = DataType::UNKNOWN;
-        }
-        else
-        {
-            node->dtype = node->operand ? node->operand->dtype : DataType::UNKNOWN;
-        }
-    }
+    DataType opType = node->operand ? node->operand->dtype : DataType::UNKNOWN;
+    
+    DataType inferred = inferUnaryOpType(node->op, opType); 
+
+    if (inferred == DataType::UNKNOWN && opType != DataType::UNKNOWN)
+        invalidUnaryOperandError(node->op, opType);
+    
+    node->dtype = inferred;
 }
