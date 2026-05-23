@@ -1,0 +1,9 @@
+program ComplexIndexTest;
+var
+  arr: array[1..100] of integer;
+  a, b, c: integer;
+begin
+  arr[(a + b) * c] := 1;
+  arr[a div 2] := 2;
+  arr[a mod 10] := 3;
+end.

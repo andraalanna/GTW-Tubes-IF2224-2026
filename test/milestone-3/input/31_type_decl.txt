@@ -1,0 +1,10 @@
+program TypeDeclTest;
+type
+  Range = 1..10;
+  Month = (Jan, Feb, Mar, Apr);
+var
+  r: Range;
+  m: Month;
+begin
+  r := 5;
+end.

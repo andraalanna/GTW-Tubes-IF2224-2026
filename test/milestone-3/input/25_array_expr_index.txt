@@ -1,0 +1,9 @@
+program ArrayExprIndexTest;
+var
+  arr: array[1..10] of integer;
+  a, b, result: integer;
+begin
+  arr[a + b] := 10;
+  arr[a * 2] := 20;
+  result := arr[a + 1];
+end.

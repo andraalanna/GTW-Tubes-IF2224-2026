@@ -1,0 +1,19 @@
+ProgramNode(name: 'ArrayOfArrayTest')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('matrix')		→ tab_index:38, type:array, lev:1
+│   └── VarDecl('val')		→ tab_index:39, type:integer, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(matrix[1][2] := 5)		→ type:void
+    │   ├── ArrayAccess		→ type:unknown
+    │   │   ├── ArrayAccess		→ type:array
+    │   │   │   ├── Var(matrix)		→ tab_index:38, type:array, lev:1
+    │   │   │   └── Num(1)		→ type:integer
+    │   │   └── Num(2)		→ type:integer
+    │   └── Num(5)		→ type:integer
+    └── Assign(val := matrix[2][3])		→ type:void
+        ├── Var(val)		→ tab_index:39, type:integer, lev:1
+        └── ArrayAccess		→ type:unknown
+            ├── ArrayAccess		→ type:array
+            │   ├── Var(matrix)		→ tab_index:38, type:array, lev:1
+            │   └── Num(2)		→ type:integer
+            └── Num(3)		→ type:integer
