@@ -1,0 +1,8 @@
+program LeftAssocTest;
+var
+  a, b, c, d: integer;
+begin
+  d := a + b + c;
+  d := a - b - c;
+  d := a * b * c;
+end.

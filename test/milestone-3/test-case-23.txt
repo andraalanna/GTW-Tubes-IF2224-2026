@@ -1,0 +1,8 @@
+program ArrayExprIndexTest;
+var
+  arr: array[1..10] of integer;
+  i, result: integer;
+begin
+  arr[i] := 10;
+  result := arr[i];
+end.

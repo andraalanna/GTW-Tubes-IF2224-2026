@@ -1,0 +1,12 @@
+program CombinedTest;
+type
+  Point == record
+    x: integer;
+    y: integer
+  end;
+var
+  points: array[1..5] of integer;
+  i: integer;
+begin
+  points[i] := 10;
+end.
