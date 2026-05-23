@@ -1,20 +1,4 @@
-program TC2;
-var
-  nums: array[1..10] of integer;
-  grid: array[1..5] of array[1..5] of real;
-  i, j: integer;
-
-procedure FillRow(row: array[1..5] of integer; val: integer);
-var
-  k: integer;
+program TestEmpty;
 begin
-  k := 1;
-end;
-
-begin
-  nums[1] := 100;
-  grid[1][1] := 3.14;
-  i := nums[3];
-  j := 0;
-  FillRow(nums, j);
+  ;
 end.

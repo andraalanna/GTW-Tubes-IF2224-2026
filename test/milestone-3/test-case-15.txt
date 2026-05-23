@@ -1,0 +1,15 @@
+program TC15;
+var
+  x, y: Integer;
+procedure Add(a, b: Integer);
+begin
+  x := a + b;
+end;
+begin
+  x := 5;
+  y := 3;
+  Add(x, y, x);
+  Add();
+  x := Add;
+  writeln();
+end.

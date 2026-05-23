@@ -8,7 +8,7 @@ using namespace std;
 SymbolTable::SymbolTable(){
     init();
 }
-void SymbolTable::init(){
+void SymbolTable::init(){   
     //clear dulu semua
     tab.clear();
     atab.clear();
@@ -104,18 +104,20 @@ int SymbolTable::lookup(const string& name) const {
     return -1;
 }
 
-int SymbolTable::lookupCurrentScope(const string& name) const {
-    // Hanya cari di blok aktif saat ini.
-    // Hentikan traversal begitu menyentuh entry dari scope luar (lev < currentLevel).
+int SymbolTable::lookupCurrentScope(const string &name) const
+{
     int i = btab[currentBlock].last;
-    while (i > 0) {
-        if (tab[i].lev < currentLevel) break; // keluar dari scope saat ini
-        if (tab[i].name == name) return i;
+    while (i > 0)
+    {
+        
+        if (tab[i].lev < currentLevel && currentLevel > 0)
+            break;
+        if (tab[i].name == name)
+            return i;
         i = tab[i].link;
     }
     return -1;
 }
-
 
 // Operasi btab
 // Buat entri blok baru di btab, return indeksnya

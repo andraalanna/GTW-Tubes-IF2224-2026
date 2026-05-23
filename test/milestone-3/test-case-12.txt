@@ -1,0 +1,17 @@
+program TC12;
+var
+  x: Integer;
+  x: Real;
+  y: Boolean;
+begin
+  x := 5;
+  if x then
+    y := true;
+  while x do
+  begin
+    x := x - 1;
+  end;
+  repeat
+    x := x + 1;
+  until x;
+end.

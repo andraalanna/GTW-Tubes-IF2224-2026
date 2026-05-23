@@ -1,0 +1,10 @@
+program TC13;
+type
+  BadArray == array[1.0..5.0] of Integer;
+  BadRange == array[10..1] of Integer;
+var
+  a: array[1..5] of Integer;
+  b: BadArray;
+begin
+  a[1] := 10;
+end.

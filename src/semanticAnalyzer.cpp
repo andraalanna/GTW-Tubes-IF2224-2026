@@ -128,8 +128,6 @@ void SemanticAnalyzer::visitConstDecl(ConstDeclNode *node)
     node->dtype    = t;
 }
 
-
-
 void SemanticAnalyzer::visitTypeDecl(TypeDeclNode *node)
 {
     if (st.lookupCurrentScope(node->typeName) != -1)
@@ -141,12 +139,25 @@ void SemanticAnalyzer::visitTypeDecl(TypeDeclNode *node)
 
     int ref = node->typeRef;
 
-    // Validasi index type untuk ARRAY
     if (node->baseType == DataType::ARRAY &&
         ref >= 0 && ref < (int)st.atab.size())
     {
-        if (!isValidIndexType(st.atab[ref].xtyp))
-            invalidIndexTypeError(st.atab[ref].xtyp);
+        DataType xtyp = st.atab[ref].xtyp;
+
+        if (xtyp == DataType::REAL)
+        {
+            invalidIndexTypeError(xtyp);
+            realSubrangeError();
+        }
+        else if (!isValidIndexType(xtyp))
+        {
+            invalidIndexTypeError(xtyp);
+        }
+
+        if (st.atab[ref].low > st.atab[ref].high)
+        {
+            invalidSubrangeError(st.atab[ref].low, st.atab[ref].high);
+        }
     }
 
     int idx = st.enterTab(
@@ -156,12 +167,11 @@ void SemanticAnalyzer::visitTypeDecl(TypeDeclNode *node)
         ref,
         1,
         st.currentLevel,
-        0
-    );
+        0);
 
     node->tabIndex = idx;
     node->lexLevel = st.currentLevel;
-    node->dtype    = node->baseType;
+    node->dtype = node->baseType;
 }
 
 void SemanticAnalyzer::visitProcDecl(ProcDeclNode *node)
@@ -404,22 +414,29 @@ int SemanticAnalyzer::elementSize(DataType t, int ref) const
 
 void SemanticAnalyzer::visitAssign(AssignNode *node)
 {
-    if (node->target) visitStatement(node->target.get());
-    if (node->value) visitStatement(node->value.get());
+    if (node->target)
+        visitStatement(node->target.get());
+    if (node->value)
+        visitStatement(node->value.get());
 
     if (node->target && node->value)
     {
-        // Skip check kalau value adalah VOID (procedure call bukan function)
         if (node->value->dtype != DataType::VOID)
         {
             if (!isAssignCompatible(node->target->dtype, node->value->dtype))
             {
-                assignIncompatibleError(node->target->dtype, node->value->dtype);
+                // PERBAIKAN: sertakan nama variabel dari target
+                std::string varName = "";
+                if (auto *v = dynamic_cast<VarNode *>(node->target.get()))
+                    varName = v->varName;
+
+                assignIncompatibleError(node->target->dtype, node->value->dtype, varName);
             }
         }
     }
     node->dtype = DataType::VOID;
 }
+
 void SemanticAnalyzer::visitBinOp(BinOpNode *node)
 {
     if (node->left) visitStatement(node->left.get());
@@ -570,19 +587,24 @@ void SemanticAnalyzer::visitCase(CaseNode *node)
     if (node->selector)
     {
         visitStatement(node->selector.get());
-        if (node->selector->dtype != DataType::UNKNOWN && !isSimpleType(node->selector->dtype) && node->selector->dtype != DataType::BOOLEAN)
+
+        DataType stype = node->selector->dtype;
+        if (stype != DataType::UNKNOWN &&
+            stype != DataType::INTEGER &&
+            stype != DataType::CHAR &&
+            stype != DataType::BOOLEAN &&
+            stype != DataType::SUBRANGE &&
+            stype != DataType::ENUMERATED)
         {
-            if (node->selector->dtype == DataType::REAL || node->selector->dtype == DataType::STRING || 
-                node->selector->dtype == DataType::ARRAY || node->selector->dtype == DataType::RECORD)
-            {
-                semanticError("Case selector must be of ordinal type.");
-            }
+            semanticError("Case selector must be of ordinal type, got '" +
+                          dataTypeToString(stype) + "'");
         }
     }
 
     for (auto &branch : node->branches)
     {
-        if (branch.second) visitStatement(branch.second.get());
+        if (branch.second)
+            visitStatement(branch.second.get());
     }
 
     node->dtype = DataType::VOID;
@@ -607,9 +629,8 @@ void SemanticAnalyzer::visitProcCall(ProcCallNode *node)
     }
 
     for (auto &arg : node->args)
-    {
-        if (arg) visitStatement(arg.get());
-    }
+        if (arg)
+            visitStatement(arg.get());
 
     if (idx == PredefinedIdx::PROC_WRITELN || idx == PredefinedIdx::PROC_READLN)
     {
@@ -618,42 +639,52 @@ void SemanticAnalyzer::visitProcCall(ProcCallNode *node)
     }
 
     int ref = st.tab[idx].ref;
-    int paramCount = 0;
-    int p = st.btab[ref].lpar;
-    
+
     std::vector<int> params;
+    int p = st.btab[ref].lpar;
     while (p > 0)
     {
         params.push_back(p);
         p = st.tab[p].link;
+        if (p > 0 && st.tab[p].lev < st.tab[idx].lev + 1)
+            break;
     }
-    
     std::reverse(params.begin(), params.end());
-    paramCount = params.size();
+
+    int paramCount = (int)params.size();
 
     if ((int)node->args.size() != paramCount)
     {
-        wrongArgCountError(node->procName, paramCount, node->args.size());
+        wrongArgCountError(node->procName, paramCount, (int)node->args.size());
     }
     else
     {
         for (size_t i = 0; i < node->args.size(); i++)
         {
-            if (node->args[i] && node->args[i]->dtype != DataType::UNKNOWN)
+            if (!node->args[i])
+                continue;
+            if (node->args[i]->dtype == DataType::UNKNOWN)
+                continue;
+
+            DataType expectedType = st.tab[params[i]].type;
+            int expectedRef = st.tab[params[i]].ref;
+            int argRef = 0;
+
+            if (auto *v = dynamic_cast<VarNode *>(node->args[i].get()))
+                argRef = (v->tabIndex >= 0) ? st.tab[v->tabIndex].ref : 0;
+
+            if (!isAssignCompatible(expectedType, node->args[i]->dtype,
+                                    expectedRef, argRef))
             {
-                DataType expectedType = st.tab[params[i]].type;
-                if (!isAssignCompatible(expectedType, node->args[i]->dtype))
-                {
-                    assignIncompatibleError(expectedType, node->args[i]->dtype);
-                }
+                assignIncompatibleError(expectedType, node->args[i]->dtype,
+                                        node->procName);
             }
         }
     }
 
-    if (st.tab[idx].obj == AllowedObj::FUNCTION)
-        node->dtype = st.tab[idx].type;
-    else
-        node->dtype = DataType::VOID;
+    node->dtype = (st.tab[idx].obj == AllowedObj::FUNCTION)
+                      ? st.tab[idx].type
+                      : DataType::VOID;
 }
 
 void SemanticAnalyzer::visitArrayAccess(ArrayAccessNode *node) {
@@ -678,23 +709,37 @@ void SemanticAnalyzer::visitArrayAccess(ArrayAccessNode *node) {
     }
 }
 
+
 void SemanticAnalyzer::visitUnaryOp(UnaryOpNode *node)
 {
-    if (node->operand) visitStatement(node->operand.get());
-    
+    if (node->operand)
+        visitStatement(node->operand.get());
+
     if (node->op == "notsy")
     {
-        // not harus boolean
-        if (node->operand && node->operand->dtype != DataType::BOOLEAN && 
+        if (node->operand && node->operand->dtype != DataType::BOOLEAN &&
             node->operand->dtype != DataType::UNKNOWN)
         {
-            semanticError("Operand of 'not' must be Boolean");
+            invalidUnaryOperandError("not", node->operand->dtype);
         }
-        node->dtype = DataType::BOOLEAN;
+        if (node->operand && node->operand->dtype != DataType::BOOLEAN)
+            node->dtype = DataType::UNKNOWN;
+        else
+            node->dtype = DataType::BOOLEAN;
     }
-    else
+    else 
     {
-        // unary + atau - harus integer atau real
-        node->dtype = node->operand ? node->operand->dtype : DataType::UNKNOWN;
+        if (node->operand &&
+            node->operand->dtype != DataType::INTEGER &&
+            node->operand->dtype != DataType::REAL &&
+            node->operand->dtype != DataType::UNKNOWN)
+        {
+            invalidUnaryOperandError(node->op, node->operand->dtype);
+            node->dtype = DataType::UNKNOWN;
+        }
+        else
+        {
+            node->dtype = node->operand ? node->operand->dtype : DataType::UNKNOWN;
+        }
     }
 }
