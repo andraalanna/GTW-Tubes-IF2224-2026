@@ -1,0 +1,6 @@
+program Test3;
+const
+  MAX == 100;
+  MAX == 200;
+begin
+end.

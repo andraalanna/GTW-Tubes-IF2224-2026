@@ -1,0 +1,9 @@
+program Test4;
+procedure hitung(x: integer);
+begin
+end;
+procedure hitung(y: real);
+begin
+end;
+begin
+end.
