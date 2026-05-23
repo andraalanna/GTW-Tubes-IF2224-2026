@@ -1,0 +1,10 @@
+  program TC20;
+  var
+    x: integer;
+  procedure hitung;
+  var
+    x: real;
+  begin
+  end;
+  begin
+  end.

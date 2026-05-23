@@ -1,0 +1,17 @@
+program TC16;
+const
+  MAX == 100;
+  PI == 3;
+type
+  Score == integer;
+var
+  x: integer;
+  flag: boolean;
+function max(a: integer; b: integer): integer;
+begin
+end;
+procedure cetak(val: integer);
+begin
+end;
+begin
+end.
