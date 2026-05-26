@@ -1,0 +1,85 @@
+// src/ICG.h
+#pragma once
+#include <vector>
+#include <string>
+#include <ostream>
+#include "ASTNode.h"
+#include "symbolTable.hpp"
+
+using namespace std;
+
+enum class OpCode
+{
+    LIT,
+    LOD,
+    STO,
+    CAL,
+    INT_OP,
+    JMP,
+    JPC,
+    OPR,
+    RET
+};
+
+enum class OprCode
+{
+    NEG = 1,
+    ADD = 2,
+    SUB = 3,
+    MUL = 4,
+    DIV = 5,
+    MOD = 6,
+    EQL = 7,
+    NEQ = 8,
+    LSS = 9,
+    GEQ = 10,
+    GTR = 11,
+    LEQ = 12,
+    WRT = 13,
+    WRTLN = 14
+};
+
+struct Instruction
+{
+    int lineNo;
+    OpCode opcode;
+    int level;
+    int operand;
+};
+
+class ICG
+{
+public:
+    explicit ICG(SymbolTable &symTable);
+    vector<Instruction> generate(ASTNodePtr root);
+
+    void printInstructions(ostream &out) const;
+    void writeToFile(const string &filename) const;
+
+private:
+    SymbolTable &st;
+    vector<Instruction> instructions;
+    int currentLine;
+
+    void genProgram(ProgramNode *node);
+    void genINT(ProgramNode *node); // instruksi INT
+    void genStatement(ASTNode *node);
+    void genAssign(AssignNode *node); // LIT / LOD / STO
+    void genExpression(ASTNode *node);
+    void genBinOp(BinOpNode *node);     // OPR aritmatika
+    void genUnaryOp(UnaryOpNode *node); // OPR NEG
+    void genVar(VarNode *node);         // LOD
+    void genNumber(NumberNode *node);   // LIT
+    void genChar(CharNode *node);       // LIT
+
+    void genIf(IfNode *node);             // anggota 2
+    void genWhile(WhileNode *node);       // anggota 2
+    void genFor(ForNode *node);           // anggota 2
+    void genProcCall(ProcCallNode *node); // anggota 2
+    void genProcDecl(ProcDeclNode *node); // anggota 3
+    void genFuncDecl(FuncDeclNode *node); // anggota 3
+
+    void emit(OpCode op, int level, int operand);
+    int countVarDecl(ProgramNode *node);
+    string opcodeToString(OpCode op) const;
+};
