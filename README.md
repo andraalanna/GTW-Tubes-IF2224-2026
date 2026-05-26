@@ -1,137 +1,118 @@
-# Parser Arion — IF2224 Teori Bahasa Formal dan Otomata
-## Milestone 2: Syntax Analysis
+# Work Breakdown Structure — Milestone 4
+**Arion Compiler | IF2224 - Teori Bahasa Formal dan Otomata**
 
-Parser untuk bahasa pemrograman **Arion** yang mengimplementasikan **Recursive Descent Parser** dan menghasilkan **Parse Tree** dari source code Arion.
-
----
-
-## Anggota Kelompok
-
-| Nama | NIM |
-|------|-----|
-| Muhammad Jordan Ferimeison | 13524047 |
-| Arina Azka | 13524049 |
-| Hakam Avicena Mustain | 13524075 |
-| Yavie Azka Putra Araly | 13524077 |
-| Angelina Andra Alanna | 13524079 |
+> Deadline: **Kamis, 4 Juni 2026, pukul 23.59 WIB**
+> Release tag: `v0.4.1` | File laporan: `Laporan-4-[KODE].pdf` di folder `/doc`
 
 ---
 
-## Deskripsi Program
+## Anggota 1 — Setup & ICG: Ekspresi
 
-Program ini menerima source code Arion sebagai input, melakukan analisis leksikal (lexer dari Milestone 1) dan analisis sintaks (parser), kemudian menghasilkan parse tree yang dicetak ke terminal dan disimpan ke file output.
+**Fokus:** Arsitektur proyek · ICG untuk assignment & ekspresi aritmatika
 
----
+### Implementasi
+- Setup struktur repositori dan antarmuka antar-modul (ICG, Stack, Interpreter)
+  - Tentukan format Intermediate Code output dan format input Decorated AST di awal, agar semua anggota bisa paralel
+- ICG: Inisiasi memori — instruksi `INT`
+  - Hitung ukuran memori dari jumlah VarDecl di setiap scope (3 slot fix + n variabel)
+- ICG: Assignment — instruksi `LIT`, `LOD`, `STO`
+  - Traversal node Assign di AST, resolve address variabel dari symbol table
+- ICG: Ekspresi aritmatika — `OPR` (ADD, SUB, MUL, DIV, MOD, NEG)
+  - Post-order traversal BinaryExpr, generate variabel sementara bila perlu
 
-## Struktur Repository
-
-```
-.
-├── bin/                  # Direktori output executable (dibuat otomatis saat build)
-│   └── program
-├── src/
-│   ├── main.cpp          # Entry point program
-│   ├── lexer.cpp         # Implementasi lexer (Milestone 1)
-│   ├── lexer.h           # Header lexer
-│   ├── Parser.cpp        # Implementasi parser
-│   ├── Parser.h          # Header parser
-│   ├── token.h           # Definisi struct Token
-│   └── dfa.h             # Definisi state DFA lexer
-├── Makefile
-└── README.md
-```
+### Bagian Laporan
+- Teori: arsitektur front-end vs back-end, Three-Address Code
+- Implementasi: perancangan struktur program & modul ICG ekspresi
+- Cover + daftar isi + pembagian tugas kelompok
 
 ---
 
-## Dependensi
+## Anggota 2 — ICG: Control Flow
 
-- **Compiler:** `g++`
-- **Standar C++:** C++17
-- **OS:** Linux / macOS (atau Windows dengan MinGW)
+**Fokus:** ICG untuk IF-ELSE, WHILE, dan Write statement
 
----
+### Implementasi
+- ICG: IF-ELSE — instruksi `JPC` dan `JMP`
+  - Generate label sementara, patch jump target setelah blok then/else selesai di-generate
+- ICG: WHILE loop — label balik dan conditional jump
+  - Simpan posisi label awal sebelum kondisi, patch JPC ke after-body setelah body selesai
+- ICG: Perbandingan — `OPR` (EQL, NEQ, LSS, GEQ, GTR, LEQ)
+  - Digunakan sebagai kondisi untuk JPC pada IF dan WHILE
+- ICG: Write & Writeln — `OPR WRT` dan `OPR WRTLN`
+  - Load ekspresi ke stack, kemudian panggil OPR 13/14
 
-## Build
-
-```bash
-make
-```
-
-Executable akan tersimpan di `bin/program`. Untuk membersihkan hasil build:
-
-```bash
-make clean
-```
+### Bagian Laporan
+- Teori: translasi control flow (IF-ELSE, WHILE) ke TAC, penggunaan label & jump
+- Implementasi: ICG control flow & perbandingan beserta contoh instruksi yang dihasilkan
 
 ---
 
-## Cara Menjalankan
+## Anggota 3 — ICG: Fungsi & Prosedur
 
-```bash
-./bin/program <path_to_input.txt> <path_to_output.txt>
-```
+**Fokus:** ICG untuk function call, scope bersarang, dan return
 
-**Contoh:**
+### Implementasi
+- ICG: Deklarasi fungsi/prosedur — instruksi `INT` per scope baru
+  - Setiap fungsi/prosedur punya frame sendiri; hitung ukuran memorinya dari VarDecl + parameter
+- ICG: Pemanggilan fungsi — instruksi `CAL`
+  - Resolve target baris instruksi fungsi, pasang static/dynamic link yang benar
+- ICG: Return dari fungsi/prosedur — instruksi `RET`
+  - Termasuk pengembalian nilai jika itu fungsi (bukan prosedur)
+- Manajemen level scope dan resolusi address variabel lintas scope
+  - Variabel di scope luar diakses dengan level berbeda di instruksi LOD/STO
 
-```bash
-./bin/program test/input.txt output/result.txt
-```
-
-- `path_to_input.txt` — file source code Arion yang akan diparse
-- `path_to_output.txt` — file tujuan penyimpanan parse tree
-
-Parse tree juga akan dicetak langsung ke terminal.
-
----
-
-## Contoh Input dan Output
-
-**Input (`input.txt`):**
-```
-program Contoh;
-type
-    Point == record
-        x, y: integer
-    end;
-var
-    p: Point;
-begin
-    p.x := 10;
-    p.y := 20
-end.
-```
-
-**Output (parse tree):**
-```
-<program>
-├── <program-header>
-│   ├── programsy
-│   ├── ident(Contoh)
-│   └── semicolon
-├── <declaration-part>
-│   └── ...
-└── ...
-```
+### Bagian Laporan
+- Teori: Decorated AST, scope & symbol table, static/dynamic link
+- Implementasi: ICG fungsi & prosedur, resolusi scope, contoh instruksi CAL/RET
 
 ---
 
-## Fitur Parser
+## Anggota 4 — Interpreter & Stack Machine
 
-Parser mengimplementasikan grammar Arion untuk node-node berikut:
+**Fokus:** Virtual machine, execution cycle, dan semua instruksi TAC
 
-- **Deklarasi:** `<type-declaration>`, `<var-declaration>`, `<const-declaration>`
-- **Tipe data:** `<type>`, `<array-type>`, `<range>`, `<enumerated>`, `<record-type>`
-- **Statement:** `<compound-statement>`, `<statement-list>`, `<statement>`, `<assignment-statement>`, `<if-statement>`, `<while-statement>`, `<for-statement>`, `<repeat-statement>`, `<case-statement>`
-- **Ekspresi:** `<expression>`, `<simple-expression>`, `<term>`, `<factor>`
-- **Variable:** `<variable>`, `<component-variable>`, `<index-list>`
-- **Subprogram:** `<procedure-declaration>`, `<function-declaration>`
+### Implementasi
+- Struktur Stack Machine — stack frame (static link, dynamic link, return address, variabel)
+  - Push/pop frame saat CAL dan RET, akses variabel berdasarkan level dan address
+- Siklus Fetch-Decode-Execute dengan Instruction Pointer (IP)
+  - Loop utama interpreter: baca instruksi → dispatch ke handler → IP++ (kecuali JMP/JPC)
+- Implementasi handler semua instruksi TAC: `LIT`, `LOD`, `STO`, `CAL`, `INT`, `JMP`, `JPC`, `OPR`, `RET`
+  - Termasuk semua 14 operasi OPR (aritmatika, perbandingan, WRT, WRTLN)
+- Parsing file Intermediate Code sebagai input interpreter
+  - Baca output ICG baris per baris, parse menjadi daftar instruksi terstruktur
+
+### Bagian Laporan
+- Teori: konsep virtual machine, Stack Machine, siklus eksekusi, LIFO stack frame
+- Implementasi: arsitektur interpreter, handler instruksi, contoh eksekusi step-by-step
 
 ---
 
-## Error Handling
+## Anggota 5 — Error Handling, Testing & Pengumpulan
 
-Parser menampilkan pesan error sintaks yang informatif ketika source code tidak sesuai grammar, beserta token yang tidak terduga dan token yang diharapkan. Contoh:
+**Fokus:** Robustness, test cases, bonus, dan administrasi pengumpulan
 
-```
-Syntax error at line 3, col 17: unexpected token 'realcon(1.10)', expected type (ident, array-type, range, enumerated, or record-type)
-```
+### Implementasi
+- Error handling wajib di seluruh komponen
+  - Division by zero, undefined variable, invalid jump target — pesan error informatif, tidak crash
+- **[Bonus]** Deteksi kerentanan Stack: Overflow, Underflow, Corruption
+  - Limit kedalaman stack ~1000 frame, deteksi push/pop yang tidak simetris
+- **[Bonus]** Out-of-Bounds Array & Numerical Overflow/Underflow
+  - IndexOutOfBoundsException untuk array, OverflowError/UnderflowError untuk integer
+- Buat minimal 5 test case unik dengan screenshot I/O
+  - Cakup: ekspresi biasa, IF-ELSE, WHILE, fungsi bersarang, edge case error
+- Urus GitHub Release tag `v0.4.1` dan form pengumpulan
+  - Pastikan laporan ada di `/doc`, invite asisten ke repository
+
+### Bagian Laporan
+- Teori: runtime error handling, kerentanan interpreter (bonus)
+- Implementasi: error handling & mekanisme deteksi
+- Pengujian: dokumentasi 5+ test case dengan screenshot I/O
+- Kesimpulan, saran, dan referensi
+
+---
+
+## Catatan Penting
+
+- **Anggota 1 harus menyelesaikan setup antarmuka di hari 1–2 pertama** agar anggota 2, 3, dan 4 bisa langsung mulai secara paralel.
+- Anggota 5 berkoordinasi dengan semua anggota untuk menyisipkan error handling ke seluruh komponen.
+- Setiap anggota menulis bagian laporan sesuai implementasi yang mereka kerjakan.
