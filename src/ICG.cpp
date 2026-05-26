@@ -96,7 +96,7 @@ void ICG::genAssign(AssignNode *node)
         int level = st.tab[vn->tabIndex].lev;
         emit(OpCode::STO, level, addr);
     }
-    else if (auto *an = dynamic_cast<ArrayAccessNode *>(target))
+    else if (dynamic_cast<ArrayAccessNode *>(target))
     {
         // TODO: koordinasi sama anggota 3/4
     }
@@ -147,30 +147,32 @@ void ICG::genBinOp(BinOpNode *node)
     genExpression(node->left.get());
     genExpression(node->right.get());
     string op = node->op;
-    if (op == "+")
+
+    // Aritmatika — token names dari Parser/ASTBuilder
+    if (op == "plus")
         emit(OpCode::OPR, 0, (int)OprCode::ADD);
-    else if (op == "-")
+    else if (op == "minus")
         emit(OpCode::OPR, 0, (int)OprCode::SUB);
-    else if (op == "*")
+    else if (op == "times")
         emit(OpCode::OPR, 0, (int)OprCode::MUL);
-    else if (op == "div")
+    else if (op == "slash")
         emit(OpCode::OPR, 0, (int)OprCode::DIV);
-    else if (op == "/")
+    else if (op == "div")
         emit(OpCode::OPR, 0, (int)OprCode::DIV);
     else if (op == "mod")
         emit(OpCode::OPR, 0, (int)OprCode::MOD);
-
-    else if (op == "=")
+    // Perbandingan
+    else if (op == "eql")
         emit(OpCode::OPR, 0, (int)OprCode::EQL);
-    else if (op == "<>")
+    else if (op == "neq")
         emit(OpCode::OPR, 0, (int)OprCode::NEQ);
-    else if (op == "<")
+    else if (op == "lss")
         emit(OpCode::OPR, 0, (int)OprCode::LSS);
-    else if (op == ">=")
+    else if (op == "geq")
         emit(OpCode::OPR, 0, (int)OprCode::GEQ);
-    else if (op == ">")
+    else if (op == "gtr")
         emit(OpCode::OPR, 0, (int)OprCode::GTR);
-    else if (op == "<=")
+    else if (op == "leq")
         emit(OpCode::OPR, 0, (int)OprCode::LEQ);
 }
 
