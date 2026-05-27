@@ -24,6 +24,8 @@ vector<Instruction> ICG::generate(ASTNodePtr root)
 void ICG::genProgram(ProgramNode *node)
 {
     genINT(node);
+    int jmpPos = currentLine;
+    emit(OpCode::JMP, 0, 0);
 
     for (auto &decl : node->declarations)
     {
@@ -32,6 +34,8 @@ void ICG::genProgram(ProgramNode *node)
         else if (auto *fd = dynamic_cast<FuncDeclNode *>(decl.get()))
             genFuncDecl(fd);
     }
+
+    instructions[jmpPos].operand = currentLine;
 
     if (node->body)
     {
@@ -192,8 +196,46 @@ void ICG::genIf(IfNode *) { /* TODO: anggota 2 */ }
 void ICG::genWhile(WhileNode *) { /* TODO: anggota 2 */ }
 void ICG::genFor(ForNode *) { /* TODO: anggota 2 */ }
 void ICG::genProcCall(ProcCallNode *) { /* TODO: anggota 2 (writeln) */ }
-void ICG::genProcDecl(ProcDeclNode *) { /* TODO: anggota 3 */ }
-void ICG::genFuncDecl(FuncDeclNode *) { /* TODO: anggota 3 */ }
+void ICG::genProcDecl(ProcDeclNode *node)
+{
+
+    int startLine = currentLine;
+    st.tab[node->tabIndex].adr = startLine;
+
+    funcStartLine[node->procName] = startLine;
+    int ref       = st.tab[node->tabIndex].ref;
+    int psze      = (ref > 0 && ref < (int)st.btab.size()) ? st.btab[ref].psze : (int)node->params.size();
+    int vsze      = (ref > 0 && ref < (int)st.btab.size()) ? st.btab[ref].vsze : 0;
+    int frameSize = 3 + psze + vsze;
+
+    emit(OpCode::INT_OP, 0, frameSize);
+
+    if (node->body)
+        genStatement(node->body.get());
+
+
+    emit(OpCode::RET, 0, 0);
+}
+
+void ICG::genFuncDecl(FuncDeclNode * node) 
+{
+    int startLine = currentLine;
+    st.tab[node->tabIndex].adr = startLine;
+
+    funcStartLine[node->funcName] = startLine;
+    int ref = st.tab[node->tabIndex].ref;
+    int psze      = (ref > 0 && ref < (int)st.btab.size()) ? st.btab[ref].psze : (int)node->params.size();
+    int vsze      = (ref > 0 && ref < (int)st.btab.size()) ? st.btab[ref].vsze : 1;
+    int frameSize = 3 + psze + vsze;
+
+    emit(OpCode::INT_OP, 0, frameSize);
+
+    if (node->body) genStatement(node->body.get());
+
+    int resultAdr = findReturnVarAddr(node);
+    emit(OpCode::LOD, 0, resultAdr);
+    emit(OpCode::RET, 0 , 0);
+}
 
 void ICG::emit(OpCode op, int level, int operand)
 {
@@ -245,4 +287,68 @@ void ICG::writeToFile(const string &filename) const
     if (!f)
         throw runtime_error("ICG: tidak bisa buat file " + filename);
     printInstructions(f);
+}
+
+/**
+ * HELPER
+ */
+
+// Tugas: hitung ukuran frame untuk satu blok subprogram
+// Frame: 3 slot wajib (static + dynamic link, return adr), jml parimeter, jml var lokal
+
+static int countLocalVars(const vector<ASTNodePtr> &declarations){
+    int count = 0;
+    for (auto &decl : declarations){
+         if(dynamic_cast<VarDeclNode *>(decl.get()))
+            count++;
+    }
+    return count;
+}
+
+void ICG::genNestedSubprograms(const vector<ASTNodePtr> &declarations){
+    for (auto &decl : declarations){
+        if (auto *pd = dynamic_cast<ProcDeclNode *>(decl.get())) 
+            genProcDecl(pd);
+        else if (auto *fd = dynamic_cast<FuncDeclNode*>(decl.get()))
+            genFuncDecl(fd);
+    }
+}
+
+int ICG::findReturnVarAddr(FuncDeclNode *node)
+{
+    int funcLev = st.tab[node->tabIndex].lev;
+    int bodyLev = funcLev + 1;
+
+    // Cari variabel dengan nama = nama fungsi 
+    for (int i = PredefinedIdx::USER_START; i < (int)st.tab.size(); i++)
+    {
+        if (st.tab[i].obj  == AllowedObj::VARIABLE &&
+            st.tab[i].lev  == bodyLev &&
+            st.tab[i].name == node->funcName)
+        {
+            return st.tab[i].adr;
+        }
+    }
+
+    // Fallback 1: cari variabel bernama "result"
+    for (int i = PredefinedIdx::USER_START; i < (int)st.tab.size(); i++)
+    {
+        if (st.tab[i].obj  == AllowedObj::VARIABLE &&
+            st.tab[i].lev  == bodyLev &&
+            st.tab[i].name == "result")
+        {
+            return st.tab[i].adr;
+        }
+    }
+
+    // Fallback 2: hitung manual dari btab
+    int ref  = st.tab[node->tabIndex].ref;
+    int psze = (ref > 0 && ref < (int)st.btab.size()) ? st.btab[ref].psze : (int)node->params.size();
+    return 3 + psze;
+}
+
+int ICG::getFuncStartLine(const string& name) const{
+    auto it = funcStartLine.find(name);
+    if (it == funcStartLine.end()) throw runtime_error("ICG: subprogram '" + name + "' belum di-generate. " "Pastikan genProcDecl/genFuncDecl dipanggil sebelum genProcCall.");
+    return it->second;
 }

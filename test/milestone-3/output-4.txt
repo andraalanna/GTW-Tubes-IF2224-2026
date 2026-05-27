@@ -1,0 +1,1 @@
+Syntax error at line 7, col 6: unexpected token 'ident(i)', expected beginsy

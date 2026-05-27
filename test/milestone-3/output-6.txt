@@ -1,0 +1,48 @@
+ProgramNode(name: 'TC6')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('x')		→ tab_index:38, type:integer, lev:1
+│   ├── VarDecl('y')		→ tab_index:39, type:integer, lev:1
+│   ├── VarDecl('flag')		→ tab_index:40, type:boolean, lev:1
+│   ├── ProcDecl(Swap)		→ tab_index:41, type:void, lev:1
+│   │   ├── VarDecl('a')		→ tab_index:42, type:integer, lev:2
+│   │   ├── VarDecl('b')		→ tab_index:43, type:integer, lev:2
+│   │   └── CompoundStmt		→ type:void
+│   │       ├── VarDecl('tmp')		→ tab_index:44, type:integer, lev:2
+│   │       ├── Assign(tmp := a)		→ type:void
+│   │       │   ├── Var(tmp)		→ tab_index:44, type:integer, lev:2
+│   │       │   └── Var(a)		→ tab_index:42, type:integer, lev:2
+│   │       ├── Assign(a := b)		→ type:void
+│   │       │   ├── Var(a)		→ tab_index:42, type:integer, lev:2
+│   │       │   └── Var(b)		→ tab_index:43, type:integer, lev:2
+│   │       └── Assign(b := tmp)		→ type:void
+│   │           ├── Var(b)		→ tab_index:43, type:integer, lev:2
+│   │           └── Var(tmp)		→ tab_index:44, type:integer, lev:2
+│   └── FuncDecl(Max)		→ tab_index:45, type:integer, lev:1
+│       ├── VarDecl('p')		→ tab_index:46, type:integer, lev:2
+│       ├── VarDecl('q')		→ tab_index:47, type:integer, lev:2
+│       └── CompoundStmt		→ type:void
+│           └── If		→ type:void
+│               ├── BinOp(gtr)		→ type:boolean
+│               │   ├── Var(p)		→ tab_index:46, type:integer, lev:2
+│               │   └── Var(q)		→ tab_index:47, type:integer, lev:2
+│               ├── Assign(Max := p)		→ type:void
+│               │   ├── Var(Max)		→ tab_index:45, type:integer, lev:1
+│               │   └── Var(p)		→ tab_index:46, type:integer, lev:2
+│               └── Assign(Max := q)		→ type:void
+│                   ├── Var(Max)		→ tab_index:45, type:integer, lev:1
+│                   └── Var(q)		→ tab_index:47, type:integer, lev:2
+└── CompoundStmt		→ type:void
+    ├── Assign(x := 10)		→ type:void
+    │   ├── Var(x)		→ tab_index:38, type:integer, lev:1
+    │   └── Num(10)		→ type:integer
+    ├── Assign(y := 20)		→ type:void
+    │   ├── Var(y)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(20)		→ type:integer
+    ├── ProcedureCall(name: 'Swap')		→ type:void
+    │   ├── Var(x)		→ tab_index:38, type:integer, lev:1
+    │   └── Var(y)		→ tab_index:39, type:integer, lev:1
+    └── Assign		→ type:void
+        ├── Var(x)		→ tab_index:38, type:integer, lev:1
+        └── ProcedureCall(name: 'Max')		→ type:integer
+            ├── Var(x)		→ tab_index:38, type:integer, lev:1
+            └── Var(y)		→ tab_index:39, type:integer, lev:1

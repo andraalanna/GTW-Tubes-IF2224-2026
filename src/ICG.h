@@ -5,6 +5,7 @@
 #include <ostream>
 #include "ASTNode.h"
 #include "symbolTable.hpp"
+#include <map>
 
 using namespace std;
 
@@ -60,7 +61,10 @@ private:
     SymbolTable &st;
     vector<Instruction> instructions;
     int currentLine;
+    map<string, int> funcStartLine;
 
+    int findReturnVarAddr(FuncDeclNode *node);  
+    int getFuncStartLine(const string&name) const; // anggota 2
     void genProgram(ProgramNode *node);
     void genINT(ProgramNode *node); // instruksi INT
     void genStatement(ASTNode *node);
@@ -82,4 +86,6 @@ private:
     void emit(OpCode op, int level, int operand);
     int countVarDecl(ProgramNode *node);
     string opcodeToString(OpCode op) const;
+    void genNestedSubprograms(const vector<ASTNodePtr> &declaration);
+    int findReturnVarAddr(FuncDeclNode *node);
 };

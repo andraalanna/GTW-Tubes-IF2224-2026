@@ -1,0 +1,3 @@
+Syntax error at line 5, col 10: unexpected token 'ident(e)', expected endsy
+Syntax error at line 6, col 4: unexpected token 'endsy(end)', expected period
+Syntax error at line 6, col 4: unexpected token 'endsy', expected end of program
