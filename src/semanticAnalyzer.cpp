@@ -669,7 +669,7 @@ void SemanticAnalyzer::visitCase(CaseNode *node)
             if (arg)
                 visitStatement(arg.get());
 
-        if (idx == PredefinedIdx::PROC_WRITELN || idx == PredefinedIdx::PROC_READLN)
+        if (idx == PredefinedIdx::PROC_WRITELN || idx == PredefinedIdx::PROC_READLN || idx == PredefinedIdx::PROC_WRITE)
         {
             node->dtype = DataType::VOID;
             return;
