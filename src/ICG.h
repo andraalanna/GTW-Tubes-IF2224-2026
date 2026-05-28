@@ -19,7 +19,9 @@ enum class OpCode
     JMP,
     JPC,
     OPR,
-    RET
+    RET,
+    LODA,
+    STOA
 };
 
 enum class OprCode
@@ -37,7 +39,8 @@ enum class OprCode
     GTR = 11,
     LEQ = 12,
     WRT = 13,
-    WRTLN = 14
+    WRTLN = 14,
+    PUSHBP = 15
 };
 
 struct Instruction
@@ -56,6 +59,7 @@ public:
 
     void printInstructions(ostream &out) const;
     void writeToFile(const string &filename) const;
+    static string opcodeToString(OpCode op);
 
 private:
     SymbolTable &st;
@@ -82,10 +86,10 @@ private:
     void genProcCall(ProcCallNode *node); // anggota 2
     void genProcDecl(ProcDeclNode *node); // anggota 3
     void genFuncDecl(FuncDeclNode *node); // anggota 3
+    void genArrayAddress(ArrayAccessNode *an);
 
     void emit(OpCode op, int level, int operand);
     int countVarDecl(ProgramNode *node);
-    string opcodeToString(OpCode op) const;
     void genNestedSubprograms(const vector<ASTNodePtr> &declaration);
     int findReturnVarAddr(FuncDeclNode *node);
 };

@@ -1,14 +1,16 @@
 #include "Interpreter.hpp"
 #include <iostream>
+#include <fstream>
 #include <climits>
 #include <sstream>
 
-Interpreter::Interpreter(std::ostream &out ): output(out), stackPtr(-1), basePtr(0), pointerCtr(0), pushCtr(0), popCtr(0){}
+Interpreter::Interpreter(std::ostream &out) : output(out), stackPtr(-1), basePtr(0), pointerCtr(0), pushCtr(0), popCtr(0) {}
 
 void Interpreter::run(const std::vector<Instruction> &code)
-{   
-    if(code.empty()){
-            return;
+{
+    if (code.empty())
+    {
+        return;
     }
 
     stackPtr = -1;
@@ -18,41 +20,87 @@ void Interpreter::run(const std::vector<Instruction> &code)
     popCtr = 0;
     stack.clear();
 
-    for(const auto& ins: code){
-        if(ins.opcode == OpCode::JMP || ins.opcode == OpCode::JPC){
+    for (const auto &ins : code)
+    {
+        if (ins.opcode == OpCode::JMP || ins.opcode == OpCode::JPC)
+        {
             validateJump(ins.operand, static_cast<int>(code.size()));
         }
     }
 
-    while(pointerCtr >= 0 && pointerCtr < static_cast<int>(code.size())){
-        const Instruction& ins = code.at(pointerCtr);
+    while (pointerCtr >= 0 && pointerCtr < static_cast<int>(code.size()))
+    {
+        const Instruction &ins = code.at(pointerCtr);
 
         pointerCtr++;
 
-        switch(ins.opcode){
-            case OpCode::CAL: operateCAL(ins); break;
-            case OpCode::INT_OP: operateINT(ins);
-                break;
-            case OpCode::LIT: operateLIT(ins);
-                break;
-            case OpCode::LOD: operateLOD(ins); break;
-            case OpCode::OPR: operateOPR(ins); break;
-            case OpCode::RET: operateRET(); break;
-            case OpCode::STO: operateSTO(ins); break;
-            case OpCode::JMP: operateJMP(ins, static_cast<int>(code.size())); break;
-            case OpCode::JPC: operateJPC(ins, static_cast<int>(code.size()));break;    
+        if (debugMode)
+        {
+            std::cerr << "[PC=" << pointerCtr - 1
+                      << " BP=" << basePtr
+                      << " SP=" << stackPtr << "] "
+                      << ICG::opcodeToString(ins.opcode)
+                      << " " << ins.level
+                      << " " << ins.operand << "\n";
+        }
+
+        switch (ins.opcode)
+        {
+        case OpCode::CAL:
+            operateCAL(ins);
+            break;
+        case OpCode::INT_OP:
+            operateINT(ins);
+            break;
+        case OpCode::LIT:
+            operateLIT(ins);
+            break;
+        case OpCode::LOD:
+            operateLOD(ins);
+            break;
+        case OpCode::OPR:
+            operateOPR(ins);
+            break;
+        case OpCode::RET:
+            operateRET();
+            break;
+        case OpCode::STO:
+            operateSTO(ins);
+            break;
+        case OpCode::JMP:
+            operateJMP(ins, static_cast<int>(code.size()));
+            break;
+        case OpCode::JPC:
+            operateJPC(ins, static_cast<int>(code.size()));
+            break;
+        case OpCode::LODA:
+        {
+            int addr = pop();
+            push(memLoad(addr));
+            break;
+        }
+        case OpCode::STOA:
+        {
+            int addr = pop();
+            int val = pop();
+            memStore(addr, val);
+            break;
+        }
         }
     }
 }
 
-void Interpreter::push(int val){
+void Interpreter::push(int val)
+{
     stack.push_back(val);
     stackPtr++;
     pushCtr++;
 }
 
-int Interpreter::pop(){
-    if(stackPtr < 0 || stack.empty()){
+int Interpreter::pop()
+{
+    if (stackPtr < 0 || stack.empty())
+    {
         throw StackUnderflowError();
     }
 
@@ -63,8 +111,10 @@ int Interpreter::pop(){
     return val;
 }
 
-int Interpreter::peek() const{
-    if(stackPtr < 0 || stack.empty()){
+int Interpreter::peek() const
+{
+    if (stackPtr < 0 || stack.empty())
+    {
         throw StackUnderflowError();
     }
     return stack.at(stackPtr);
@@ -153,7 +203,6 @@ void Interpreter::operateSTO(const Instruction &instr)
     memStore(addr, val);
 }
 
-
 void Interpreter::operateCAL(const Instruction &instr)
 {
 
@@ -161,15 +210,15 @@ void Interpreter::operateCAL(const Instruction &instr)
     int walkBp = basePtr;
     while (walkBp > 0 && depth <= MAX_STACK_DEPTH)
     {
-        walkBp = stack[walkBp + 1]; 
+        walkBp = stack[walkBp + 1];
         depth++;
     }
     if (depth >= MAX_STACK_DEPTH)
         throw StackOverflowError("Maximum call depth (" + std::to_string(MAX_STACK_DEPTH) + ") exceeded");
 
     int staticLink = base(instr.level, basePtr);
-    int dynamicLink = basePtr;                   
-    int returnAddr = pointerCtr;                    
+    int dynamicLink = basePtr;
+    int returnAddr = pointerCtr;
 
     push(staticLink);
     push(dynamicLink);
@@ -179,34 +228,25 @@ void Interpreter::operateCAL(const Instruction &instr)
     pointerCtr = instr.operand;
 }
 
-// INT 0 m  →  allocate m slots on stack (grow stack for this frame's variables)
-//   The first 3 slots were pushed by CAL (or are the bootstrap frame).
-//   For the main program, we simply allocate m slots from scratch.
 void Interpreter::operateINT(const Instruction &instr)
 {
     int m = instr.operand;
     if (m < 0)
         throw RuntimeError("INT operand must be non-negative, got " + std::to_string(m));
 
-    // If this is the very first INT (main program), bootstrap bp and push m slots.
-    // Otherwise, we may already have the 3 link slots; push remaining locals.
-    // Convention: CAL pushes 3 link slots; INT then pushes (m - 3) additional slots
-    // to reach total frame size m.  For the root frame (no CAL), INT pushes m slots.
     int currentFrameSize = stackPtr - basePtr + 1;
     int toAllocate = m - currentFrameSize;
 
     for (int i = 0; i < toAllocate; i++)
-        push(0); // initialize locals to 0
+        push(0);
 }
 
-// JMP 0 target  →  unconditional jump
 void Interpreter::operateJMP(const Instruction &instr, int codeSize)
 {
     validateJump(instr.operand, codeSize);
     pointerCtr = instr.operand;
 }
 
-// JPC 0 target  →  conditional jump: jump if top of stack == 0 (false)
 void Interpreter::operateJPC(const Instruction &instr, int codeSize)
 {
     int cond = pop();
@@ -217,21 +257,14 @@ void Interpreter::operateJPC(const Instruction &instr, int codeSize)
     }
 }
 
-// RET  →  return from subroutine; restore caller's context
-//   On return:
-//     new sp = bp - 1          (discard entire frame)
-//     pc     = stack[bp + 2]   (return address)
-//     bp     = stack[bp + 1]   (dynamic link = caller's bp)
 void Interpreter::operateRET()
 {
     if (basePtr == 0 && stackPtr <= 0)
     {
-        // Returning from main program — halt
         pointerCtr = -1;
         return;
     }
 
-    // Bonus: Stack Corruption guard — verify bp is within stack
     if (basePtr < 0 || basePtr + 2 > stackPtr)
     {
         throw StackCorruptionError(
@@ -241,7 +274,6 @@ void Interpreter::operateRET()
     int retAddr = stack[basePtr + 2];  // return address
     int callerBp = stack[basePtr + 1]; // dynamic link
 
-    // Pop the entire frame
     while (stackPtr >= basePtr)
     {
         stack.pop_back();
@@ -253,7 +285,6 @@ void Interpreter::operateRET()
     pointerCtr = retAddr;
 }
 
-// OPR 0 op  →  execute operation 'op' on stack values
 void Interpreter::operateOPR(const Instruction &instr)
 {
     OprCode op = static_cast<OprCode>(instr.operand);
@@ -300,7 +331,6 @@ void Interpreter::operateOPR(const Instruction &instr)
         push(a % b);
         break;
     }
-    // Comparisons — push 1 (true) or 0 (false)
     case OprCode::EQL:
     {
         int b = pop(), a = pop();
@@ -351,8 +381,87 @@ void Interpreter::operateOPR(const Instruction &instr)
         output << val << "\n";
         break;
     }
+    case OprCode::PUSHBP:
+    {
+        push(basePtr);
+        break;
+    }   
 
     default:
         throw RuntimeError("Unknown OPR code: " + std::to_string(instr.operand));
     }
+}
+
+std::vector<Instruction> Interpreter::parseFromStream(std::istream &stream)
+{
+    std::vector<Instruction> code;
+    std::string line;
+
+    while (std::getline(stream, line))
+    {
+        if (line.empty() || line[0] == ';')
+            continue;
+
+        auto semiPos = line.find(';');
+        if (semiPos != std::string::npos)
+            line = line.substr(0, semiPos);
+
+        std::istringstream iss(line);
+        int lineNo;
+        std::string mnemonic;
+        int level, operand;
+
+        if (!(iss >> lineNo >> mnemonic))
+            continue;
+
+        if (mnemonic == "RET")
+        {
+            code.push_back({lineNo, OpCode::RET, 0, 0});
+            continue;
+        }
+
+        if (!(iss >> level >> operand))
+            continue;
+
+        OpCode op;
+        if (mnemonic == "LIT")
+            op = OpCode::LIT;
+        else if (mnemonic == "LOD")
+            op = OpCode::LOD;
+        else if (mnemonic == "STO")
+            op = OpCode::STO;
+        else if (mnemonic == "CAL")
+            op = OpCode::CAL;
+        else if (mnemonic == "INT")
+            op = OpCode::INT_OP;
+        else if (mnemonic == "JMP")
+            op = OpCode::JMP;
+        else if (mnemonic == "JPC")
+            op = OpCode::JPC;
+        else if (mnemonic == "OPR")
+            op = OpCode::OPR;
+        else if (mnemonic == "LODA")
+            op = OpCode::LODA;
+        else if (mnemonic == "STOA")
+            op = OpCode::STOA;
+        else
+            throw RuntimeError("Unknown mnemonic: " + mnemonic);
+
+        code.push_back({lineNo, op, level, operand});
+    }
+    return code;
+}
+
+std::vector<Instruction> Interpreter::parseFromFile(const std::string &filename)
+{
+    std::ifstream f(filename);
+    if (!f)
+        throw RuntimeError("Cannot open file: " + filename);
+    return parseFromStream(f);
+}
+
+std::vector<Instruction> Interpreter::parseFromString(const std::string &content)
+{
+    std::istringstream stream(content);
+    return parseFromStream(stream);
 }

@@ -74,8 +74,7 @@ class Interpreter {
         void push(int val);
         int pop();
         int peek() const;
-
-       
+        bool debugMode = false;
 
         int base(int levels, int b) const;
 
@@ -99,5 +98,7 @@ class Interpreter {
         void operateOPR(const Instruction &instr);
         void operateRET();
 
-
+        static std::vector<Instruction> parseFromStream(std::istream &stream);
+        static std::vector<Instruction> parseFromFile(const std::string &filename);
+        static std::vector<Instruction> parseFromString(const std::string &content);
 };

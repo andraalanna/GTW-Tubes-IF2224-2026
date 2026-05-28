@@ -100,9 +100,11 @@ void ICG::genAssign(AssignNode *node)
         int level = st.tab[vn->tabIndex].lev;
         emit(OpCode::STO, level, addr);
     }
-    else if (dynamic_cast<ArrayAccessNode *>(target))
+    else if (auto *an = dynamic_cast<ArrayAccessNode *>(target))
     {
         // TODO: koordinasi sama anggota 3/4
+        genArrayAddress(an);
+        emit(OpCode::STOA, 0, 0);
     }
 }
 
@@ -121,6 +123,11 @@ void ICG::genExpression(ASTNode *node)
         genBinOp(n);
     else if (auto *n = dynamic_cast<UnaryOpNode *>(node))
         genUnaryOp(n);
+    else if (auto *an = dynamic_cast<ArrayAccessNode *>(node))
+    {
+        genArrayAddress(an);
+        emit(OpCode::LODA, 0, 0); 
+    }
 }
 
 void ICG::genNumber(NumberNode *node)
@@ -237,13 +244,41 @@ void ICG::genFuncDecl(FuncDeclNode * node)
     emit(OpCode::RET, 0 , 0);
 }
 
+void ICG::genArrayAddress(ArrayAccessNode *an)
+{
+    auto *vn = dynamic_cast<VarNode *>(an->array.get());
+    if (!vn)
+        throw std::runtime_error("ICG: array target bukan VarNode");
+
+    int baseAddr = st.tab[vn->tabIndex].adr;
+    int level = st.tab[vn->tabIndex].lev;
+    int ref = st.tab[vn->tabIndex].ref;
+    int low = (ref >= 0 && ref < (int)st.atab.size())
+                  ? st.atab[ref].low
+                  : 0;
+
+    genExpression(an->indices[0].get());
+
+    emit(OpCode::LIT, 0, low);
+    emit(OpCode::OPR, 0, (int)OprCode::SUB);
+
+    emit(OpCode::LIT, 0, baseAddr);
+    emit(OpCode::OPR, 0, (int)OprCode::ADD);
+
+    if (level > 0)
+    {
+        emit(OpCode::OPR, 0, (int)OprCode::PUSHBP);
+        emit(OpCode::OPR, 0, (int)OprCode::ADD);
+    }
+}
+
 void ICG::emit(OpCode op, int level, int operand)
 {
     instructions.push_back({currentLine, op, level, operand});
     currentLine++;
 }
 
-string ICG::opcodeToString(OpCode op) const
+string ICG::opcodeToString(OpCode op) 
 {
     switch (op)
     {
@@ -265,6 +300,10 @@ string ICG::opcodeToString(OpCode op) const
         return "OPR";
     case OpCode::RET:
         return "RET";
+    case OpCode::LODA:
+        return "LODA";
+    case OpCode::STOA:
+        return "STOA";
     default:
         return "???";
     }
