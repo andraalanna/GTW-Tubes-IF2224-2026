@@ -259,7 +259,7 @@ void Interpreter::operateJPC(const Instruction &instr, int codeSize)
 
 void Interpreter::operateRET()
 {
-    if (basePtr == 0 && stackPtr <= 0)
+    if (basePtr == 0)
     {
         pointerCtr = -1;
         return;
@@ -270,6 +270,9 @@ void Interpreter::operateRET()
         throw StackCorruptionError(
             "bp=" + std::to_string(basePtr) + " is invalid during RET (sp=" + std::to_string(stackPtr) + ")");
     }
+
+    bool hasReturnValue = (stackPtr > basePtr + 2);
+    int returnValue = hasReturnValue ? stack[stackPtr] : 0;
 
     int retAddr = stack[basePtr + 2];  // return address
     int callerBp = stack[basePtr + 1]; // dynamic link
@@ -283,6 +286,9 @@ void Interpreter::operateRET()
 
     basePtr = callerBp;
     pointerCtr = retAddr;
+
+    if (hasReturnValue)   
+        push(returnValue);
 }
 
 void Interpreter::operateOPR(const Instruction &instr)

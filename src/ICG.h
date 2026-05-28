@@ -64,10 +64,10 @@ public:
 private:
     SymbolTable &st;
     vector<Instruction> instructions;
-    int currentLine;
+    int currentLine = 0;
+    int currentLevel = 1; 
     map<string, int> funcStartLine;
-
-    int findReturnVarAddr(FuncDeclNode *node);  
+    
     int getFuncStartLine(const string&name) const; // anggota 2
     void genProgram(ProgramNode *node);
     void genINT(ProgramNode *node); // instruksi INT
@@ -84,6 +84,8 @@ private:
     void genWhile(WhileNode *node);       // anggota 2
     void genFor(ForNode *node);           // anggota 2
     void genProcCall(ProcCallNode *node); // anggota 2
+    void genRepeat(RepeatNode *node);   
+    void genCase(CaseNode *node);       
     void genProcDecl(ProcDeclNode *node); // anggota 3
     void genFuncDecl(FuncDeclNode *node); // anggota 3
     void genArrayAddress(ArrayAccessNode *an);

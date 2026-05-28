@@ -12,6 +12,7 @@ vector<Instruction> ICG::generate(ASTNodePtr root)
 {
     instructions.clear();
     currentLine = 0;
+    currentLevel = 1; 
 
     auto *prog = dynamic_cast<ProgramNode *>(root.get());
     if (!prog)
@@ -80,6 +81,10 @@ void ICG::genStatement(ASTNode *node)
         genWhile(n);
     else if (auto *n = dynamic_cast<ForNode *>(node))
         genFor(n);
+    else if (auto *n = dynamic_cast<RepeatNode *>(node))
+        genRepeat(n);
+    else if (auto *n = dynamic_cast<CaseNode *>(node))
+        genCase(n);
     else if (auto *n = dynamic_cast<ProcCallNode *>(node))
         genProcCall(n);
     else if (auto *n = dynamic_cast<CompoundStmtNode *>(node))
@@ -96,13 +101,27 @@ void ICG::genAssign(AssignNode *node)
 
     if (auto *vn = dynamic_cast<VarNode *>(target))
     {
-        int addr = st.tab[vn->tabIndex].adr;
-        int level = st.tab[vn->tabIndex].lev;
-        emit(OpCode::STO, level, addr);
+        int addr     = st.tab[vn->tabIndex].adr;
+        int varLevel = st.tab[vn->tabIndex].lev;
+        int relLevel = currentLevel - varLevel;
+
+        if (st.tab[vn->tabIndex].obj == AllowedObj::FUNCTION)
+        {
+            int ref  = st.tab[vn->tabIndex].ref;
+            int psze = (ref > 0 && ref < (int)st.btab.size())
+                       ? st.btab[ref].psze
+                       : (int)0;
+            emit(OpCode::STO, 0, 3 + psze);
+            return;
+        }
+
+        if (varLevel > 1)
+            addr += 3;
+
+        emit(OpCode::STO, relLevel, addr);
     }
     else if (auto *an = dynamic_cast<ArrayAccessNode *>(target))
     {
-        // TODO: koordinasi sama anggota 3/4
         genArrayAddress(an);
         emit(OpCode::STOA, 0, 0);
     }
@@ -123,6 +142,8 @@ void ICG::genExpression(ASTNode *node)
         genBinOp(n);
     else if (auto *n = dynamic_cast<UnaryOpNode *>(node))
         genUnaryOp(n);
+    else if (auto *n = dynamic_cast<ProcCallNode *>(node))  // ← TAMBAH
+        genProcCall(n);        
     else if (auto *an = dynamic_cast<ArrayAccessNode *>(node))
     {
         genArrayAddress(an);
@@ -148,9 +169,15 @@ void ICG::genChar(CharNode *node)
 
 void ICG::genVar(VarNode *node)
 {
-    int addr = st.tab[node->tabIndex].adr;
-    int level = st.tab[node->tabIndex].lev;
-    emit(OpCode::LOD, level, addr);
+    int addr     = st.tab[node->tabIndex].adr;
+    int varLevel = st.tab[node->tabIndex].lev;
+    int relLevel = currentLevel - varLevel;
+
+    int ref = st.tab[node->tabIndex].ref;
+    if (varLevel > 1)  
+        addr += 3;
+
+    emit(OpCode::LOD, relLevel, addr);
 }
 
 void ICG::genBinOp(BinOpNode *node)
@@ -199,10 +226,247 @@ void ICG::genUnaryOp(UnaryOpNode *node)
     }
 }
 
-void ICG::genIf(IfNode *) { /* TODO: anggota 2 */ }
-void ICG::genWhile(WhileNode *) { /* TODO: anggota 2 */ }
-void ICG::genFor(ForNode *) { /* TODO: anggota 2 */ }
-void ICG::genProcCall(ProcCallNode *) { /* TODO: anggota 2 (writeln) */ }
+void ICG::genIf(IfNode *node)
+{
+    if (!node)
+        return;
+    genExpression(node->condition.get());
+ 
+    int jpcPos = currentLine;
+    emit(OpCode::JPC, 0, 0); // placeholder
+ 
+    genStatement(node->thenBranch.get());
+ 
+    if (node->elseBranch)
+    {
+        int jmpPos = currentLine;
+        emit(OpCode::JMP, 0, 0); // placeholder
+        instructions[jpcPos].operand = currentLine;
+        genStatement(node->elseBranch.get());
+        instructions[jmpPos].operand = currentLine;
+    }
+    else
+    {
+        instructions[jpcPos].operand = currentLine;
+    }
+}
+
+void ICG::genWhile(WhileNode *node)
+{
+    if (!node)
+        return;
+ 
+    int loopStart = currentLine;
+ 
+    genExpression(node->condition.get());
+    int jpcPos = currentLine;
+    emit(OpCode::JPC, 0, 0); // placeholder
+ 
+    genStatement(node->body.get());
+    emit(OpCode::JMP, 0, loopStart);
+ 
+    instructions[jpcPos].operand = currentLine;
+}
+
+void ICG::genFor(ForNode *node)
+{
+    if (!node)
+        return;
+ 
+    int varAddr  = -1;
+    int varLevel = -1;
+ 
+    for (int i = 0; i < (int)st.tab.size(); i++)
+    {
+        if (st.tab[i].name == node->varName &&
+            st.tab[i].obj  == AllowedObj::VARIABLE)
+        {
+            varAddr  = st.tab[i].adr;
+            varLevel = st.tab[i].lev;
+        }
+    }
+ 
+    if (varAddr < 0)
+        throw runtime_error("ICG genFor: variabel loop '" + node->varName + "' tidak ditemukan di symbol table");
+
+    int relLevel = currentLevel - varLevel;
+
+    genExpression(node->fromExpr.get());
+    emit(OpCode::STO, relLevel, varAddr);
+ 
+    int loopStart = currentLine;
+    emit(OpCode::LOD, relLevel, varAddr);   
+    genExpression(node->toExpr.get());
+ 
+    if (node->isDownto)
+        emit(OpCode::OPR, 0, (int)OprCode::GEQ);
+    else
+        emit(OpCode::OPR, 0, (int)OprCode::LEQ);
+ 
+    int jpcPos = currentLine;
+    emit(OpCode::JPC, 0, 0);
+ 
+    genStatement(node->body.get());
+ 
+    emit(OpCode::LOD, relLevel, varAddr);    
+    emit(OpCode::LIT, 0, 1);
+    if (node->isDownto)
+        emit(OpCode::OPR, 0, (int)OprCode::SUB);
+    else
+        emit(OpCode::OPR, 0, (int)OprCode::ADD);
+    emit(OpCode::STO, relLevel, varAddr);   
+ 
+    emit(OpCode::JMP, 0, loopStart);
+    instructions[jpcPos].operand = currentLine;
+}
+
+void ICG::genRepeat(RepeatNode *node)
+{
+    if (!node)
+        return;
+ 
+    int loopStart = currentLine;
+ 
+    for (auto &stmt : node->statements)
+        genStatement(stmt.get());
+ 
+    genExpression(node->condition.get());
+ 
+    emit(OpCode::JPC, 0, loopStart);
+}
+
+void ICG::genCase(CaseNode *node)
+{
+    if (!node)
+        return;
+ 
+    vector<int> jmpAfterPositions;
+ 
+    for (auto &branch : node->branches)
+    {
+ 
+        vector<int> jmpToBodyPositions;
+ 
+        for (const string &val : branch.first)
+        {
+
+            genExpression(node->selector.get());
+ 
+            try {
+                int v = stoi(val);
+                emit(OpCode::LIT, 0, v);
+            } catch (...) {
+                char c = val.empty() ? 0 : val[0];
+                emit(OpCode::LIT, 0, (int)c);
+            }
+ 
+            emit(OpCode::OPR, 0, (int)OprCode::EQL);
+ 
+            int jpcToNextPos = currentLine;
+            emit(OpCode::JPC, 0, 0); 
+ 
+            int jmpToBodyPos = currentLine;
+            emit(OpCode::JMP, 0, 0);
+            jmpToBodyPositions.push_back(jmpToBodyPos);
+            instructions[jpcToNextPos].operand = currentLine;
+        }
+ 
+        int jmpToNextBranch = currentLine;
+        emit(OpCode::JMP, 0, 0); 
+ 
+        int bodyStart = currentLine;
+        for (int pos : jmpToBodyPositions)
+            instructions[pos].operand = bodyStart;
+ 
+        genStatement(branch.second.get());
+ 
+        int jmpAfterPos = currentLine;
+        emit(OpCode::JMP, 0, 0); // placeholder
+        jmpAfterPositions.push_back(jmpAfterPos);
+
+        instructions[jmpToNextBranch].operand = currentLine;
+    }
+
+    int afterPos = currentLine;
+    for (int pos : jmpAfterPositions)
+        instructions[pos].operand = afterPos;
+}
+
+void ICG::genProcCall(ProcCallNode *node)
+{
+    if (!node)
+        return;
+ 
+    const string &name = node->procName;
+ 
+    if (name == "write")
+    {
+        for (auto &arg : node->args)
+        {
+            genExpression(arg.get());
+            emit(OpCode::OPR, 0, (int)OprCode::WRT);
+        }
+        return;
+    }
+
+    if (name == "writeln")
+    {
+        if (node->args.empty())
+        {
+
+            emit(OpCode::LIT, 0, 0);
+            emit(OpCode::OPR, 0, (int)OprCode::WRTLN);
+        }
+        else
+        {
+
+            for (int i = 0; i < (int)node->args.size(); i++)
+            {
+                genExpression(node->args[i].get());
+                if (i == (int)node->args.size() - 1)
+                    emit(OpCode::OPR, 0, (int)OprCode::WRTLN); 
+                else
+                    emit(OpCode::OPR, 0, (int)OprCode::WRT);
+            }
+        }
+        return;
+    }
+ 
+    int procTabIdx = node->tabIndex;
+    if (procTabIdx < 0)
+    {
+        for (int i = 0; i < (int)st.tab.size(); i++)
+        {
+            if (st.tab[i].name == name &&
+                (st.tab[i].obj == AllowedObj::PROCEDURE ||
+                 st.tab[i].obj == AllowedObj::FUNCTION))
+            {
+                procTabIdx = i;
+                break;
+            }
+        }
+    }
+ 
+    if (procTabIdx < 0)
+        throw runtime_error("ICG genProcCall: prosedur '" + name + "' tidak ditemukan di symbol table");
+
+    for (auto &arg : node->args)
+        genExpression(arg.get());
+ 
+    int procDefLevel = st.tab[procTabIdx].lev;
+    int levelDiff = currentLevel - procDefLevel;
+ 
+    
+    int targetLine = st.tab[procTabIdx].adr;
+    if (targetLine <= 0)
+    {
+        targetLine = getFuncStartLine(name);
+    }
+ 
+    emit(OpCode::CAL, levelDiff, targetLine);
+}
+ 
+
 void ICG::genProcDecl(ProcDeclNode *node)
 {
 
@@ -217,31 +481,51 @@ void ICG::genProcDecl(ProcDeclNode *node)
 
     emit(OpCode::INT_OP, 0, frameSize);
 
+    for (int p = 0; p < psze; p++)
+    {
+        emit(OpCode::LOD, 0, -(psze - p));  // load arg dari bp-(psze-p)
+        emit(OpCode::STO, 0, 3 + p);        // simpan ke bp+3+p
+    }
+
+    currentLevel++; 
+
     if (node->body)
         genStatement(node->body.get());
-
+    currentLevel--;
 
     emit(OpCode::RET, 0, 0);
 }
 
-void ICG::genFuncDecl(FuncDeclNode * node) 
+void ICG::genFuncDecl(FuncDeclNode *node)
 {
     int startLine = currentLine;
     st.tab[node->tabIndex].adr = startLine;
 
     funcStartLine[node->funcName] = startLine;
-    int ref = st.tab[node->tabIndex].ref;
-    int psze      = (ref > 0 && ref < (int)st.btab.size()) ? st.btab[ref].psze : (int)node->params.size();
-    int vsze      = (ref > 0 && ref < (int)st.btab.size()) ? st.btab[ref].vsze : 1;
-    int frameSize = 3 + psze + vsze;
+    int ref       = st.tab[node->tabIndex].ref;
+    int psze      = (ref > 0 && ref < (int)st.btab.size())
+                    ? st.btab[ref].psze : (int)node->params.size();
+    int vsze      = (ref > 0 && ref < (int)st.btab.size())
+                    ? st.btab[ref].vsze : 0;   
+
+    int frameSize = 3 + psze + vsze + 1;      
 
     emit(OpCode::INT_OP, 0, frameSize);
 
-    if (node->body) genStatement(node->body.get());
+    for (int p = 0; p < psze; p++)
+    {
+        emit(OpCode::LOD, 0, -(psze - p));
+        emit(OpCode::STO, 0, 3 + p);
+    }
+
+    currentLevel++;
+    if (node->body)
+        genStatement(node->body.get());
+    currentLevel--;
 
     int resultAdr = findReturnVarAddr(node);
     emit(OpCode::LOD, 0, resultAdr);
-    emit(OpCode::RET, 0 , 0);
+    emit(OpCode::RET, 0, 0);
 }
 
 void ICG::genArrayAddress(ArrayAccessNode *an)
@@ -365,7 +649,7 @@ int ICG::findReturnVarAddr(FuncDeclNode *node)
             st.tab[i].lev  == bodyLev &&
             st.tab[i].name == node->funcName)
         {
-            return st.tab[i].adr;
+            return st.tab[i].adr + 3; 
         }
     }
 
@@ -376,14 +660,16 @@ int ICG::findReturnVarAddr(FuncDeclNode *node)
             st.tab[i].lev  == bodyLev &&
             st.tab[i].name == "result")
         {
-            return st.tab[i].adr;
+            return st.tab[i].adr + 3; // ← TAMBAH +3
         }
     }
 
     // Fallback 2: hitung manual dari btab
     int ref  = st.tab[node->tabIndex].ref;
-    int psze = (ref > 0 && ref < (int)st.btab.size()) ? st.btab[ref].psze : (int)node->params.size();
-    return 3 + psze;
+    int psze = (ref > 0 && ref < (int)st.btab.size())
+               ? st.btab[ref].psze
+               : (int)node->params.size();
+    return 3 + psze; // sudah benar, tidak perlu diubah
 }
 
 int ICG::getFuncStartLine(const string& name) const{
