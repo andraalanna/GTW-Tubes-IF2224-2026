@@ -37,6 +37,7 @@ public:
     void visitProcCall(ProcCallNode *node);
     void visitArrayAccess(ArrayAccessNode *node) ;
     void visitUnaryOp(UnaryOpNode *node);
+    void visitFieldAccess(FieldAccessNode *node);
     DataType resolveTypeName(const std::string &typeName, int &outRef);
 
 private:

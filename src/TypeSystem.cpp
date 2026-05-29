@@ -162,7 +162,8 @@ DataType inferBinOpType(const std::string &op, DataType leftType, DataType right
                     t == DataType::CHAR ||
                     t == DataType::STRING ||
                     t == DataType::BOOLEAN ||
-                    t == DataType::SUBRANGE);
+                    t == DataType::SUBRANGE ||
+                    t == DataType::ENUMERATED);
         };
 
         if (!isRelationalType(leftType) || !isRelationalType(rightType))

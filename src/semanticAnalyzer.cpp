@@ -359,6 +359,7 @@ void SemanticAnalyzer::visitStatement(ASTNode *node)
     if (auto *n = dynamic_cast<BinOpNode *>(node))    { visitBinOp(n);    return; }
 
     if (auto *n = dynamic_cast<ArrayAccessNode *>(node)) { visitArrayAccess(n); return; }
+    if (auto *n = dynamic_cast<FieldAccessNode *>(node)) { visitFieldAccess(n); return; }
     if (auto *n = dynamic_cast<NumberNode *>(node))      { /* dtype sudah di-set saat build */ return; }
     if (auto *n = dynamic_cast<StringNode *>(node))      { /* dtype sudah di-set saat build */ return; }
     if (auto *n = dynamic_cast<CharNode *>(node))        { /* dtype sudah di-set saat build */ return; }
@@ -774,4 +775,65 @@ void SemanticAnalyzer::visitUnaryOp(UnaryOpNode *node)
         invalidUnaryOperandError(node->op, opType);
     
     node->dtype = inferred;
+}
+
+void SemanticAnalyzer::visitFieldAccess(FieldAccessNode *node)
+{
+    if (node->record)
+        visitStatement(node->record.get());
+
+    DataType recType = node->record ? node->record->dtype : DataType::UNKNOWN;
+    int recRef = node->record ? node->record->typeRef : 0;
+
+    if (recType == DataType::UNKNOWN)
+    {
+        node->dtype = DataType::UNKNOWN;
+        node->typeRef = 0;
+        return;
+    }
+
+    if (recType != DataType::RECORD)
+    {
+        semanticError("Cannot access field of a non-record type.");
+        node->dtype = DataType::UNKNOWN;
+        node->typeRef = 0;
+        return;
+    }
+
+    if (recRef < 0 || recRef >= (int)st.btab.size())
+    {
+        semanticError("Record type reference block not found.");
+        node->dtype = DataType::UNKNOWN;
+        node->typeRef = 0;
+        return;
+    }
+
+    int fieldIdx = -1;
+    int i = st.btab[recRef].last;
+    while (i > 0)
+    {
+        string s1 = st.tab[i].name;
+        string s2 = node->fieldName;
+        for (char &c : s1) c = tolower(c);
+        for (char &c : s2) c = tolower(c);
+        if (s1 == s2)
+        {
+            fieldIdx = i;
+            break;
+        }
+        i = st.tab[i].link;
+    }
+
+    if (fieldIdx == -1)
+    {
+        semanticError("Field '" + node->fieldName + "' not found in record.");
+        node->dtype = DataType::UNKNOWN;
+        node->typeRef = 0;
+    }
+    else
+    {
+        node->dtype = st.tab[fieldIdx].type;
+        node->typeRef = st.tab[fieldIdx].ref;
+        node->tabIndex = fieldIdx;
+    }
 }

@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -80,4 +81,6 @@ private:
     static vector<shared_ptr<ParseNode>> children(shared_ptr<ParseNode> n, const string &tag);
     // Collect all ident leaves from an <identifier-list>
     static vector<string> collectIdents(shared_ptr<ParseNode> identListNode);
+
+    map<string, TypeInfo> declaredTypes;
 };

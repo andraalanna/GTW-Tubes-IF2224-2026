@@ -94,6 +94,10 @@ void ASTBuilder::buildTypeDeclaration(shared_ptr<ParseNode> n, vector<ASTNodePtr
         } else if (c->type == "<type>") {
             auto tinfo = resolveType(c);
             out.push_back(make_shared<TypeDeclNode>(currentIdent, tinfo.type, tinfo.ref));
+            
+            string lowerName = currentIdent;
+            for (char &ch : lowerName) ch = tolower(ch);
+            declaredTypes[lowerName] = tinfo;
         }
     }
 }
@@ -220,6 +224,14 @@ void ASTBuilder::buildParameterGroup(shared_ptr<ParseNode> n, vector<ASTNodePtr>
             else if (tl == "char") t = DataType::CHAR;
             else if (tl == "boolean") t = DataType::BOOLEAN;
             else if (tl == "string") t = DataType::STRING;
+            else {
+                string lowerName = tl;
+                auto it = declaredTypes.find(lowerName);
+                if (it != declaredTypes.end()) {
+                    t = it->second.type;
+                    ref = it->second.ref;
+                }
+            }
         }
     }
     
@@ -253,6 +265,7 @@ ASTNodePtr ASTBuilder::buildStatement(shared_ptr<ParseNode> n) {
         if (c->type == "<case-statement>") return buildCaseStatement(c);
         if (c->type == "<assignment-statement>") return buildAssignmentStatement(c);
         if (c->type == "<procedure/function-call>") return buildProcFuncCall(c);
+        if (c->type == "<compound-statement>") return buildCompoundStatement(c);
     }
     return nullptr;
 }
@@ -477,6 +490,73 @@ ASTBuilder::TypeInfo ASTBuilder::resolveType(shared_ptr<ParseNode> n) {
     auto arr = child(n, "<array-type>");
     if (arr) return resolveArrayType(arr);
     
+    auto enm = child(n, "<enumerated>");
+    if (enm) {
+        TypeInfo einfo{DataType::ENUMERATED, 0};
+        int newBlock = st.enterBtab();
+        einfo.ref = newBlock;
+        
+        int valIdx = 0;
+        for (auto &c : enm->children) {
+            if (c && c->type == "ident") {
+                st.enterTab(
+                    c->value,
+                    AllowedObj::CONSTANT,
+                    DataType::ENUMERATED,
+                    newBlock,
+                    1,
+                    st.currentLevel,
+                    valIdx++
+                );
+            }
+        }
+        return einfo;
+    }
+
+    auto rec = child(n, "<record-type>");
+    if (rec) {
+        TypeInfo rinfo{DataType::RECORD, 0};
+        int newBlock = st.pushScope();
+        rinfo.ref = newBlock;
+        
+        auto fieldList = child(rec, "<field-list>");
+        if (fieldList) {
+            auto fieldParts = children(fieldList, "<field-part>");
+            for (auto &part : fieldParts) {
+                if (!part) continue;
+                auto idList = child(part, "<identifier-list>");
+                auto typeNode = child(part, "<type>");
+                if (idList && typeNode) {
+                    vector<string> idents = collectIdents(idList);
+                    TypeInfo tinfo = resolveType(typeNode);
+                    
+                    for (const auto &id : idents) {
+                        int offset = st.btab[newBlock].vsze;
+                        int elsz = 1;
+                        if (tinfo.type == DataType::REAL) elsz = 2;
+                        else if (tinfo.type == DataType::STRING) elsz = 4;
+                        else if (tinfo.type == DataType::ARRAY) elsz = st.atab[tinfo.ref].size;
+                        else if (tinfo.type == DataType::RECORD) elsz = st.btab[tinfo.ref].vsze;
+                        
+                        st.btab[newBlock].vsze += elsz;
+                        
+                        st.enterTab(
+                            id,
+                            AllowedObj::VARIABLE,
+                            tinfo.type,
+                            tinfo.ref,
+                            1,
+                            st.currentLevel,
+                            offset
+                        );
+                    }
+                }
+            }
+        }
+        st.popScope();
+        return rinfo;
+    }
+    
     auto ident = child(n, "ident");
     if (ident) {
         string tl = ident->value;
@@ -486,6 +566,13 @@ ASTBuilder::TypeInfo ASTBuilder::resolveType(shared_ptr<ParseNode> n) {
         else if (tl == "char") info.type = DataType::CHAR;
         else if (tl == "boolean") info.type = DataType::BOOLEAN;
         else if (tl == "string") info.type = DataType::STRING;
+        else {
+            string lowerName = tl;
+            auto it = declaredTypes.find(lowerName);
+            if (it != declaredTypes.end()) {
+                info = it->second;
+            }
+        }
     }
     return info;
 }
