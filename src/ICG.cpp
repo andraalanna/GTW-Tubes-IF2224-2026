@@ -6,7 +6,7 @@
 using namespace std;
 
 ICG::ICG(SymbolTable &symTable)
-    : st(symTable), currentLine(0) {}
+    : st(symTable), currentLine(0), nextRealIdx(-1) {}
 
 vector<Instruction> ICG::generate(ASTNodePtr root)
 {
@@ -64,7 +64,13 @@ int ICG::countVarDecl(ProgramNode *node)
 
 void ICG::genINT(ProgramNode *node)
 {
-    int memSize = 3 + countVarDecl(node);
+    // Gunakan vsze dari btab yang sudah dihitung Semantic Analyzer.
+    // vsze = total ukuran semua variabel (benar untuk array, record, dll.)
+    int ref  = st.tab[node->tabIndex].ref;
+    int vsze = (ref >= 0 && ref < (int)st.btab.size())
+               ? st.btab[ref].vsze
+               : 0;
+    int memSize = 3 + vsze;
     emit(OpCode::INT_OP, 0, memSize);
 }
 
@@ -87,6 +93,24 @@ void ICG::genStatement(ASTNode *node)
         genCase(n);
     else if (auto *n = dynamic_cast<ProcCallNode *>(node))
         genProcCall(n);
+    else if (auto *n = dynamic_cast<ProcDeclNode *>(node))
+    {
+        int jmpPos = currentLine;
+        emit(OpCode::JMP, 0, 0); // Skip over procedure body
+        genProcDecl(n);
+        instructions[jmpPos].operand = currentLine;
+    }
+    else if (auto *n = dynamic_cast<FuncDeclNode *>(node))
+    {
+        int jmpPos = currentLine;
+        emit(OpCode::JMP, 0, 0); // Skip over function body
+        genFuncDecl(n);
+        instructions[jmpPos].operand = currentLine;
+    }
+    else if (auto *n = dynamic_cast<VarDeclNode *>(node))
+    {
+        (void)n;
+    }
     else if (auto *n = dynamic_cast<CompoundStmtNode *>(node))
     {
         for (auto &s : n->statements)
@@ -115,7 +139,7 @@ void ICG::genAssign(AssignNode *node)
             return;
         }
 
-        if (varLevel > 1)
+        if (varLevel >= 1)
             addr += 3;
 
         emit(OpCode::STO, relLevel, addr);
@@ -123,6 +147,11 @@ void ICG::genAssign(AssignNode *node)
     else if (auto *an = dynamic_cast<ArrayAccessNode *>(target))
     {
         genArrayAddress(an);
+        emit(OpCode::STOA, 0, 0);
+    }
+    else if (auto *fn = dynamic_cast<FieldAccessNode *>(target))
+    {
+        genFieldAccessAddress(fn);
         emit(OpCode::STOA, 0, 0);
     }
 }
@@ -136,6 +165,8 @@ void ICG::genExpression(ASTNode *node)
         genNumber(n);
     else if (auto *n = dynamic_cast<CharNode *>(node))
         genChar(n);
+    else if (auto *n = dynamic_cast<StringNode *>(node))
+        genString(n);
     else if (auto *n = dynamic_cast<VarNode *>(node))
         genVar(n);
     else if (auto *n = dynamic_cast<BinOpNode *>(node))
@@ -149,16 +180,39 @@ void ICG::genExpression(ASTNode *node)
         genArrayAddress(an);
         emit(OpCode::LODA, 0, 0); 
     }
+    else if (auto *fn = dynamic_cast<FieldAccessNode *>(node))
+    {
+        genFieldAccessAddress(fn);
+        emit(OpCode::LODA, 0, 0);
+    }
 }
 
 void ICG::genNumber(NumberNode *node)
 {
-    int value;
     if (node->dtype == DataType::REAL)
-        value = (int)stof(node->rawValue);
+    {
+        double f = stod(node->rawValue);
+        int idx = -1;
+        for (auto &[k, v] : realPool)
+        {
+            if (v == f)
+            {
+                idx = k;
+                break;
+            }
+        }
+        if (idx == -1)
+        {
+            idx = nextRealIdx--;
+            realPool[idx] = f;
+        }
+        emit(OpCode::LIT, 0, idx);
+    }
     else
-        value = stoi(node->rawValue);
-    emit(OpCode::LIT, 0, value);
+    {
+        int value = stoi(node->rawValue);
+        emit(OpCode::LIT, 0, value);
+    }
 }
 
 void ICG::genChar(CharNode *node)
@@ -169,12 +223,18 @@ void ICG::genChar(CharNode *node)
 
 void ICG::genVar(VarNode *node)
 {
-    int addr     = st.tab[node->tabIndex].adr;
-    int varLevel = st.tab[node->tabIndex].lev;
+    int idx = node->tabIndex;
+    if (st.tab[idx].obj == AllowedObj::CONSTANT)
+    {
+        emit(OpCode::LIT, 0, st.tab[idx].adr);
+        return;
+    }
+
+    int addr     = st.tab[idx].adr;
+    int varLevel = st.tab[idx].lev;
     int relLevel = currentLevel - varLevel;
 
-    int ref = st.tab[node->tabIndex].ref;
-    if (varLevel > 1)  
+    if (varLevel >= 1)
         addr += 3;
 
     emit(OpCode::LOD, relLevel, addr);
@@ -431,6 +491,16 @@ void ICG::genProcCall(ProcCallNode *node)
         }
         return;
     }
+
+    if (name == "read" || name == "readln")
+    {
+        for (auto &arg : node->args)
+        {
+            genRecordAddress(arg.get());
+            emit(OpCode::OPR, static_cast<int>(arg->dtype), (int)OprCode::RED);
+        }
+        return;
+    }
  
     int procTabIdx = node->tabIndex;
     if (procTabIdx < 0)
@@ -493,7 +563,7 @@ void ICG::genProcDecl(ProcDeclNode *node)
         genStatement(node->body.get());
     currentLevel--;
 
-    emit(OpCode::RET, 0, 0);
+    emit(OpCode::RET, 0, psze);
 }
 
 void ICG::genFuncDecl(FuncDeclNode *node)
@@ -525,36 +595,49 @@ void ICG::genFuncDecl(FuncDeclNode *node)
 
     int resultAdr = findReturnVarAddr(node);
     emit(OpCode::LOD, 0, resultAdr);
-    emit(OpCode::RET, 0, 0);
+    emit(OpCode::RET, 1, psze);
 }
 
 void ICG::genArrayAddress(ArrayAccessNode *an)
 {
-    auto *vn = dynamic_cast<VarNode *>(an->array.get());
-    if (!vn)
-        throw std::runtime_error("ICG: array target bukan VarNode");
+    genRecordAddress(an->array.get());
 
-    int baseAddr = st.tab[vn->tabIndex].adr;
-    int level = st.tab[vn->tabIndex].lev;
-    int ref = st.tab[vn->tabIndex].ref;
-    int low = (ref >= 0 && ref < (int)st.atab.size())
-                  ? st.atab[ref].low
-                  : 0;
-
-    genExpression(an->indices[0].get());
-
-    emit(OpCode::LIT, 0, low);
-    emit(OpCode::OPR, 0, (int)OprCode::SUB);
-
-    emit(OpCode::LIT, 0, baseAddr);
-    emit(OpCode::OPR, 0, (int)OprCode::ADD);
-
-    if (level > 0)
+    int ref = 0;
+    if (auto *vn = dynamic_cast<VarNode *>(an->array.get()))
     {
-        emit(OpCode::OPR, 0, (int)OprCode::PUSHBP);
+        ref = st.tab[vn->tabIndex].ref;
+    }
+    else
+    {
+        ref = an->array->typeRef;
+    }
+
+    for (size_t k = 0; k < an->indices.size(); k++)
+    {
+        int low = 0;
+        int elsz = 1;
+        if (ref >= 0 && ref < (int)st.atab.size())
+        {
+            low = st.atab[ref].low;
+            elsz = st.atab[ref].elsz;
+            ref = st.atab[ref].eref;
+        }
+
+        genExpression(an->indices[k].get());
+
+        emit(OpCode::LIT, 0, low);
+        emit(OpCode::OPR, 0, (int)OprCode::SUB);
+
+        if (elsz > 1)
+        {
+            emit(OpCode::LIT, 0, elsz);
+            emit(OpCode::OPR, 0, (int)OprCode::MUL);
+        }
+
         emit(OpCode::OPR, 0, (int)OprCode::ADD);
     }
 }
+
 
 void ICG::emit(OpCode op, int level, int operand)
 {
@@ -676,4 +759,68 @@ int ICG::getFuncStartLine(const string& name) const{
     auto it = funcStartLine.find(name);
     if (it == funcStartLine.end()) throw runtime_error("ICG: subprogram '" + name + "' belum di-generate. " "Pastikan genProcDecl/genFuncDecl dipanggil sebelum genProcCall.");
     return it->second;
+}
+
+void ICG::genString(StringNode *node)
+{
+    const std::string &s = node->rawValue;
+
+    int idx = -1;
+    for (auto &[k, v] : stringTable)
+        if (v == s)
+        {
+            idx = k;
+            break;
+        }
+
+    if (idx == -1)
+    {
+        idx = nextStringIdx--;
+        stringTable[idx] = s;
+    }
+
+    emit(OpCode::LIT, 0, idx);
+}
+
+void ICG::genFieldAccessAddress(FieldAccessNode *fn)
+{
+    genRecordAddress(fn->record.get());
+    int offset = st.tab[fn->tabIndex].adr;
+    if (offset != 0)
+    {
+        emit(OpCode::LIT, 0, offset);
+        emit(OpCode::OPR, 0, (int)OprCode::ADD);
+    }
+}
+
+void ICG::genRecordAddress(ASTNode *node)
+{
+    if (auto *vn = dynamic_cast<VarNode *>(node))
+    {
+        int baseAddr = st.tab[vn->tabIndex].adr;
+        int varLevel = st.tab[vn->tabIndex].lev;
+        if (varLevel >= 1)
+            baseAddr += 3;
+
+        emit(OpCode::OPR, 0, (int)OprCode::PUSHBP);
+        int relLevel = currentLevel - varLevel;
+        for (int i = 0; i < relLevel; i++)
+        {
+            emit(OpCode::LODA, 0, 0);
+        }
+        emit(OpCode::LIT, 0, baseAddr);
+        emit(OpCode::OPR, 0, (int)OprCode::ADD);
+    }
+    else if (auto *an = dynamic_cast<ArrayAccessNode *>(node))
+    {
+        genArrayAddress(an);
+    }
+    else if (auto *fn = dynamic_cast<FieldAccessNode *>(node))
+    {
+        genFieldAccessAddress(fn);
+    }
+    else
+    {
+        throw std::runtime_error("ICG: Unsupported base for address generation");
+    }
 }

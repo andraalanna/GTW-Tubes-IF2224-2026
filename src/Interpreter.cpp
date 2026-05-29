@@ -62,7 +62,7 @@ void Interpreter::run(const std::vector<Instruction> &code)
             operateOPR(ins);
             break;
         case OpCode::RET:
-            operateRET();
+            operateRET(ins);
             break;
         case OpCode::STO:
             operateSTO(ins);
@@ -257,7 +257,7 @@ void Interpreter::operateJPC(const Instruction &instr, int codeSize)
     }
 }
 
-void Interpreter::operateRET()
+void Interpreter::operateRET(const Instruction &ins)
 {
     if (basePtr == 0)
     {
@@ -271,13 +271,17 @@ void Interpreter::operateRET()
             "bp=" + std::to_string(basePtr) + " is invalid during RET (sp=" + std::to_string(stackPtr) + ")");
     }
 
-    bool hasReturnValue = (stackPtr > basePtr + 2);
-    int returnValue = hasReturnValue ? stack[stackPtr] : 0;
+    bool isFunction = (ins.level == 1);
+    int psze = ins.operand;
 
-    int retAddr = stack[basePtr + 2];  // return address
-    int callerBp = stack[basePtr + 1]; // dynamic link
+    int returnValue = isFunction ? stack[stackPtr] : 0;
 
-    while (stackPtr >= basePtr)
+    int retAddr = stack[basePtr + 2];
+    int callerBp = stack[basePtr + 1];
+
+    int targetSp = basePtr - psze - 1;
+
+    while (stackPtr > targetSp)
     {
         stack.pop_back();
         stackPtr--;
@@ -287,7 +291,7 @@ void Interpreter::operateRET()
     basePtr = callerBp;
     pointerCtr = retAddr;
 
-    if (hasReturnValue)   
+    if (isFunction)   
         push(returnValue);
 }
 
@@ -378,13 +382,13 @@ void Interpreter::operateOPR(const Instruction &instr)
     case OprCode::WRT:
     {
         int val = pop();
-        output << val;
+        outputValue(val, false);
         break;
     }
     case OprCode::WRTLN:
     {
         int val = pop();
-        output << val << "\n";
+        outputValue(val, true);
         break;
     }
     case OprCode::PUSHBP:
@@ -392,6 +396,135 @@ void Interpreter::operateOPR(const Instruction &instr)
         push(basePtr);
         break;
     }   
+    case OprCode::RED:
+    {
+        int addr = pop();
+        std::string inputStr;
+        DataType expectedType = static_cast<DataType>(instr.level);
+        bool readSuccess = false;
+
+        if (expectedType == DataType::STRING)
+        {
+            while (std::cin.peek() == '\n' || std::cin.peek() == '\r')
+            {
+                std::cin.get();
+            }
+            if (std::getline(std::cin, inputStr))
+            {
+                readSuccess = true;
+            }
+        }
+        else
+        {
+            if (std::cin >> inputStr)
+            {
+                readSuccess = true;
+            }
+        }
+
+        if (readSuccess)
+        {
+            try
+            {
+                if (expectedType == DataType::REAL)
+                {
+                    size_t parsedChars = 0;
+                    double doubleVal = std::stod(inputStr, &parsedChars);
+                    if (parsedChars < inputStr.size())
+                    {
+                        throw std::invalid_argument("not a pure double");
+                    }
+                    int idx = -1;
+                    for (auto &[k, v] : realPool)
+                    {
+                        if (v == doubleVal)
+                        {
+                            idx = k;
+                            break;
+                        }
+                    }
+                    if (idx == -1)
+                    {
+                        int minIdx = -1;
+                        for (auto &[k, v] : realPool)
+                        {
+                            if (k < minIdx) minIdx = k;
+                        }
+                        idx = minIdx - 1;
+                        realPool[idx] = doubleVal;
+                    }
+                    memStore(addr, idx);
+                }
+                else if (expectedType == DataType::INTEGER)
+                {
+                    size_t parsedChars = 0;
+                    int intVal = std::stoi(inputStr, &parsedChars);
+                    if (parsedChars < inputStr.size())
+                    {
+                        throw std::invalid_argument("not a pure integer");
+                    }
+                    memStore(addr, intVal);
+                }
+                else if (expectedType == DataType::CHAR)
+                {
+                    if (inputStr.size() != 1)
+                    {
+                        throw std::invalid_argument("not a char");
+                    }
+                    memStore(addr, static_cast<int>(inputStr[0]));
+                }
+                else if (expectedType == DataType::BOOLEAN)
+                {
+                    std::string lowerStr = inputStr;
+                    for (char &c : lowerStr) c = tolower(c);
+                    if (lowerStr == "true" || lowerStr == "1")
+                    {
+                        memStore(addr, 1);
+                    }
+                    else if (lowerStr == "false" || lowerStr == "0")
+                    {
+                        memStore(addr, 0);
+                    }
+                    else
+                    {
+                        throw std::invalid_argument("not a boolean");
+                    }
+                }
+                else if (expectedType == DataType::STRING)
+                {
+                    int idx = -1;
+                    for (auto &[k, v] : stringTable)
+                    {
+                        if (v == inputStr)
+                        {
+                            idx = k;
+                            break;
+                        }
+                    }
+                    if (idx == -1)
+                    {
+                        int minIdx = -100000;
+                        for (auto &[k, v] : stringTable)
+                        {
+                            if (k < minIdx) minIdx = k;
+                        }
+                        idx = minIdx - 1;
+                        stringTable[idx] = inputStr;
+                    }
+                    memStore(addr, idx);
+                }
+                else
+                {
+                    throw std::invalid_argument("unsupported input type");
+                }
+            }
+            catch (...)
+            {
+                throw RuntimeError("Invalid input: '" + inputStr + "' does not match expected type");
+            }
+        }
+        break;
+    }
 
     default:
         throw RuntimeError("Unknown OPR code: " + std::to_string(instr.operand));
@@ -470,4 +603,61 @@ std::vector<Instruction> Interpreter::parseFromString(const std::string &content
 {
     std::istringstream stream(content);
     return parseFromStream(stream);
+}
+
+void Interpreter::outputValue(int val, bool newline)
+{
+    if (val <= -100000 && stringTable.count(val))
+    {
+        std::string s = stringTable.at(val);
+        if (s.size() >= 2 && s.front() == '\'' && s.back() == '\'')
+        {
+            s = s.substr(1, s.size() - 2);
+        }
+        size_t pos = 0;
+        while ((pos = s.find("''", pos)) != std::string::npos)
+        {
+            s.replace(pos, 2, "'");
+            pos += 1;
+        }
+        pos = 0;
+        while ((pos = s.find("\\n", pos)) != std::string::npos)
+        {
+            s.replace(pos, 2, "\n");
+            pos += 1;
+        }
+        pos = 0;
+        while ((pos = s.find("\\t", pos)) != std::string::npos)
+        {
+            s.replace(pos, 2, "\t");
+            pos += 1;
+        }
+        output << s;
+    }
+    else if (val >= -99999 && val <= -1)
+    {
+        if (realPool.count(val))
+        {
+            double d = realPool.at(val);
+            if (d == (int)d)
+            {
+                output << d << ".0";
+            }
+            else
+            {
+                output << d;
+            }
+        }
+        else
+        {
+            output << val;
+        }
+    }
+    else
+    {
+        output << val;
+    }
+
+    if (newline)
+        output << "\n";
 }

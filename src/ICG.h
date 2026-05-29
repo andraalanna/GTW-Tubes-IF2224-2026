@@ -6,6 +6,7 @@
 #include "ASTNode.h"
 #include "symbolTable.hpp"
 #include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -40,7 +41,8 @@ enum class OprCode
     LEQ = 12,
     WRT = 13,
     WRTLN = 14,
-    PUSHBP = 15
+    PUSHBP = 15,
+    RED = 16
 };
 
 struct Instruction
@@ -56,6 +58,9 @@ class ICG
 public:
     explicit ICG(SymbolTable &symTable);
     vector<Instruction> generate(ASTNodePtr root);
+    std::unordered_map<int, std::string> stringTable;
+    std::unordered_map<int, double> realPool;
+
 
     void printInstructions(ostream &out) const;
     void writeToFile(const string &filename) const;
@@ -67,6 +72,9 @@ private:
     int currentLine = 0;
     int currentLevel = 1; 
     map<string, int> funcStartLine;
+    int nextStringIdx = -100000;
+    int nextRealIdx = -1;
+    void genString(StringNode *node);
     
     int getFuncStartLine(const string&name) const; // anggota 2
     void genProgram(ProgramNode *node);
@@ -89,6 +97,8 @@ private:
     void genProcDecl(ProcDeclNode *node); // anggota 3
     void genFuncDecl(FuncDeclNode *node); // anggota 3
     void genArrayAddress(ArrayAccessNode *an);
+    void genFieldAccessAddress(FieldAccessNode *fn);
+    void genRecordAddress(ASTNode *node);
 
     void emit(OpCode op, int level, int operand);
     int countVarDecl(ProgramNode *node);

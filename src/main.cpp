@@ -9,6 +9,7 @@
 #include "ErrorHandler.h"
 #include "ASTBuilder.h"
 #include "ICG.h"
+#include "Interpreter.hpp"
 using namespace std;
 
 void printTree(shared_ptr<ParseNode> node, ostream &out, string prefix = "", bool isLast = true, bool isRoot = true)
@@ -180,9 +181,48 @@ int main(int argc, char *argv[])
             auto instrs = icg.generate(astRoot);
 
             cout << "\n=== Intermediate Code ===" << endl;
+            outFile << "\n=== Intermediate Code ===" << endl;
             icg.printInstructions(cout);
-
             icg.printInstructions(outFile);
+
+            cout << "\n=== Output Program ===\n";
+            outFile << "\n=== Output Program ===\n";
+
+            struct MultiBuf : public std::streambuf
+            {
+                MultiBuf(std::streambuf* b1, std::streambuf* b2) : buf1(b1), buf2(b2) {}
+                virtual int overflow(int c) override
+                {
+                    if (c == EOF) return EOF;
+                    int r1 = buf1->sputc(c);
+                    int r2 = buf2->sputc(c);
+                    return (r1 == EOF || r2 == EOF) ? EOF : c;
+                }
+                virtual int sync() override
+                {
+                    int r1 = buf1->pubsync();
+                    int r2 = buf2->pubsync();
+                    return (r1 == -1 || r2 == -1) ? -1 : 0;
+                }
+                std::streambuf* buf1;
+                std::streambuf* buf2;
+            };
+
+            MultiBuf multi(cout.rdbuf(), outFile.rdbuf());
+            ostream multiOut(&multi);
+
+            Interpreter interpreter(multiOut);
+            interpreter.stringTable = icg.stringTable;
+            interpreter.realPool = icg.realPool;
+
+            try
+            {
+                interpreter.run(instrs);
+            }
+            catch (const RuntimeError &e)
+            {
+                multiOut << e.what() << endl;
+            }
         }
 
         cout << "\n=== Symbol Table ===" << endl;
@@ -205,7 +245,10 @@ int main(int argc, char *argv[])
         printErrorSummary();
 
         if (astRoot)
+        {
+            outFile << "\n=== Decorated AST ===\n";
             astRoot->print(outFile);
+        }
         outFile.close();
     }
 

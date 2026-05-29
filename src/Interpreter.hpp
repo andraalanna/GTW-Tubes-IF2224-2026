@@ -62,12 +62,14 @@ class Interpreter {
         explicit Interpreter(std::ostream &out = std::cout);
 
         void run(const std::vector<Instruction> &code);
+        std::unordered_map<int, std::string> stringTable;
+        std::unordered_map<int, double> realPool;
 
     private:
         std::ostream& output;
         std::vector<int> stack;
-        int basePtr;
         int stackPtr;
+        int basePtr;
         int pointerCtr;
         int pushCtr;
         int popCtr;
@@ -77,6 +79,7 @@ class Interpreter {
         bool debugMode = false;
 
         int base(int levels, int b) const;
+        void outputValue(int val, bool newline);
 
         int memLoad(int addr) const;
         void memStore(int addr, int val);
@@ -96,7 +99,7 @@ class Interpreter {
         void operateJMP(const Instruction &instr, int codeSize);
         void operateJPC(const Instruction &instr, int codeSize);
         void operateOPR(const Instruction &instr);
-        void operateRET();
+        void operateRET(const Instruction &instr);
 
         static std::vector<Instruction> parseFromStream(std::istream &stream);
         static std::vector<Instruction> parseFromFile(const std::string &filename);
