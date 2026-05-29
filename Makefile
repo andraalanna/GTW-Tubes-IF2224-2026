@@ -18,7 +18,8 @@ SOURCES = $(SRC_DIR)/main.cpp \
           $(SRC_DIR)/TypeSystem.cpp \
           $(SRC_DIR)/ErrorHandler.cpp \
           $(SRC_DIR)/ASTBuilder.cpp \
-          $(SRC_DIR)/ICG.cpp 
+          $(SRC_DIR)/ICG.cpp \
+          $(SRC_DIR)/Interpreter.cpp
 
 # Target default yang dijalankan saat ketik 'make'
 all: $(TARGET)
