@@ -22,7 +22,8 @@ enum class OpCode
     OPR,
     RET,
     LODA,
-    STOA
+    STOA,
+    CKB
 };
 
 enum class OprCode

@@ -23,6 +23,12 @@ struct StackUnderflowError : public RuntimeError
         : RuntimeError(msg) {}
 };
 
+struct StackSmashingError : public RuntimeError
+{
+    explicit StackSmashingError(const std::string &msg = "Stack smashing: control frame corrupted")
+        : RuntimeError(msg) {}
+};
+
 struct StackCorruptionError : public RuntimeError
 {
     explicit StackCorruptionError(const std::string &msg)
@@ -39,6 +45,12 @@ struct OutOfBoundsError : public RuntimeError
 {
     explicit OutOfBoundsError(int addr, int base, int limit)
         : RuntimeError("Memory access out of bounds: address " + std::to_string(addr) + " (frame base=" + std::to_string(base) + ", limit=" + std::to_string(limit) + ")") {}
+};
+
+struct IndexOutOfBoundsError : public RuntimeError
+{
+    explicit IndexOutOfBoundsError(int index, int low, int high)
+        : RuntimeError("Index out of bounds: index " + std::to_string(index) + " is not in range [" + std::to_string(low) + ".." + std::to_string(high) + "]") {}
 };
 
 struct DivisionByZeroError : public RuntimeError
@@ -99,7 +111,7 @@ class Interpreter {
         void operateJMP(const Instruction &instr, int codeSize);
         void operateJPC(const Instruction &instr, int codeSize);
         void operateOPR(const Instruction &instr);
-        void operateRET(const Instruction &instr);
+        void operateRET(const Instruction &instr, int codeSize);
 
         static std::vector<Instruction> parseFromStream(std::istream &stream);
         static std::vector<Instruction> parseFromFile(const std::string &filename);

@@ -615,15 +615,19 @@ void ICG::genArrayAddress(ArrayAccessNode *an)
     for (size_t k = 0; k < an->indices.size(); k++)
     {
         int low = 0;
+        int high = 0;
         int elsz = 1;
         if (ref >= 0 && ref < (int)st.atab.size())
         {
             low = st.atab[ref].low;
+            high = st.atab[ref].high;
             elsz = st.atab[ref].elsz;
             ref = st.atab[ref].eref;
         }
 
         genExpression(an->indices[k].get());
+
+        emit(OpCode::CKB, low, high);
 
         emit(OpCode::LIT, 0, low);
         emit(OpCode::OPR, 0, (int)OprCode::SUB);
@@ -671,6 +675,8 @@ string ICG::opcodeToString(OpCode op)
         return "LODA";
     case OpCode::STOA:
         return "STOA";
+    case OpCode::CKB:
+        return "CKB";
     default:
         return "???";
     }

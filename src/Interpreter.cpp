@@ -62,7 +62,7 @@ void Interpreter::run(const std::vector<Instruction> &code)
             operateOPR(ins);
             break;
         case OpCode::RET:
-            operateRET(ins);
+            operateRET(ins, static_cast<int>(code.size()));
             break;
         case OpCode::STO:
             operateSTO(ins);
@@ -84,6 +84,17 @@ void Interpreter::run(const std::vector<Instruction> &code)
             int addr = pop();
             int val = pop();
             memStore(addr, val);
+            break;
+        }
+        case OpCode::CKB:
+        {
+            int index = peek();
+            int low = ins.level;
+            int high = ins.operand;
+            if (index < low || index > high)
+            {
+                throw IndexOutOfBoundsError(index, low, high);
+            }
             break;
         }
         }
@@ -257,7 +268,7 @@ void Interpreter::operateJPC(const Instruction &instr, int codeSize)
     }
 }
 
-void Interpreter::operateRET(const Instruction &ins)
+void Interpreter::operateRET(const Instruction &ins, int codeSize)
 {
     if (basePtr == 0)
     {
@@ -278,6 +289,16 @@ void Interpreter::operateRET(const Instruction &ins)
 
     int retAddr = stack[basePtr + 2];
     int callerBp = stack[basePtr + 1];
+
+    if (retAddr < 0 || retAddr >= codeSize)
+    {
+        throw StackSmashingError("Return address corrupted (" + std::to_string(retAddr) + ")");
+    }
+
+    if (callerBp < 0 || callerBp >= basePtr)
+    {
+        throw StackSmashingError("Dynamic link / Caller BP corrupted (" + std::to_string(callerBp) + ")");
+    }
 
     int targetSp = basePtr - psze - 1;
 
@@ -583,6 +604,8 @@ std::vector<Instruction> Interpreter::parseFromStream(std::istream &stream)
             op = OpCode::LODA;
         else if (mnemonic == "STOA")
             op = OpCode::STOA;
+        else if (mnemonic == "CKB")
+            op = OpCode::CKB;
         else
             throw RuntimeError("Unknown mnemonic: " + mnemonic);
 
