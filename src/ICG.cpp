@@ -253,11 +253,11 @@ void ICG::genBinOp(BinOpNode *node)
         emit(OpCode::OPR, 0, (int)OprCode::SUB);
     else if (op == "times")
         emit(OpCode::OPR, 0, (int)OprCode::MUL);
-    else if (op == "slash")
+    else if (op == "slash" || op == "rdiv")
         emit(OpCode::OPR, 0, (int)OprCode::DIV);
-    else if (op == "div")
+    else if (op == "div" || op == "idiv")
         emit(OpCode::OPR, 0, (int)OprCode::DIV);
-    else if (op == "mod")
+    else if (op == "mod" || op == "imod")
         emit(OpCode::OPR, 0, (int)OprCode::MOD);
     // Perbandingan
     else if (op == "eql")
@@ -277,9 +277,9 @@ void ICG::genBinOp(BinOpNode *node)
 void ICG::genUnaryOp(UnaryOpNode *node)
 {
     genExpression(node->operand.get());
-    if (node->op == "-")
+    if (node->op == "-" || node->op == "minus")
         emit(OpCode::OPR, 0, (int)OprCode::NEG);
-    else if (node->op == "not")
+    else if (node->op == "not" || node->op == "notsy")
     {
         emit(OpCode::LIT, 0, 0);
         emit(OpCode::OPR, 0, (int)OprCode::EQL);

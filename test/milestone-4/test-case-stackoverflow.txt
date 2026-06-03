@@ -1,0 +1,8 @@
+program TestStackOverflow;
+procedure recurse();
+begin
+    recurse()
+end;
+begin
+    recurse()
+end.
