@@ -1,0 +1,14 @@
+program TestProsedur;
+
+var x : integer;
+
+procedure Sapa(n : integer);
+begin
+    writeln(n)
+end;
+
+begin
+    x := 42;
+    Sapa(x);
+    Sapa(7)
+end.

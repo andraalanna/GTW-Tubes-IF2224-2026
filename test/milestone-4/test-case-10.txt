@@ -1,0 +1,24 @@
+program TestFibonacci;
+
+var i : integer;
+var r : integer;
+
+function Fib(n : integer) : integer;
+begin
+    if n <= 0 then
+        Fib := 0
+    else if n <= 1 then
+        Fib := 1
+    else
+        Fib := Fib(n - 1) + Fib(n - 2)
+end;
+
+begin
+    i := 0;
+    while i <= 7 do
+    begin
+        r := Fib(i);
+        writeln(r);
+        i := i + 1
+    end
+end.

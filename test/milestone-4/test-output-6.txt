@@ -1,0 +1,39 @@
+
+=== Intermediate Code ===
+0 INT 0 4
+1 JMP 0 8
+2 INT 0 4
+3 LOD 0 -1
+4 STO 0 3
+5 LOD 0 3
+6 OPR 0 14
+7 RET 0 1
+8 LIT 0 42
+9 STO 0 3
+10 LOD 0 3
+11 CAL 0 2
+12 LIT 0 7
+13 CAL 0 2
+14 RET 0 0
+
+=== Output Program ===
+42
+7
+
+=== Decorated AST ===
+ProgramNode(name: 'TestProsedur')		→ tab_index:38, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('x')		→ tab_index:39, type:integer, lev:1
+│   └── ProcDecl(Sapa)		→ tab_index:40, type:void, lev:1
+│       ├── VarDecl('n')		→ tab_index:41, type:integer, lev:2
+│       └── CompoundStmt		→ type:void
+│           └── ProcedureCall(name: 'writeln')		→ type:void
+│               └── Var(n)		→ tab_index:41, type:integer, lev:2
+└── CompoundStmt		→ type:void
+    ├── Assign(x := 42)		→ type:void
+    │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(42)		→ type:integer
+    ├── ProcedureCall(name: 'Sapa')		→ type:void
+    │   └── Var(x)		→ tab_index:39, type:integer, lev:1
+    └── ProcedureCall(name: 'Sapa')		→ type:void
+        └── Num(7)		→ type:integer

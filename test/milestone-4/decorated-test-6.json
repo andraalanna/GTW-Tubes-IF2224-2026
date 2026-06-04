@@ -1,0 +1,586 @@
+{
+  "ast": {
+    "body": {
+      "dtype": "void",
+      "kind": "CompoundStmt",
+      "lexLevel": 0,
+      "statements": [
+        {
+          "dtype": "void",
+          "kind": "Assign",
+          "lexLevel": 0,
+          "tabIndex": -1,
+          "target": {
+            "dtype": "integer",
+            "kind": "Var",
+            "lexLevel": 1,
+            "tabIndex": 39,
+            "typeRef": 0,
+            "varName": "x"
+          },
+          "typeRef": 0,
+          "value": {
+            "dtype": "integer",
+            "kind": "Number",
+            "lexLevel": 0,
+            "rawValue": "42",
+            "tabIndex": -1,
+            "typeRef": 0
+          }
+        },
+        {
+          "args": [
+            {
+              "dtype": "integer",
+              "kind": "Var",
+              "lexLevel": 1,
+              "tabIndex": 39,
+              "typeRef": 0,
+              "varName": "x"
+            }
+          ],
+          "dtype": "void",
+          "kind": "ProcCall",
+          "lexLevel": 0,
+          "procName": "Sapa",
+          "tabIndex": -1,
+          "typeRef": 0
+        },
+        {
+          "args": [
+            {
+              "dtype": "integer",
+              "kind": "Number",
+              "lexLevel": 0,
+              "rawValue": "7",
+              "tabIndex": -1,
+              "typeRef": 0
+            }
+          ],
+          "dtype": "void",
+          "kind": "ProcCall",
+          "lexLevel": 0,
+          "procName": "Sapa",
+          "tabIndex": -1,
+          "typeRef": 0
+        }
+      ],
+      "tabIndex": -1,
+      "typeRef": 0
+    },
+    "declarations": [
+      {
+        "dtype": "integer",
+        "kind": "VarDecl",
+        "lexLevel": 1,
+        "tabIndex": 39,
+        "typeRef": 0,
+        "varName": "x",
+        "varType": "integer"
+      },
+      {
+        "body": {
+          "dtype": "void",
+          "kind": "CompoundStmt",
+          "lexLevel": 0,
+          "statements": [
+            {
+              "args": [
+                {
+                  "dtype": "integer",
+                  "kind": "Var",
+                  "lexLevel": 2,
+                  "tabIndex": 41,
+                  "typeRef": 0,
+                  "varName": "n"
+                }
+              ],
+              "dtype": "void",
+              "kind": "ProcCall",
+              "lexLevel": 0,
+              "procName": "writeln",
+              "tabIndex": -1,
+              "typeRef": 0
+            }
+          ],
+          "tabIndex": -1,
+          "typeRef": 0
+        },
+        "dtype": "void",
+        "kind": "ProcDecl",
+        "lexLevel": 1,
+        "params": [
+          {
+            "dtype": "integer",
+            "kind": "VarDecl",
+            "lexLevel": 2,
+            "tabIndex": 41,
+            "typeRef": 0,
+            "varName": "n",
+            "varType": "integer"
+          }
+        ],
+        "procName": "Sapa",
+        "tabIndex": 40,
+        "typeRef": 0
+      }
+    ],
+    "dtype": "void",
+    "kind": "Program",
+    "lexLevel": 0,
+    "name": "TestProsedur",
+    "tabIndex": 38,
+    "typeRef": 0
+  },
+  "symtable": {
+    "btab": [
+      {
+        "last": 38,
+        "lpar": 0,
+        "psze": 0,
+        "vsze": 0
+      },
+      {
+        "last": 40,
+        "lpar": 0,
+        "psze": 0,
+        "vsze": 1
+      },
+      {
+        "last": 41,
+        "lpar": 41,
+        "psze": 1,
+        "vsze": 0
+      }
+    ],
+    "currentBlock": 0,
+    "currentLevel": 0,
+    "display": [
+      0,
+      1,
+      2
+    ],
+    "tab": [
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 0,
+        "name": "",
+        "nrm": 0,
+        "obj": "variable",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 0,
+        "name": "AND",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 1,
+        "name": "ARRAY",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 2,
+        "name": "BEGIN",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 3,
+        "name": "CASE",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 4,
+        "name": "CONST",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 5,
+        "name": "DIV",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 6,
+        "name": "DOWNTO",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 7,
+        "name": "DO",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 8,
+        "name": "ELSE",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 9,
+        "name": "END",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 10,
+        "name": "FOR",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 11,
+        "name": "FUNCTION",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 12,
+        "name": "IF",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 13,
+        "name": "MOD",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 14,
+        "name": "NOT",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 15,
+        "name": "OF",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 16,
+        "name": "OR",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 17,
+        "name": "PROCEDURE",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 18,
+        "name": "PROGRAM",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 19,
+        "name": "RECORD",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 20,
+        "name": "REPEAT",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 21,
+        "name": "INTEGER",
+        "nrm": 1,
+        "obj": "type",
+        "ref": 0,
+        "type": "integer"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 22,
+        "name": "REAL",
+        "nrm": 1,
+        "obj": "type",
+        "ref": 0,
+        "type": "real"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 23,
+        "name": "BOOLEAN",
+        "nrm": 1,
+        "obj": "type",
+        "ref": 0,
+        "type": "boolean"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 24,
+        "name": "CHAR",
+        "nrm": 1,
+        "obj": "type",
+        "ref": 0,
+        "type": "char"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 25,
+        "name": "STRING",
+        "nrm": 1,
+        "obj": "type",
+        "ref": 0,
+        "type": "string"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 26,
+        "name": "THEN",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 27,
+        "name": "TO",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 28,
+        "name": "TYPE",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 29,
+        "name": "UNTIL",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 30,
+        "name": "VAR",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 31,
+        "name": "WHILE",
+        "nrm": 1,
+        "obj": "keyword",
+        "ref": 0,
+        "type": "unknown"
+      },
+      {
+        "adr": 1,
+        "lev": 0,
+        "link": 32,
+        "name": "true",
+        "nrm": 1,
+        "obj": "constant",
+        "ref": 0,
+        "type": "boolean"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 33,
+        "name": "false",
+        "nrm": 1,
+        "obj": "constant",
+        "ref": 0,
+        "type": "boolean"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 34,
+        "name": "writeln",
+        "nrm": 1,
+        "obj": "procedure",
+        "ref": 0,
+        "type": "void"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 35,
+        "name": "readln",
+        "nrm": 1,
+        "obj": "procedure",
+        "ref": 0,
+        "type": "void"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 36,
+        "name": "write",
+        "nrm": 1,
+        "obj": "procedure",
+        "ref": 0,
+        "type": "void"
+      },
+      {
+        "adr": 0,
+        "lev": 0,
+        "link": 37,
+        "name": "TestProsedur",
+        "nrm": 1,
+        "obj": "program",
+        "ref": 1,
+        "type": "void"
+      },
+      {
+        "adr": 0,
+        "lev": 1,
+        "link": 0,
+        "name": "x",
+        "nrm": 1,
+        "obj": "variable",
+        "ref": 0,
+        "type": "integer"
+      },
+      {
+        "adr": 2,
+        "lev": 1,
+        "link": 39,
+        "name": "Sapa",
+        "nrm": 1,
+        "obj": "procedure",
+        "ref": 2,
+        "type": "void"
+      },
+      {
+        "adr": 0,
+        "lev": 2,
+        "link": 0,
+        "name": "n",
+        "nrm": 1,
+        "obj": "variable",
+        "ref": 0,
+        "type": "integer"
+      }
+    ]
+  }
+}

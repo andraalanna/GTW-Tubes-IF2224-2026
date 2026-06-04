@@ -1,0 +1,114 @@
+
+=== Intermediate Code ===
+0 INT 0 5
+1 JMP 0 31
+2 INT 0 5
+3 LOD 0 -1
+4 STO 0 3
+5 LOD 0 3
+6 LIT 0 0
+7 OPR 0 12
+8 JPC 0 12
+9 LIT 0 0
+10 STO 0 4
+11 JMP 0 29
+12 LOD 0 3
+13 LIT 0 1
+14 OPR 0 12
+15 JPC 0 19
+16 LIT 0 1
+17 STO 0 4
+18 JMP 0 29
+19 LOD 0 3
+20 LIT 0 1
+21 OPR 0 3
+22 CAL 1 2
+23 LOD 0 3
+24 LIT 0 2
+25 OPR 0 3
+26 CAL 1 2
+27 OPR 0 2
+28 STO 0 4
+29 LOD 0 4
+30 RET 1 1
+31 LIT 0 0
+32 STO 0 3
+33 LOD 0 3
+34 LIT 0 7
+35 OPR 0 12
+36 JPC 0 47
+37 LOD 0 3
+38 CAL 0 2
+39 STO 0 4
+40 LOD 0 4
+41 OPR 0 14
+42 LOD 0 3
+43 LIT 0 1
+44 OPR 0 2
+45 STO 0 3
+46 JMP 0 33
+47 RET 0 0
+
+=== Output Program ===
+0
+1
+1
+2
+3
+5
+8
+13
+
+=== Decorated AST ===
+ProgramNode(name: 'TestFibonacci')		→ tab_index:38, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('i')		→ tab_index:39, type:integer, lev:1
+│   ├── VarDecl('r')		→ tab_index:40, type:integer, lev:1
+│   └── FuncDecl(Fib)		→ tab_index:41, type:integer, lev:1
+│       ├── VarDecl('n')		→ tab_index:42, type:integer, lev:2
+│       └── CompoundStmt		→ type:void
+│           └── If		→ type:void
+│               ├── BinOp(leq)		→ type:boolean
+│               │   ├── Var(n)		→ tab_index:42, type:integer, lev:2
+│               │   └── Num(0)		→ type:integer
+│               ├── Assign(Fib := 0)		→ type:void
+│               │   ├── Var(Fib)		→ tab_index:41, type:integer, lev:1
+│               │   └── Num(0)		→ type:integer
+│               └── If		→ type:void
+│                   ├── BinOp(leq)		→ type:boolean
+│                   │   ├── Var(n)		→ tab_index:42, type:integer, lev:2
+│                   │   └── Num(1)		→ type:integer
+│                   ├── Assign(Fib := 1)		→ type:void
+│                   │   ├── Var(Fib)		→ tab_index:41, type:integer, lev:1
+│                   │   └── Num(1)		→ type:integer
+│                   └── Assign(Fib :=  + )		→ type:void
+│                       ├── Var(Fib)		→ tab_index:41, type:integer, lev:1
+│                       └── BinOp(plus)		→ type:integer
+│                           ├── ProcedureCall(name: 'Fib')		→ type:integer
+│                           │   └── BinOp(minus)		→ type:integer
+│                           │       ├── Var(n)		→ tab_index:42, type:integer, lev:2
+│                           │       └── Num(1)		→ type:integer
+│                           └── ProcedureCall(name: 'Fib')		→ type:integer
+│                               └── BinOp(minus)		→ type:integer
+│                                   ├── Var(n)		→ tab_index:42, type:integer, lev:2
+│                                   └── Num(2)		→ type:integer
+└── CompoundStmt		→ type:void
+    ├── Assign(i := 0)		→ type:void
+    │   ├── Var(i)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(0)		→ type:integer
+    └── While		→ type:void
+        ├── BinOp(leq)		→ type:boolean
+        │   ├── Var(i)		→ tab_index:39, type:integer, lev:1
+        │   └── Num(7)		→ type:integer
+        └── CompoundStmt		→ type:void
+            ├── Assign		→ type:void
+            │   ├── Var(r)		→ tab_index:40, type:integer, lev:1
+            │   └── ProcedureCall(name: 'Fib')		→ type:integer
+            │       └── Var(i)		→ tab_index:39, type:integer, lev:1
+            ├── ProcedureCall(name: 'writeln')		→ type:void
+            │   └── Var(r)		→ tab_index:40, type:integer, lev:1
+            └── Assign(i := i + 1)		→ type:void
+                ├── Var(i)		→ tab_index:39, type:integer, lev:1
+                └── BinOp(plus)		→ type:integer
+                    ├── Var(i)		→ tab_index:39, type:integer, lev:1
+                    └── Num(1)		→ type:integer
