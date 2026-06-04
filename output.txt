@@ -1,64 +1,21 @@
-<program>
-├── <program-header>
-│   ├── programsy
-│   ├── ident(Hello)
-│   └── semicolon
-├── <declaration-part>
-│   └── <var-declaration>
-│       ├── varsy
-│       ├── <identifier-list>
-│       │   ├── ident(a)
-│       │   ├── comma
-│       │   └── ident(b)
-│       ├── colon
-│       ├── <type>
-│       │   └── ident(integer)
-│       └── semicolon
-├── <compound-statement>
-│   ├── beginsy
-│   ├── <statement-list>
-│   │   ├── <statement>
-│   │   │   └── <assignment-statement>
-│   │   │       ├── <variable>
-│   │   │       │   └── ident(a)
-│   │   │       ├── becomes
-│   │   │       └── <expression>
-│   │   │           └── <simple-expression>
-│   │   │               └── <term>
-│   │   │                   └── <factor>
-│   │   │                       └── intcon(5)
-│   │   ├── semicolon
-│   │   ├── <statement>
-│   │   │   └── <assignment-statement>
-│   │   │       ├── <variable>
-│   │   │       │   └── ident(b)
-│   │   │       ├── becomes
-│   │   │       └── <expression>
-│   │   │           └── <simple-expression>
-│   │   │               ├── <term>
-│   │   │               │   └── <factor>
-│   │   │               │       └── <variable>
-│   │   │               │           └── ident(a)
-│   │   │               ├── <additive-operator>
-│   │   │               │   └── plus
-│   │   │               └── <term>
-│   │   │                   └── <factor>
-│   │   │                       └── intcon(10)
-│   │   ├── semicolon
-│   │   ├── <statement>
-│   │   │   └── <procedure/function-call>
-│   │   │       ├── <variable>
-│   │   │       │   └── ident(writeln)
-│   │   │       ├── lparent
-│   │   │       ├── <parameter-list>
-│   │   │       │   └── <expression>
-│   │   │       │       └── <simple-expression>
-│   │   │       │           └── <term>
-│   │   │       │               └── <factor>
-│   │   │       │                   └── <variable>
-│   │   │       │                       └── ident(b)
-│   │   │       └── rparent
-│   │   ├── semicolon
-│   │   └── <statement>
-│   └── endsy
-└── period
+0 INT 0 5
+1 LIT 0 10
+2 STO 1 0
+3 LOD 1 0
+4 LIT 0 2
+5 OPR 0 4
+6 STO 1 1
+7 RET 0 0
+ProgramNode(name: 'TestBasic')		→ tab_index:37, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('x')		→ tab_index:38, type:integer, lev:1
+│   └── VarDecl('y')		→ tab_index:39, type:integer, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(x := 10)		→ type:void
+    │   ├── Var(x)		→ tab_index:38, type:integer, lev:1
+    │   └── Num(10)		→ type:integer
+    └── Assign(y := xtimes2)		→ type:void
+        ├── Var(y)		→ tab_index:39, type:integer, lev:1
+        └── BinOp(times)		→ type:integer
+            ├── Var(x)		→ tab_index:38, type:integer, lev:1
+            └── Num(2)		→ type:integer

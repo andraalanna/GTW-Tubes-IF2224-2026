@@ -71,8 +71,9 @@ namespace PredefinedIdx {
     constexpr int CONST_FALSE   = 34;
     constexpr int PROC_WRITELN  = 35;
     constexpr int PROC_READLN   = 36;
-    // Identifier user mulai dari indeks 37
-    constexpr int USER_START    = 37;
+    constexpr int PROC_WRITE    = 37;
+    // update: write ditambahkan, identifier user mulai dari 38
+    constexpr int USER_START    = 38;
 }
 
 class SymbolTable{

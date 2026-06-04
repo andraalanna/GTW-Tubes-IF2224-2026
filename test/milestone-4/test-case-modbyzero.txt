@@ -1,0 +1,8 @@
+program TestModByZero;
+var
+    x, y: integer;
+begin
+    x := 10;
+    y := x mod 0;
+    writeln(y)
+end.

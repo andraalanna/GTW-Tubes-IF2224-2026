@@ -1,0 +1,2 @@
+ProgramNode(name: 'TestEmpty')		→ tab_index:37, type:void, lev:0
+└── CompoundStmt		→ type:void

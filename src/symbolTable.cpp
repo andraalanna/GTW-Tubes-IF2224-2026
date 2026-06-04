@@ -52,6 +52,7 @@ void SymbolTable::init(){
     // procedure
     addPredefined("writeln", AllowedObj::PROCEDURE, DataType::VOID, 0, 1, 0, 0); // idx 35
     addPredefined("readln", AllowedObj::PROCEDURE, DataType::VOID, 0, 1, 0, 0); // idx 36
+    addPredefined("write",   AllowedObj::PROCEDURE, DataType::VOID, 0, 1, 0, 0); 
     
     // slot kosong dulu sampe USER_START
     for (int i = (int)tab.size(); i < PredefinedIdx::USER_START; i++) {

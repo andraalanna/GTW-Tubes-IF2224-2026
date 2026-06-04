@@ -1,0 +1,22 @@
+program TestStackCorruption;
+type
+  Corruptor == record
+    arr: array[1..-3] of integer; { size -3 }
+    staticLink: integer;         { offset = -3 }
+    dynamicLink: integer;        { offset = -2 }
+    returnAddr: integer          { offset = -1 }
+  end;
+var
+  g: integer;
+
+procedure p();
+var
+  c: Corruptor;
+begin
+  c.staticLink := 999999;
+  g := 42;
+end;
+
+begin
+  p();
+end.

@@ -1,0 +1,8 @@
+program TestOverflow;
+var
+    x: integer;
+begin
+    x := 2147483647;
+    x := x + 1;
+    writeln(x)
+end.
