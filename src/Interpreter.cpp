@@ -285,7 +285,13 @@ void Interpreter::operateRET(const Instruction &ins, int codeSize)
     bool isFunction = (ins.level == 1);
     int psze = ins.operand;
 
-    int returnValue = isFunction ? stack[stackPtr] : 0;
+    int returnValue = 0;
+    if (isFunction)
+    {
+        if (stackPtr < 0 || stackPtr >= static_cast<int>(stack.size()))
+            throw StackCorruptionError("No return value available on stack for function");
+        returnValue = stack[stackPtr];
+    }
 
     int retAddr = stack[basePtr + 2];
     int callerBp = stack[basePtr + 1];
@@ -351,6 +357,8 @@ void Interpreter::operateOPR(const Instruction &instr)
         int b = pop(), a = pop();
         if (b == 0)
             throw DivisionByZeroError();
+        if (b == -1 && a == static_cast<int>(INT_MIN_VAL))
+            throw ArithmeticOverflowError("DIV signed overflow (" + std::to_string(a) + " / " + std::to_string(b) + ")");
         push(a / b);
         break;
     }
@@ -359,6 +367,8 @@ void Interpreter::operateOPR(const Instruction &instr)
         int b = pop(), a = pop();
         if (b == 0)
             throw DivisionByZeroError();
+        if (b == -1 && a == static_cast<int>(INT_MIN_VAL))
+            throw ArithmeticOverflowError("MOD signed overflow (" + std::to_string(a) + " % " + std::to_string(b) + ")");
         push(a % b);
         break;
     }
