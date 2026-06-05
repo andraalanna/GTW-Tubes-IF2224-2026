@@ -1,0 +1,16 @@
+program TestFaktorial;
+
+var hasil : integer;
+
+function Fakt(n : integer) : integer;
+begin
+    if n <= 1 then
+        Fakt := 1
+    else
+        Fakt := n * Fakt(n - 1)
+end;
+
+begin
+    hasil := Fakt(5);
+    writeln(hasil)
+end.
