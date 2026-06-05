@@ -1,0 +1,257 @@
+
+=== Intermediate Code ===
+0 INT 0 17
+1 JMP 0 2
+2 LIT 0 -100000
+3 OPR 0 14
+4 LIT 0 -100001
+5 OPR 0 14
+6 LIT 0 1
+7 OPR 0 14
+8 LIT 0 0
+9 OPR 0 14
+10 LIT 0 -100002
+11 OPR 0 14
+12 LIT 0 -100003
+13 OPR 0 14
+14 LIT 0 -100004
+15 OPR 0 14
+16 OPR 0 15
+17 LIT 0 6
+18 OPR 0 2
+19 LIT 0 1
+20 CKB 1 3
+21 LIT 0 1
+22 OPR 0 3
+23 LIT 0 2
+24 OPR 0 4
+25 OPR 0 2
+26 OPR 1 16
+27 LIT 0 -100005
+28 OPR 0 14
+29 OPR 0 15
+30 LIT 0 6
+31 OPR 0 2
+32 LIT 0 2
+33 CKB 1 3
+34 LIT 0 1
+35 OPR 0 3
+36 LIT 0 2
+37 OPR 0 4
+38 OPR 0 2
+39 OPR 1 16
+40 LIT 0 -100006
+41 OPR 0 14
+42 OPR 0 15
+43 LIT 0 6
+44 OPR 0 2
+45 LIT 0 3
+46 CKB 1 3
+47 LIT 0 1
+48 OPR 0 3
+49 LIT 0 2
+50 OPR 0 4
+51 OPR 0 2
+52 OPR 1 16
+53 LIT 0 -100007
+54 OPR 0 14
+55 OPR 0 15
+56 LIT 0 6
+57 OPR 0 2
+58 LIT 0 1
+59 CKB 1 3
+60 LIT 0 1
+61 OPR 0 3
+62 LIT 0 2
+63 OPR 0 4
+64 OPR 0 2
+65 LODA 0 0
+66 OPR 0 14
+67 OPR 0 15
+68 LIT 0 6
+69 OPR 0 2
+70 LIT 0 2
+71 CKB 1 3
+72 LIT 0 1
+73 OPR 0 3
+74 LIT 0 2
+75 OPR 0 4
+76 OPR 0 2
+77 LODA 0 0
+78 OPR 0 14
+79 OPR 0 15
+80 LIT 0 6
+81 OPR 0 2
+82 LIT 0 3
+83 CKB 1 3
+84 LIT 0 1
+85 OPR 0 3
+86 LIT 0 2
+87 OPR 0 4
+88 OPR 0 2
+89 LODA 0 0
+90 OPR 0 14
+91 LIT 0 -100008
+92 OPR 0 14
+93 LIT 0 -100009
+94 OPR 0 14
+95 OPR 0 15
+96 LIT 0 3
+97 OPR 0 2
+98 OPR 0 16
+99 LIT 0 -100010
+100 OPR 0 14
+101 OPR 0 15
+102 LIT 0 3
+103 OPR 0 2
+104 LIT 0 1
+105 OPR 0 2
+106 OPR 1 16
+107 LIT 0 -100011
+108 OPR 0 14
+109 LIT 0 -100012
+110 OPR 0 13
+111 OPR 0 15
+112 LIT 0 3
+113 OPR 0 2
+114 LODA 0 0
+115 OPR 0 14
+116 LIT 0 -100013
+117 OPR 0 13
+118 OPR 0 15
+119 LIT 0 3
+120 OPR 0 2
+121 LIT 0 1
+122 OPR 0 2
+123 LODA 0 0
+124 OPR 0 14
+125 LIT 0 -100014
+126 OPR 0 14
+127 LIT 0 -100015
+128 OPR 0 14
+129 OPR 0 15
+130 LIT 0 13
+131 OPR 0 2
+132 OPR 4 16
+133 LIT 0 -100016
+134 OPR 0 13
+135 LOD 0 13
+136 OPR 0 14
+137 LIT 0 -100017
+138 OPR 0 14
+139 RET 0 0
+
+=== Output Program ===
+--- TEST 1: Escape & Primitif ---
+hai\\'
+1
+0
+Mengecek fitur 'READLN' dan 'WRITELN' Arion
+--- TEST 2: Array of Real ---
+Masukkan nilai rating ke-1 (contoh: 4.5):
+Masukkan nilai rating ke-2 (contoh: 3.14):
+Masukkan nilai rating ke-3 (contoh: 5.0):
+Menampilkan isi Array Ratings (Wajib Desimal/Real):
+4.2
+3.11111
+3.0
+--- TEST 3: Record Field ---
+Masukkan ID Barang (Integer, contoh: 99):
+Masukkan Harga Barang (Real, contoh: 1250.75):
+Menampilkan isi Record Laptop:
+ID Laptop: 3
+Harga Laptop ($): 44.2222
+--- TEST 4: String Echo ---
+Ketikkan satu kata/kalimat tanpa petik:
+Pesan yang Anda ketik: Hello, Arion!
+--- ALL TESTS COMPLETED ---
+
+=== Decorated AST ===
+ProgramNode(name: 'TestReadWriteRobustness')		→ tab_index:40, type:void, lev:0
+├── Declarations
+│   ├── TypeDecl(Item)		→ tab_index:41, type:record, lev:1
+│   ├── VarDecl('laptop')		→ tab_index:42, type:record, lev:1
+│   ├── VarDecl('ratings')		→ tab_index:43, type:array, lev:1
+│   ├── VarDecl('status')		→ tab_index:44, type:boolean, lev:1
+│   └── VarDecl('userMsg')		→ tab_index:45, type:string, lev:1
+└── CompoundStmt		→ type:void
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('--- TEST 1: Escape & Primitif ---')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('hai\\'')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(true)		→ tab_index:33, type:boolean, lev:0
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(false)		→ tab_index:34, type:boolean, lev:0
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Mengecek fitur 'READLN' dan 'WRITELN' Arion')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('--- TEST 2: Array of Real ---')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Masukkan nilai rating ke-1 (contoh: 4.5):')		→ type:string
+    ├── ProcedureCall(name: 'readln')		→ type:void
+    │   └── ArrayAccess		→ type:real
+    │       ├── Var(ratings)		→ tab_index:43, type:array, lev:1
+    │       └── Num(1)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Masukkan nilai rating ke-2 (contoh: 3.14):')		→ type:string
+    ├── ProcedureCall(name: 'readln')		→ type:void
+    │   └── ArrayAccess		→ type:real
+    │       ├── Var(ratings)		→ tab_index:43, type:array, lev:1
+    │       └── Num(2)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Masukkan nilai rating ke-3 (contoh: 5.0):')		→ type:string
+    ├── ProcedureCall(name: 'readln')		→ type:void
+    │   └── ArrayAccess		→ type:real
+    │       ├── Var(ratings)		→ tab_index:43, type:array, lev:1
+    │       └── Num(3)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Menampilkan isi Array Ratings (Wajib Desimal/Real):')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── ArrayAccess		→ type:real
+    │       ├── Var(ratings)		→ tab_index:43, type:array, lev:1
+    │       └── Num(1)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── ArrayAccess		→ type:real
+    │       ├── Var(ratings)		→ tab_index:43, type:array, lev:1
+    │       └── Num(2)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── ArrayAccess		→ type:real
+    │       ├── Var(ratings)		→ tab_index:43, type:array, lev:1
+    │       └── Num(3)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('--- TEST 3: Record Field ---')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Masukkan ID Barang (Integer, contoh: 99):')		→ type:string
+    ├── ProcedureCall(name: 'readln')		→ type:void
+    │   └── FieldAccess(id)		→ tab_index:38, type:integer, lev:0
+    │       └── Var(laptop)		→ tab_index:42, type:record, lev:1
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Masukkan Harga Barang (Real, contoh: 1250.75):')		→ type:string
+    ├── ProcedureCall(name: 'readln')		→ type:void
+    │   └── FieldAccess(price)		→ tab_index:39, type:real, lev:0
+    │       └── Var(laptop)		→ tab_index:42, type:record, lev:1
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Menampilkan isi Record Laptop:')		→ type:string
+    ├── ProcedureCall(name: 'write')		→ type:void
+    │   └── Str('ID Laptop: ')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── FieldAccess(id)		→ tab_index:38, type:integer, lev:0
+    │       └── Var(laptop)		→ tab_index:42, type:record, lev:1
+    ├── ProcedureCall(name: 'write')		→ type:void
+    │   └── Str('Harga Laptop ($): ')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── FieldAccess(price)		→ tab_index:39, type:real, lev:0
+    │       └── Var(laptop)		→ tab_index:42, type:record, lev:1
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('--- TEST 4: String Echo ---')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Str('Ketikkan satu kata/kalimat tanpa petik:')		→ type:string
+    ├── ProcedureCall(name: 'readln')		→ type:void
+    │   └── Var(userMsg)		→ tab_index:45, type:string, lev:1
+    ├── ProcedureCall(name: 'write')		→ type:void
+    │   └── Str('Pesan yang Anda ketik: ')		→ type:string
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(userMsg)		→ tab_index:45, type:string, lev:1
+    └── ProcedureCall(name: 'writeln')		→ type:void
+        └── Str('--- ALL TESTS COMPLETED ---')		→ type:string
