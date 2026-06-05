@@ -1,0 +1,78 @@
+program TestReadWriteRobustness;
+
+type
+  Item == record
+    id: integer;
+    price: real
+  end;
+
+var
+  laptop: Item;
+  ratings: array[1..3] of real;
+  status: boolean;
+  userMsg: string;
+
+begin
+  { ================================================================= }
+  { TEST 1: PENGUJIAN ESCAPE CHARACTER & PRIMITIF                    }
+  { ================================================================= }
+  writeln('--- TEST 1: Escape & Primitif ---');
+  
+  { Menguji teks kirimanmu: literal backslash + escaped quote }
+  writeln('hai\\'''); 
+  
+  { Menguji cetak boolean langsung }
+  writeln(true);
+  writeln(false);
+  
+  { Menguji teks dengan petik ganda di dalam string }
+  writeln('Mengecek fitur ''READLN'' dan ''WRITELN'' Arion');
+
+
+  { ================================================================= }
+  { TEST 2: PENGUJIAN INPUT & OUTPUT PADA ARRAY OF REAL              }
+  { ================================================================= }
+  writeln('--- TEST 2: Array of Real ---');
+  writeln('Masukkan nilai rating ke-1 (contoh: 4.5):');
+  readln(ratings[1]);
+  
+  writeln('Masukkan nilai rating ke-2 (contoh: 3.14):');
+  readln(ratings[2]);
+  
+  writeln('Masukkan nilai rating ke-3 (contoh: 5.0):');
+  readln(ratings[3]);
+
+  writeln('Menampilkan isi Array Ratings (Wajib Desimal/Real):');
+  writeln(ratings[1]);
+  writeln(ratings[2]);
+  writeln(ratings[3]);
+
+
+  { ================================================================= }
+  { TEST 3: PENGUJIAN INPUT & OUTPUT PADA FIELD RECORD                }
+  { ================================================================= }
+  writeln('--- TEST 3: Record Field ---');
+  writeln('Masukkan ID Barang (Integer, contoh: 99):');
+  readln(laptop.id);
+  
+  writeln('Masukkan Harga Barang (Real, contoh: 1250.75):');
+  readln(laptop.price);
+
+  writeln('Menampilkan isi Record Laptop:');
+  write('ID Laptop: ');
+  writeln(laptop.id);
+  write('Harga Laptop ($): ');
+  writeln(laptop.price);
+
+
+  { ================================================================= }
+  { TEST 4: INTEGRASI INPUT STRING                                   }
+  { ================================================================= }
+  writeln('--- TEST 4: String Echo ---');
+  writeln('Ketikkan satu kata/kalimat tanpa petik:');
+  readln(userMsg);
+  write('Pesan yang Anda ketik: ');
+  writeln(userMsg);
+
+  writeln('--- ALL TESTS COMPLETED ---');
+end.
