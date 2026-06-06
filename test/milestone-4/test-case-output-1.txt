@@ -1,0 +1,44 @@
+
+=== Intermediate Code ===
+0 INT 0 4
+1 JMP 0 2
+2 LIT 4 -100000
+3 STO 0 3
+4 LIT 0 999
+5 OPR 0 15
+6 LIT 0 7
+7 OPR 0 2
+8 LIT 0 -4
+9 OPR 0 2
+10 STOA 0 0
+11 LOD 0 3
+12 LIT 4 -100000
+13 OPR 0 7
+14 JPC 0 17
+15 LIT 4 -100001
+16 OPR 0 14
+17 RET 0 0
+
+=== Output Program ===
+[RuntimeError] Type mismatch: cannot compare String and Integer
+
+=== Decorated AST ===
+ProgramNode(name: 'TypeMismatch')		→ tab_index:40, type:void, lev:0
+├── Declarations
+│   ├── TypeDecl(Corruptor)		→ tab_index:41, type:record, lev:1
+│   ├── VarDecl('idx')		→ tab_index:42, type:string, lev:1
+│   └── VarDecl('c')		→ tab_index:43, type:record, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(idx := "'hello'")		→ type:void
+    │   ├── Var(idx)		→ tab_index:42, type:string, lev:1
+    │   └── Str('hello')		→ type:string
+    ├── Assign(c.fakeString := 999)		→ type:void
+    │   ├── FieldAccess(fakeString)		→ tab_index:39, type:integer, lev:0
+    │   │   └── Var(c)		→ tab_index:43, type:record, lev:1
+    │   └── Num(999)		→ type:integer
+    └── If		→ type:void
+        ├── BinOp(eql)		→ type:boolean
+        │   ├── Var(idx)		→ tab_index:42, type:string, lev:1
+        │   └── Str('hello')		→ type:string
+        └── ProcedureCall(name: 'writeln')		→ type:void
+            └── Str('Matches!')		→ type:string

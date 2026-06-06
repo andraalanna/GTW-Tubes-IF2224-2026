@@ -217,7 +217,14 @@ void ICG::genNumber(NumberNode *node)
 
 void ICG::genChar(CharNode *node)
 {
-    char c = node->rawValue.empty() ? 0 : node->rawValue[0];
+    char c = 0;
+    if (!node->rawValue.empty())
+    {
+        if (node->rawValue.size() >= 3 && node->rawValue[0] == '\'')
+            c = node->rawValue[1];
+        else
+            c = node->rawValue[0];
+    }
     emit(OpCode::LIT, static_cast<int>(DataType::CHAR), (int)c);
 }
 
