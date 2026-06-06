@@ -1,0 +1,380 @@
+
+=== Intermediate Code ===
+0 INT 0 7
+1 JMP 0 47
+2 INT 0 5
+3 LOD 0 -2
+4 STO 0 3
+5 LOD 0 -1
+6 STO 0 4
+7 LOD 0 3
+8 OPR 0 13
+9 LOD 0 4
+10 OPR 0 14
+11 RET 0 2
+12 INT 0 6
+13 LOD 0 -2
+14 STO 0 3
+15 LOD 0 -1
+16 STO 0 4
+17 LOD 0 3
+18 LOD 0 4
+19 OPR 0 2
+20 STO 0 5
+21 LOD 0 5
+22 RET 1 2
+23 INT 0 6
+24 LOD 0 -1
+25 STO 0 3
+26 LIT 0 1
+27 STO 0 4
+28 LIT 0 1
+29 STO 1 2
+30 LOD 1 2
+31 LOD 0 3
+32 OPR 0 12
+33 JPC 0 43
+34 LOD 0 4
+35 LOD 1 2
+36 OPR 0 4
+37 STO 0 4
+38 LOD 1 2
+39 LIT 0 1
+40 OPR 0 2
+41 STO 1 2
+42 JMP 0 30
+43 LOD 0 4
+44 STO 0 5
+45 LOD 0 5
+46 RET 1 1
+47 LIT 0 10
+48 STO 0 0
+49 LOD 0 0
+50 LIT 0 5
+51 OPR 0 11
+52 JPC 0 55
+53 LOD 0 0
+54 OPR 0 14
+55 LIT 0 3
+56 STO 0 0
+57 LOD 0 0
+58 LIT 0 5
+59 OPR 0 11
+60 JPC 0 64
+61 LIT 0 1
+62 OPR 0 14
+63 JMP 0 66
+64 LIT 0 0
+65 OPR 0 14
+66 LIT 0 1
+67 STO 0 0
+68 LIT 0 0
+69 STO 0 1
+70 LOD 0 0
+71 LIT 0 5
+72 OPR 0 12
+73 JPC 0 83
+74 LOD 0 1
+75 LOD 0 0
+76 OPR 0 2
+77 STO 0 1
+78 LOD 0 0
+79 LIT 0 1
+80 OPR 0 2
+81 STO 0 0
+82 JMP 0 70
+83 LOD 0 1
+84 OPR 0 14
+85 LIT 0 0
+86 STO 0 3
+87 LIT 0 1
+88 STO 0 2
+89 LOD 0 2
+90 LIT 0 5
+91 OPR 0 12
+92 JPC 0 102
+93 LOD 0 3
+94 LOD 0 2
+95 OPR 0 2
+96 STO 0 3
+97 LOD 0 2
+98 LIT 0 1
+99 OPR 0 2
+100 STO 0 2
+101 JMP 0 89
+102 LOD 0 3
+103 OPR 0 14
+104 LIT 0 0
+105 STO 0 3
+106 LIT 0 5
+107 STO 0 2
+108 LOD 0 2
+109 LIT 0 1
+110 OPR 0 10
+111 JPC 0 121
+112 LOD 0 3
+113 LOD 0 2
+114 OPR 0 2
+115 STO 0 3
+116 LOD 0 2
+117 LIT 0 1
+118 OPR 0 3
+119 STO 0 2
+120 JMP 0 108
+121 LOD 0 3
+122 OPR 0 14
+123 LIT 0 1
+124 STO 0 0
+125 LIT 0 0
+126 STO 0 1
+127 LOD 0 1
+128 LOD 0 0
+129 OPR 0 2
+130 STO 0 1
+131 LOD 0 0
+132 LIT 0 1
+133 OPR 0 2
+134 STO 0 0
+135 LOD 0 0
+136 LIT 0 6
+137 OPR 0 7
+138 JPC 0 127
+139 LOD 0 1
+140 OPR 0 14
+141 LIT 0 2
+142 STO 0 0
+143 LOD 0 0
+144 LIT 0 1
+145 OPR 0 7
+146 JPC 0 148
+147 JMP 0 149
+148 JMP 0 152
+149 LIT 0 100
+150 OPR 0 14
+151 JMP 0 170
+152 LOD 0 0
+153 LIT 0 2
+154 OPR 0 7
+155 JPC 0 157
+156 JMP 0 158
+157 JMP 0 161
+158 LIT 0 200
+159 OPR 0 14
+160 JMP 0 170
+161 LOD 0 0
+162 LIT 0 3
+163 OPR 0 7
+164 JPC 0 166
+165 JMP 0 167
+166 JMP 0 170
+167 LIT 0 300
+168 OPR 0 14
+169 JMP 0 170
+170 LIT 0 4
+171 OPR 0 13
+172 LIT 0 2
+173 OPR 0 13
+174 LIT 0 0
+175 OPR 0 14
+176 LIT 0 7
+177 LIT 0 8
+178 CAL 0 2
+179 LIT 0 10
+180 LIT 0 32
+181 CAL 0 12
+182 STO 0 3
+183 LOD 0 3
+184 OPR 0 14
+185 LIT 0 5
+186 CAL 0 23
+187 STO 0 3
+188 LOD 0 3
+189 OPR 0 14
+190 RET 0 0
+
+=== Output Program ===
+10
+0
+15
+15
+15
+15
+200
+420
+78
+42
+120
+
+=== Decorated AST ===
+ProgramNode(name: 'TC16')		→ tab_index:38, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('x')		→ tab_index:39, type:integer, lev:1
+│   ├── VarDecl('y')		→ tab_index:40, type:integer, lev:1
+│   ├── VarDecl('i')		→ tab_index:41, type:integer, lev:1
+│   ├── VarDecl('hasil')		→ tab_index:42, type:integer, lev:1
+│   ├── ProcDecl(cetakDua)		→ tab_index:43, type:void, lev:1
+│   │   ├── VarDecl('a')		→ tab_index:44, type:integer, lev:2
+│   │   ├── VarDecl('b')		→ tab_index:45, type:integer, lev:2
+│   │   └── CompoundStmt		→ type:void
+│   │       ├── ProcedureCall(name: 'write')		→ type:void
+│   │       │   └── Var(a)		→ tab_index:44, type:integer, lev:2
+│   │       └── ProcedureCall(name: 'writeln')		→ type:void
+│   │           └── Var(b)		→ tab_index:45, type:integer, lev:2
+│   ├── FuncDecl(tambah)		→ tab_index:46, type:integer, lev:1
+│   │   ├── VarDecl('a')		→ tab_index:47, type:integer, lev:2
+│   │   ├── VarDecl('b')		→ tab_index:48, type:integer, lev:2
+│   │   └── CompoundStmt		→ type:void
+│   │       └── Assign(tambah := a + b)		→ type:void
+│   │           ├── Var(tambah)		→ tab_index:46, type:integer, lev:1
+│   │           └── BinOp(plus)		→ type:integer
+│   │               ├── Var(a)		→ tab_index:47, type:integer, lev:2
+│   │               └── Var(b)		→ tab_index:48, type:integer, lev:2
+│   └── FuncDecl(faktorial)		→ tab_index:49, type:integer, lev:1
+│       ├── VarDecl('n')		→ tab_index:50, type:integer, lev:2
+│       └── CompoundStmt		→ type:void
+│           ├── VarDecl('f')		→ tab_index:51, type:integer, lev:2
+│           ├── Assign(f := 1)		→ type:void
+│           │   ├── Var(f)		→ tab_index:51, type:integer, lev:2
+│           │   └── Num(1)		→ type:integer
+│           ├── For(i, to)		→ type:void
+│           │   ├── Num(1)		→ type:integer
+│           │   ├── Var(n)		→ tab_index:50, type:integer, lev:2
+│           │   └── CompoundStmt		→ type:void
+│           │       └── Assign(f := ftimesi)		→ type:void
+│           │           ├── Var(f)		→ tab_index:51, type:integer, lev:2
+│           │           └── BinOp(times)		→ type:integer
+│           │               ├── Var(f)		→ tab_index:51, type:integer, lev:2
+│           │               └── Var(i)		→ tab_index:41, type:integer, lev:1
+│           └── Assign(faktorial := f)		→ type:void
+│               ├── Var(faktorial)		→ tab_index:49, type:integer, lev:1
+│               └── Var(f)		→ tab_index:51, type:integer, lev:2
+└── CompoundStmt		→ type:void
+    ├── Assign(x := 10)		→ type:void
+    │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(10)		→ type:integer
+    ├── If		→ type:void
+    │   ├── BinOp(gtr)		→ type:boolean
+    │   │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   │   └── Num(5)		→ type:integer
+    │   └── ProcedureCall(name: 'writeln')		→ type:void
+    │       └── Var(x)		→ tab_index:39, type:integer, lev:1
+    ├── Assign(x := 3)		→ type:void
+    │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(3)		→ type:integer
+    ├── If		→ type:void
+    │   ├── BinOp(gtr)		→ type:boolean
+    │   │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   │   └── Num(5)		→ type:integer
+    │   ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   │   └── Num(1)		→ type:integer
+    │   └── ProcedureCall(name: 'writeln')		→ type:void
+    │       └── Num(0)		→ type:integer
+    ├── Assign(x := 1)		→ type:void
+    │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(1)		→ type:integer
+    ├── Assign(y := 0)		→ type:void
+    │   ├── Var(y)		→ tab_index:40, type:integer, lev:1
+    │   └── Num(0)		→ type:integer
+    ├── While		→ type:void
+    │   ├── BinOp(leq)		→ type:boolean
+    │   │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   │   └── Num(5)		→ type:integer
+    │   └── CompoundStmt		→ type:void
+    │       ├── Assign(y := y + x)		→ type:void
+    │       │   ├── Var(y)		→ tab_index:40, type:integer, lev:1
+    │       │   └── BinOp(plus)		→ type:integer
+    │       │       ├── Var(y)		→ tab_index:40, type:integer, lev:1
+    │       │       └── Var(x)		→ tab_index:39, type:integer, lev:1
+    │       └── Assign(x := x + 1)		→ type:void
+    │           ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │           └── BinOp(plus)		→ type:integer
+    │               ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │               └── Num(1)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(y)		→ tab_index:40, type:integer, lev:1
+    ├── Assign(hasil := 0)		→ type:void
+    │   ├── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    │   └── Num(0)		→ type:integer
+    ├── For(i, to)		→ type:void
+    │   ├── Num(1)		→ type:integer
+    │   ├── Num(5)		→ type:integer
+    │   └── CompoundStmt		→ type:void
+    │       └── Assign(hasil := hasil + i)		→ type:void
+    │           ├── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    │           └── BinOp(plus)		→ type:integer
+    │               ├── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    │               └── Var(i)		→ tab_index:41, type:integer, lev:1
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    ├── Assign(hasil := 0)		→ type:void
+    │   ├── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    │   └── Num(0)		→ type:integer
+    ├── For(i, downto)		→ type:void
+    │   ├── Num(5)		→ type:integer
+    │   ├── Num(1)		→ type:integer
+    │   └── CompoundStmt		→ type:void
+    │       └── Assign(hasil := hasil + i)		→ type:void
+    │           ├── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    │           └── BinOp(plus)		→ type:integer
+    │               ├── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    │               └── Var(i)		→ tab_index:41, type:integer, lev:1
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    ├── Assign(x := 1)		→ type:void
+    │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(1)		→ type:integer
+    ├── Assign(y := 0)		→ type:void
+    │   ├── Var(y)		→ tab_index:40, type:integer, lev:1
+    │   └── Num(0)		→ type:integer
+    ├── Repeat		→ type:void
+    │   ├── Assign(y := y + x)		→ type:void
+    │   │   ├── Var(y)		→ tab_index:40, type:integer, lev:1
+    │   │   └── BinOp(plus)		→ type:integer
+    │   │       ├── Var(y)		→ tab_index:40, type:integer, lev:1
+    │   │       └── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   ├── Assign(x := x + 1)		→ type:void
+    │   │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   │   └── BinOp(plus)		→ type:integer
+    │   │       ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   │       └── Num(1)		→ type:integer
+    │   └── BinOp(eql)		→ type:boolean
+    │       ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │       └── Num(6)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(y)		→ tab_index:40, type:integer, lev:1
+    ├── Assign(x := 2)		→ type:void
+    │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(2)		→ type:integer
+    ├── Case		→ type:void
+    │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   ├── CaseBranch(1)
+    │   │   └── ProcedureCall(name: 'writeln')		→ type:void
+    │   │       └── Num(100)		→ type:integer
+    │   ├── CaseBranch(2)
+    │   │   └── ProcedureCall(name: 'writeln')		→ type:void
+    │   │       └── Num(200)		→ type:integer
+    │   └── CaseBranch(3)
+    │       └── ProcedureCall(name: 'writeln')		→ type:void
+    │           └── Num(300)		→ type:integer
+    ├── ProcedureCall(name: 'write')		→ type:void
+    │   └── Num(4)		→ type:integer
+    ├── ProcedureCall(name: 'write')		→ type:void
+    │   └── Num(2)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Num(0)		→ type:integer
+    ├── ProcedureCall(name: 'cetakDua')		→ type:void
+    │   ├── Num(7)		→ type:integer
+    │   └── Num(8)		→ type:integer
+    ├── Assign		→ type:void
+    │   ├── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    │   └── ProcedureCall(name: 'tambah')		→ type:integer
+    │       ├── Num(10)		→ type:integer
+    │       └── Num(32)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    ├── Assign		→ type:void
+    │   ├── Var(hasil)		→ tab_index:42, type:integer, lev:1
+    │   └── ProcedureCall(name: 'faktorial')		→ type:integer
+    │       └── Num(5)		→ type:integer
+    └── ProcedureCall(name: 'writeln')		→ type:void
+        └── Var(hasil)		→ tab_index:42, type:integer, lev:1

@@ -1,0 +1,46 @@
+program TC17;
+var
+  x : integer;
+begin
+  { Edge 1: kondisi tepat di batas (boundary) }
+  x := 5;
+  if x > 5 then
+    writeln(1)
+  else
+    writeln(0);
+
+  { Edge 2: kondisi false, tidak ada else (tidak boleh ada output) }
+  x := 3;
+  if x > 10 then
+    writeln(99);
+
+  { Edge 3: nested if, semua cabang false kecuali else terdalam }
+  x := 1;
+  if x > 10 then
+    writeln(3)
+  else
+    if x > 5 then
+      writeln(2)
+    else
+      writeln(1);
+
+  { Edge 4: nested if, cabang pertama true (tidak masuk else) }
+  x := 15;
+  if x > 10 then
+    writeln(3)
+  else
+    if x > 5 then
+      writeln(2)
+    else
+      writeln(1);
+
+  { Edge 5: kondisi dengan ekspresi kompleks }
+  x := 6;
+  if x > 5 then
+    if x < 10 then
+      writeln(1)
+    else
+      writeln(0)
+  else
+    writeln(0)
+end.

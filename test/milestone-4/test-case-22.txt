@@ -1,0 +1,74 @@
+program TC22;
+var
+  x : integer;
+  y : integer;
+
+procedure tanpaParam;
+begin
+  writeln(99)
+end;
+
+procedure satuParam(a : integer);
+begin
+  writeln(a)
+end;
+
+procedure tigaParam(a : integer; b : integer; c : integer);
+begin
+  writeln(a);
+  writeln(b);
+  writeln(c)
+end;
+
+procedure denganLoop(n : integer);
+var
+  i : integer;
+begin
+  i := 1;
+  while i <= n do
+  begin
+    write(i);
+    i := i + 1
+  end;
+  writeln(0)
+end;
+
+function kali(a : integer; b : integer) : integer;
+begin
+  kali := a * b
+end;
+
+function kuadrat(n : integer) : integer;
+begin
+  kuadrat := kali(n, n)
+end;
+
+begin
+  { Edge 1: prosedur tanpa parameter }
+  tanpaParam;
+
+  { Edge 2: prosedur dengan satu parameter }
+  satuParam(42);
+
+  { Edge 3: prosedur dengan tiga parameter }
+  tigaParam(1, 2, 3);
+
+  { Edge 4: prosedur dengan ekspresi sebagai argumen }
+  x := 3;
+  y := 4;
+  satuParam(x + y);
+
+  { Edge 5: prosedur dengan loop di dalamnya }
+  denganLoop(5);
+
+  { Edge 6: function call di dalam ekspresi }
+  x := kali(3, 4);
+  writeln(x);
+
+  { Edge 7: function call bersarang }
+  x := kuadrat(5);
+  writeln(x);
+
+  { Edge 8: function call langsung di writeln }
+  writeln(kali(6, 7))
+end.

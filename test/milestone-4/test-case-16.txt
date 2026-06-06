@@ -1,0 +1,101 @@
+program TC16;
+var
+  x : integer;
+  y : integer;
+  i : integer;
+  hasil : integer;
+
+procedure cetakDua(a : integer; b : integer);
+begin
+  write(a);
+  writeln(b)
+end;
+
+function tambah(a : integer; b : integer) : integer;
+begin
+  tambah := a + b
+end;
+
+function faktorial(n : integer) : integer;
+var
+  f : integer;
+begin
+  f := 1;
+  for i := 1 to n do
+  begin
+    f := f * i
+  end;
+  faktorial := f
+end;
+
+begin
+  { === IF-ELSE === }
+  x := 10;
+  if x > 5 then
+    writeln(x);
+
+  x := 3;
+  if x > 5 then
+    writeln(1)
+  else
+    writeln(0);
+
+  { === WHILE === }
+  x := 1;
+  y := 0;
+  while x <= 5 do
+  begin
+    y := y + x;
+    x := x + 1
+  end;
+  writeln(y);
+
+  { === FOR TO === }
+  hasil := 0;
+  for i := 1 to 5 do
+  begin
+    hasil := hasil + i
+  end;
+  writeln(hasil);
+
+  { === FOR DOWNTO === }
+  hasil := 0;
+  for i := 5 downto 1 do
+  begin
+    hasil := hasil + i
+  end;
+  writeln(hasil);
+
+  { === REPEAT === }
+  x := 1;
+  y := 0;
+  repeat
+    y := y + x;
+    x := x + 1
+  until x == 6;
+  writeln(y);
+
+  { === CASE === }
+  x := 2;
+  case x of
+    1: writeln(100);
+    2: writeln(200);
+    3: writeln(300)
+  end;
+
+  { === WRITE / WRITELN === }
+  write(4);
+  write(2);
+  writeln(0);
+
+  { === PROCEDURE CALL === }
+  cetakDua(7, 8);
+
+  { === FUNCTION CALL === }
+  hasil := tambah(10, 32);
+  writeln(hasil);
+
+  { === FUNCTION DENGAN LOOP === }
+  hasil := faktorial(5);
+  writeln(hasil)
+end.

@@ -1,0 +1,35 @@
+program TC20;
+var
+  x : integer;
+  y : integer;
+begin
+  { Edge 1: kondisi langsung true di iterasi pertama (1 kali jalan) }
+  x := 5;
+  y := 0;
+  repeat
+    y := y + 1;
+    x := x + 1
+  until x == 6;
+  writeln(y);
+
+  { Edge 2: banyak iterasi sebelum kondisi terpenuhi }
+  x := 1;
+  y := 0;
+  repeat
+    y := y + x;
+    x := x + 1
+  until x == 10;
+  writeln(y);
+
+  { Edge 3: repeat dengan if di dalamnya }
+  x := 1;
+  y := 0;
+  repeat
+    if x > 5 then
+      y := y + 10
+    else
+      y := y + 1;
+    x := x + 1
+  until x == 8;
+  writeln(y)
+end.

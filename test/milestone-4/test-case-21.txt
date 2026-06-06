@@ -1,0 +1,51 @@
+program TC21;
+var
+  x : integer;
+  y : integer;
+begin
+  { Edge 1: nilai cocok di branch pertama }
+  x := 1;
+  case x of
+    1: writeln(10);
+    2: writeln(20);
+    3: writeln(30)
+  end;
+
+  { Edge 2: nilai cocok di branch terakhir }
+  x := 3;
+  case x of
+    1: writeln(10);
+    2: writeln(20);
+    3: writeln(30)
+  end;
+
+  { Edge 3: nilai tidak cocok dengan branch manapun (tidak ada output) }
+  x := 9;
+  y := 0;
+  case x of
+    1: y := 1;
+    2: y := 2;
+    3: y := 3
+  end;
+  writeln(y);
+
+  { Edge 4: case dengan satu branch saja }
+  x := 1;
+  case x of
+    1: writeln(42)
+  end;
+
+  { Edge 5: case dengan body compound statement }
+  x := 2;
+  y := 0;
+  case x of
+    1: begin
+         y := 10;
+         writeln(y)
+       end;
+    2: begin
+         y := 20;
+         writeln(y)
+       end
+  end
+end.
