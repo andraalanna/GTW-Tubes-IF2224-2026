@@ -474,7 +474,7 @@ void ICG::genProcCall(ProcCallNode *node)
         for (auto &arg : node->args)
         {
             genExpression(arg.get());
-            emit(OpCode::OPR, 0, (int)OprCode::WRT);
+            emit(OpCode::OPR, static_cast<int>(arg->dtype), (int)OprCode::WRT);
         }
         return;
     }
@@ -485,7 +485,7 @@ void ICG::genProcCall(ProcCallNode *node)
         {
 
             emit(OpCode::LIT, 0, 0);
-            emit(OpCode::OPR, 0, (int)OprCode::WRTLN);
+            emit(OpCode::OPR, static_cast<int>(DataType::VOID), (int)OprCode::WRTLN);
         }
         else
         {
@@ -494,9 +494,9 @@ void ICG::genProcCall(ProcCallNode *node)
             {
                 genExpression(node->args[i].get());
                 if (i == (int)node->args.size() - 1)
-                    emit(OpCode::OPR, 0, (int)OprCode::WRTLN); 
+                    emit(OpCode::OPR, static_cast<int>(node->args[i]->dtype), (int)OprCode::WRTLN); 
                 else
-                    emit(OpCode::OPR, 0, (int)OprCode::WRT);
+                    emit(OpCode::OPR, static_cast<int>(node->args[i]->dtype), (int)OprCode::WRT);
             }
         }
         return;

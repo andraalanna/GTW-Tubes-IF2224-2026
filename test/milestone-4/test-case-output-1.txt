@@ -16,7 +16,7 @@
 13 OPR 0 7
 14 JPC 0 17
 15 LIT 4 -100001
-16 OPR 0 14
+16 OPR 4 14
 17 RET 0 0
 
 === Output Program ===

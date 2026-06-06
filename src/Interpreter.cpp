@@ -564,13 +564,13 @@ void Interpreter::operateOPR(const Instruction &instr)
     case OprCode::WRT:
     {
         int val = pop().val;
-        outputValue(val, false);
+        outputValue(val, static_cast<DataType>(instr.level), false);
         break;
     }
     case OprCode::WRTLN:
     {
         int val = pop().val;
-        outputValue(val, true);
+        outputValue(val, static_cast<DataType>(instr.level), true);
         break;
     }
     case OprCode::PUSHBP:
@@ -789,36 +789,43 @@ std::vector<Instruction> Interpreter::parseFromString(const std::string &content
     return parseFromStream(stream);
 }
 
-void Interpreter::outputValue(int val, bool newline)
+void Interpreter::outputValue(int val, DataType type, bool newline)
 {
-    if (val <= -100000 && stringTable.count(val))
+    if (type == DataType::STRING)
     {
-        std::string s = stringTable.at(val);
-        if (s.size() >= 2 && s.front() == '\'' && s.back() == '\'')
+        if (stringTable.count(val))
         {
-            s = s.substr(1, s.size() - 2);
+            std::string s = stringTable.at(val);
+            if (s.size() >= 2 && s.front() == '\'' && s.back() == '\'')
+            {
+                s = s.substr(1, s.size() - 2);
+            }
+            size_t pos = 0;
+            while ((pos = s.find("''", pos)) != std::string::npos)
+            {
+                s.replace(pos, 2, "'");
+                pos += 1;
+            }
+            pos = 0;
+            while ((pos = s.find("\\n", pos)) != std::string::npos)
+            {
+                s.replace(pos, 2, "\n");
+                pos += 1;
+            }
+            pos = 0;
+            while ((pos = s.find("\\t", pos)) != std::string::npos)
+            {
+                s.replace(pos, 2, "\t");
+                pos += 1;
+            }
+            output << s;
         }
-        size_t pos = 0;
-        while ((pos = s.find("''", pos)) != std::string::npos)
+        else
         {
-            s.replace(pos, 2, "'");
-            pos += 1;
+            output << val;
         }
-        pos = 0;
-        while ((pos = s.find("\\n", pos)) != std::string::npos)
-        {
-            s.replace(pos, 2, "\n");
-            pos += 1;
-        }
-        pos = 0;
-        while ((pos = s.find("\\t", pos)) != std::string::npos)
-        {
-            s.replace(pos, 2, "\t");
-            pos += 1;
-        }
-        output << s;
     }
-    else if (val >= -99999 && val <= -1)
+    else if (type == DataType::REAL)
     {
         if (realPool.count(val))
         {
@@ -836,6 +843,18 @@ void Interpreter::outputValue(int val, bool newline)
         {
             output << val;
         }
+    }
+    else if (type == DataType::BOOLEAN)
+    {
+        output << (val ? "true" : "false");
+    }
+    else if (type == DataType::CHAR)
+    {
+        output << static_cast<char>(val);
+    }
+    else if (type == DataType::VOID)
+    {
+        // VOID (e.g. dummy value for writeln) - do not print the value
     }
     else
     {

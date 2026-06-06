@@ -1,0 +1,32 @@
+
+=== Intermediate Code ===
+0 INT 0 3
+1 JMP 0 11
+2 INT 0 3
+3 LIT 0 999999
+4 OPR 0 15
+5 LIT 0 3
+6 OPR 0 2
+7 LIT 0 -1
+8 OPR 0 2
+9 STOA 0 0
+10 RET 0 0
+11 CAL 0 2
+12 RET 0 0
+
+=== Output Program ===
+[RuntimeError] Return address corrupted (999999)
+
+=== Decorated AST ===
+ProgramNode(name: 'TestStackSmashing')		→ tab_index:42, type:void, lev:0
+├── Declarations
+│   ├── TypeDecl(Corruptor)		→ tab_index:43, type:record, lev:1
+│   └── ProcDecl(p)		→ tab_index:44, type:void, lev:1
+│       └── CompoundStmt		→ type:void
+│           ├── VarDecl('c')		→ tab_index:45, type:record, lev:2
+│           └── Assign(c.returnAddr := 999999)		→ type:void
+│               ├── FieldAccess(returnAddr)		→ tab_index:41, type:integer, lev:0
+│               │   └── Var(c)		→ tab_index:45, type:record, lev:2
+│               └── Num(999999)		→ type:integer
+└── CompoundStmt		→ type:void
+    └── ProcedureCall(name: 'p')		→ type:void
