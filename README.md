@@ -1,118 +1,166 @@
-# Work Breakdown Structure — Milestone 4
-**Arion Compiler | IF2224 - Teori Bahasa Formal dan Otomata**
+# Parser Arion — IF2224 Teori Bahasa Formal dan Otomata
+## Milestone 4
 
-> Deadline: **Kamis, 4 Juni 2026, pukul 23.59 WIB**
-> Release tag: `v0.4.1` | File laporan: `Laporan-4-[KODE].pdf` di folder `/doc`
-
----
-
-## Anggota 1 — Setup & ICG: Ekspresi
-
-**Fokus:** Arsitektur proyek · ICG untuk assignment & ekspresi aritmatika
-
-### Implementasi
-- Setup struktur repositori dan antarmuka antar-modul (ICG, Stack, Interpreter)
-  - Tentukan format Intermediate Code output dan format input Decorated AST di awal, agar semua anggota bisa paralel
-- ICG: Inisiasi memori — instruksi `INT`
-  - Hitung ukuran memori dari jumlah VarDecl di setiap scope (3 slot fix + n variabel)
-- ICG: Assignment — instruksi `LIT`, `LOD`, `STO`
-  - Traversal node Assign di AST, resolve address variabel dari symbol table
-- ICG: Ekspresi aritmatika — `OPR` (ADD, SUB, MUL, DIV, MOD, NEG)
-  - Post-order traversal BinaryExpr, generate variabel sementara bila perlu
-
-### Bagian Laporan
-- Teori: arsitektur front-end vs back-end, Three-Address Code
-- Implementasi: perancangan struktur program & modul ICG ekspresi
-- Cover + daftar isi + pembagian tugas kelompok
+Arion adalah compiler lengkap yang mencakup seluruh pipeline dari source code hingga eksekusi: Lexer → Parser → AST Builder → Semantic Analyzer → Intermediate Code Generator (ICG) → Stack-Machine Interpreter.
 
 ---
 
-## Anggota 2 — ICG: Control Flow
+## Anggota Kelompok
 
-**Fokus:** ICG untuk IF-ELSE, WHILE, dan Write statement
+| Nama | NIM |
+|------|-----|
+| Muhammad Jordan Ferimeison | 13524047 |
+| Arina Azka | 13524049 |
+| Hakam Avicena Mustain | 13524075 |
+| Yavie Azka Putra Araly | 13524077 |
+| Angelina Andra Alanna | 13524079 |
 
-### Implementasi
-- ICG: IF-ELSE — instruksi `JPC` dan `JMP`
-  - Generate label sementara, patch jump target setelah blok then/else selesai di-generate
-- ICG: WHILE loop — label balik dan conditional jump
-  - Simpan posisi label awal sebelum kondisi, patch JPC ke after-body setelah body selesai
-- ICG: Perbandingan — `OPR` (EQL, NEQ, LSS, GEQ, GTR, LEQ)
-  - Digunakan sebagai kondisi untuk JPC pada IF dan WHILE
-- ICG: Write & Writeln — `OPR WRT` dan `OPR WRTLN`
-  - Load ekspresi ke stack, kemudian panggil OPR 13/14
+## Struktur Proyek
 
-### Bagian Laporan
-- Teori: translasi control flow (IF-ELSE, WHILE) ke TAC, penggunaan label & jump
-- Implementasi: ICG control flow & perbandingan beserta contoh instruksi yang dihasilkan
-
----
-
-## Anggota 3 — ICG: Fungsi & Prosedur
-
-**Fokus:** ICG untuk function call, scope bersarang, dan return
-
-### Implementasi
-- ICG: Deklarasi fungsi/prosedur — instruksi `INT` per scope baru
-  - Setiap fungsi/prosedur punya frame sendiri; hitung ukuran memorinya dari VarDecl + parameter
-- ICG: Pemanggilan fungsi — instruksi `CAL`
-  - Resolve target baris instruksi fungsi, pasang static/dynamic link yang benar
-- ICG: Return dari fungsi/prosedur — instruksi `RET`
-  - Termasuk pengembalian nilai jika itu fungsi (bukan prosedur)
-- Manajemen level scope dan resolusi address variabel lintas scope
-  - Variabel di scope luar diakses dengan level berbeda di instruksi LOD/STO
-
-### Bagian Laporan
-- Teori: Decorated AST, scope & symbol table, static/dynamic link
-- Implementasi: ICG fungsi & prosedur, resolusi scope, contoh instruksi CAL/RET
+```
+.
+├── src/
+│   ├── main.cpp              # Entry point: orchestrasi pipeline kompilasi
+│   ├── lexer.cpp / lexer.h   # Lexer berbasis DFA
+│   ├── dfa.h / token.h       # Definisi state DFA dan token
+│   ├── Parser.cpp / Parser.h # Recursive descent parser → Parse Tree
+│   ├── ASTNode.h / ASTNode.cpp      # Definisi semua node Decorated AST
+│   ├── ASTBuilder.cpp / ASTBuilder.h # Konversi Parse Tree → AST
+│   ├── symbolTable.cpp / symbolTable.hpp # Symbol table bertingkat (scope)
+│   ├── semanticAnalyzer.cpp / semanticAnalyzer.h # Semantic analysis
+│   ├── TypeSystem.cpp / TypeSystem.h # Type checking & inferensi
+│   ├── ErrorHandler.cpp / ErrorHandler.h # Pelaporan error semantik
+│   ├── ICG.cpp / ICG.h       # Intermediate Code Generator (PL/0-like)
+│   └── Interpreter.cpp / Interpreter.hpp # Stack Machine Interpreter
+├── test/
+│   └── milestone-4/          # 15 test case beserta output-nya
+├── docs/                     # Laporan
+├── bin/                      # Binary hasil kompilasi
+└── Makefile
+```
 
 ---
 
-## Anggota 4 — Interpreter & Stack Machine
+## Cara Build dan Jalankan
 
-**Fokus:** Virtual machine, execution cycle, dan semua instruksi TAC
+### Build
 
-### Implementasi
-- Struktur Stack Machine — stack frame (static link, dynamic link, return address, variabel)
-  - Push/pop frame saat CAL dan RET, akses variabel berdasarkan level dan address
-- Siklus Fetch-Decode-Execute dengan Instruction Pointer (IP)
-  - Loop utama interpreter: baca instruksi → dispatch ke handler → IP++ (kecuali JMP/JPC)
-- Implementasi handler semua instruksi TAC: `LIT`, `LOD`, `STO`, `CAL`, `INT`, `JMP`, `JPC`, `OPR`, `RET`
-  - Termasuk semua 14 operasi OPR (aritmatika, perbandingan, WRT, WRTLN)
-- Parsing file Intermediate Code sebagai input interpreter
-  - Baca output ICG baris per baris, parse menjadi daftar instruksi terstruktur
+```bash
+make
+```
 
-### Bagian Laporan
-- Teori: konsep virtual machine, Stack Machine, siklus eksekusi, LIFO stack frame
-- Implementasi: arsitektur interpreter, handler instruksi, contoh eksekusi step-by-step
+Menghasilkan binary di `bin/program`.
 
----
+### Jalankan
 
-## Anggota 5 — Error Handling, Testing & Pengumpulan
+```bash
+./bin/program <input> <output>
+```
 
-**Fokus:** Robustness, test cases, bonus, dan administrasi pengumpulan
-
-### Implementasi
-- Error handling wajib di seluruh komponen
-  - Division by zero, undefined variable, invalid jump target — pesan error informatif, tidak crash
-- **[Bonus]** Deteksi kerentanan Stack: Overflow, Underflow, Corruption
-  - Limit kedalaman stack ~1000 frame, deteksi push/pop yang tidak simetris
-- **[Bonus]** Out-of-Bounds Array & Numerical Overflow/Underflow
-  - IndexOutOfBoundsException untuk array, OverflowError/UnderflowError untuk integer
-- Buat minimal 5 test case unik dengan screenshot I/O
-  - Cakup: ekspresi biasa, IF-ELSE, WHILE, fungsi bersarang, edge case error
-- Urus GitHub Release tag `v0.4.1` dan form pengumpulan
-  - Pastikan laporan ada di `/doc`, invite asisten ke repository
-
-### Bagian Laporan
-- Teori: runtime error handling, kerentanan interpreter (bonus)
-- Implementasi: error handling & mekanisme deteksi
-- Pengujian: dokumentasi 5+ test case dengan screenshot I/O
-- Kesimpulan, saran, dan referensi
+- `input` - source code Arion
+- `output` - file output
 
 ---
 
-## Catatan Penting
+## Pipeline Kompilasi
 
-- **Anggota 1 harus menyelesaikan setup antarmuka di hari 1–2 pertama** agar anggota 2, 3, dan 4 bisa langsung mulai secara paralel.
-- Anggota 5 berkoordinasi dengan semua anggota untuk menyisipkan error handling ke seluruh komponen.
-- Setiap anggota menulis bagian laporan sesuai implementasi yang mereka kerjakan.
+| Fase             | Output           | Deskripsi             |
+|------------------|------------------|-----------------------|
+| Lexer            | Token stream     | DFA-based             |
+| Parser           | Parse Tree       | Recursive Descent     |
+| ASTBuilder       | Decorated AST    | Symbol Table          |
+| SemanticAnalyzer | Type checking    | Scope resolution      |
+| ICG              | Intermediate Code| Instruksi PL/0-like   |
+| Interpreter      | Eksekusi         | via Stack Machine     |
+
+---
+
+## Intermediate Code Generator (`ICG.cpp`)
+Menghasilkan instruksi TAC:
+
+| Instruksi | Deskripsi |
+|-----------|-----------|
+| `LIT 0 n` | Push literal `n` ke stack |
+| `LOD l a` | Load variabel dari level `l`, address `a` |
+| `STO l a` | Store ke variabel level `l`, address `a` |
+| `CAL l a` | Panggil fungsi/prosedur di level `l`, baris `a` |
+| `INT 0 n` | Alokasi `n` slot di stack frame |
+| `JMP 0 a` | Lompat tanpa syarat ke baris `a` |
+| `JPC 0 a` | Lompat ke baris `a` jika top-of-stack = 0 (false) |
+| `OPR 0 k` | Operasi: aritmatika, perbandingan, WRT/WRTLN, READ |
+| `RET 0 0` | Return dari fungsi/prosedur |
+| `LODA l a` | Load address (untuk array/record) |
+| `STOA` | Store via address |
+| `CKB lo hi` | Cek bounds indeks array |
+
+
+**OPR sub-codes:**
+
+| Kode | Operasi |
+|------|---------|
+| 1 | NEG (negasi unary) |
+| 2 | ADD |
+| 3 | SUB |
+| 4 | MUL |
+| 5 | DIV |
+| 6 | MOD |
+| 7 | EQL (=) |
+| 8 | NEQ (<>) |
+| 9 | LSS (<) |
+| 10 | GEQ (>=) |
+| 11 | GTR (>) |
+| 12 | LEQ (<=) |
+| 13 | WRT (write) |
+| 14 | WRTLN (writeln) |
+| 15 | PUSHBP (push base pointer, untuk return value) |
+| 16 | RED (read) |
+
+ICG mendukung: ekspresi aritmatika, IF-ELSE, WHILE, FOR, REPEAT-UNTIL, CASE, pemanggilan dan deklarasi fungsi/prosedur bersarang, array (LODA/STOA/CKB), record (field access), string/real literal pool.
+
+## Interpreter (`Interpreter.cpp`)
+Stack Machine dengan siklus Fetch-Decode-Execute:
+- Stack frame: `[static link | dynamic link | return address | variabel lokal...]`
+- Akses variabel lintas scope via static link chain (`base(level, bp)`)
+- Mendukung tipe data: integer, real, char, boolean, string
+- Output melalui `OPR WRT` / `OPR WRTLN`, input melalui `OPR RED`
+
+**Error Runtime yang Ditangani:**
+
+| Error | Deskripsi |
+|-------|-----------|
+| `RuntimeError` | Error runtime generik |
+| `StackOverflowError` | Kedalaman frame melebihi batas (1000 frame) |
+| `StackUnderflowError` | Pop pada stack kosong |
+| `StackSmashingError` | Control frame corrupt |
+| `StackCorruptionError` | Inkonsistensi stack |
+| `InvalidJumpError` | Target jump di luar range instruksi |
+| `OutOfBoundsError` | Akses memori di luar frame |
+| `IndexOutOfBoundsError` | Indeks array di luar range `[low..high]` |
+| `DivisionByZeroError` | Pembagian dengan nol |
+| `ArithmeticOverflowError` | Overflow integer (range: −2147483648..2147483647) |
+
+---
+
+## Fitur Bahasa yang Didukung
+
+- **Tipe data:** `Integer`, `Real`, `Char`, `Boolean`, `String`
+- **Tipe terstruktur:** Array (`array [low..high] of T`), Record
+- **Konstanta:** `const`
+- **Deklarasi tipe:** `type`
+- **Variabel:** `var`, scope bersarang
+- **Kontrol alur:** `if-then-else`, `while-do`, `for-to/downto-do`, `repeat-until`, `case-of`
+- **Subprogram:** `procedure` dan `function` dengan parameter dan scope bersarang
+- **I/O:** `write`, `writeln`, `read`, `readln`
+- **Ekspresi:** aritmatika, relasional, boolean (`and`, `or`, `not`), unary minus
+
+---
+
+## Output Program
+
+Saat dijalankan, program mencetak ke terminal dan menyimpan ke file output:
+1. **Parse Tree** — representasi pohon dari sintaks
+2. **Intermediate Code** — daftar instruksi yang dihasilkan ICG
+3. **Output Program** — hasil eksekusi (`write`/`writeln`)
+4. **Symbol Table** — isi tabel simbol akhir
+5. **Semantic Analysis Summary** — jumlah error/warning dan status
+6. **Decorated AST** — AST beranotasi tipe dan scope
