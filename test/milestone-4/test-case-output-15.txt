@@ -1,0 +1,34 @@
+
+=== Intermediate Code ===
+0 INT 0 6
+1 JMP 0 2
+2 LIT 0 90
+3 STO 0 3
+4 LOD 0 3
+5 OPR 0 14
+6 LIT 0 -1
+7 STO 0 4
+8 LOD 0 4
+9 OPR 0 14
+10 RET 0 0
+
+=== Output Program ===
+90
+3.14
+
+=== Decorated AST ===
+ProgramNode(name: 'TestTipeCampuran')		→ tab_index:38, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('c')		→ tab_index:39, type:char, lev:1
+│   └── VarDecl('r')		→ tab_index:40, type:real, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(c := ''Z'')		→ type:void
+    │   ├── Var(c)		→ tab_index:39, type:char, lev:1
+    │   └── Char('Z')		→ type:char
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(c)		→ tab_index:39, type:char, lev:1
+    ├── Assign(r := 3.14)		→ type:void
+    │   ├── Var(r)		→ tab_index:40, type:real, lev:1
+    │   └── Num(3.14)		→ type:real
+    └── ProcedureCall(name: 'writeln')		→ type:void
+        └── Var(r)		→ tab_index:40, type:real, lev:1

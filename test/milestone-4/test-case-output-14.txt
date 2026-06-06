@@ -1,0 +1,81 @@
+
+=== Intermediate Code ===
+0 INT 0 11
+1 JMP 0 2
+2 LIT 0 1
+3 STO 0 3
+4 LIT 0 2
+5 STO 0 4
+6 LIT 0 3
+7 STO 0 5
+8 LIT 0 4
+9 STO 0 6
+10 LOD 0 3
+11 LOD 0 4
+12 OPR 0 2
+13 STO 0 7
+14 LOD 0 5
+15 LOD 0 6
+16 OPR 0 2
+17 STO 0 8
+18 LOD 0 7
+19 LOD 0 8
+20 OPR 0 4
+21 STO 0 9
+22 LOD 0 9
+23 LOD 0 3
+24 OPR 0 3
+25 STO 0 10
+26 LOD 0 10
+27 OPR 0 14
+28 RET 0 0
+
+=== Output Program ===
+20
+
+=== Decorated AST ===
+ProgramNode(name: 'TestBanyakVar')		→ tab_index:38, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('a')		→ tab_index:39, type:integer, lev:1
+│   ├── VarDecl('b')		→ tab_index:40, type:integer, lev:1
+│   ├── VarDecl('c')		→ tab_index:41, type:integer, lev:1
+│   ├── VarDecl('d')		→ tab_index:42, type:integer, lev:1
+│   ├── VarDecl('e')		→ tab_index:43, type:integer, lev:1
+│   ├── VarDecl('f')		→ tab_index:44, type:integer, lev:1
+│   ├── VarDecl('g')		→ tab_index:45, type:integer, lev:1
+│   └── VarDecl('h')		→ tab_index:46, type:integer, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(a := 1)		→ type:void
+    │   ├── Var(a)		→ tab_index:39, type:integer, lev:1
+    │   └── Num(1)		→ type:integer
+    ├── Assign(b := 2)		→ type:void
+    │   ├── Var(b)		→ tab_index:40, type:integer, lev:1
+    │   └── Num(2)		→ type:integer
+    ├── Assign(c := 3)		→ type:void
+    │   ├── Var(c)		→ tab_index:41, type:integer, lev:1
+    │   └── Num(3)		→ type:integer
+    ├── Assign(d := 4)		→ type:void
+    │   ├── Var(d)		→ tab_index:42, type:integer, lev:1
+    │   └── Num(4)		→ type:integer
+    ├── Assign(e := a + b)		→ type:void
+    │   ├── Var(e)		→ tab_index:43, type:integer, lev:1
+    │   └── BinOp(plus)		→ type:integer
+    │       ├── Var(a)		→ tab_index:39, type:integer, lev:1
+    │       └── Var(b)		→ tab_index:40, type:integer, lev:1
+    ├── Assign(f := c + d)		→ type:void
+    │   ├── Var(f)		→ tab_index:44, type:integer, lev:1
+    │   └── BinOp(plus)		→ type:integer
+    │       ├── Var(c)		→ tab_index:41, type:integer, lev:1
+    │       └── Var(d)		→ tab_index:42, type:integer, lev:1
+    ├── Assign(g := etimesf)		→ type:void
+    │   ├── Var(g)		→ tab_index:45, type:integer, lev:1
+    │   └── BinOp(times)		→ type:integer
+    │       ├── Var(e)		→ tab_index:43, type:integer, lev:1
+    │       └── Var(f)		→ tab_index:44, type:integer, lev:1
+    ├── Assign(h := g - a)		→ type:void
+    │   ├── Var(h)		→ tab_index:46, type:integer, lev:1
+    │   └── BinOp(minus)		→ type:integer
+    │       ├── Var(g)		→ tab_index:45, type:integer, lev:1
+    │       └── Var(a)		→ tab_index:39, type:integer, lev:1
+    └── ProcedureCall(name: 'writeln')		→ type:void
+        └── Var(h)		→ tab_index:46, type:integer, lev:1

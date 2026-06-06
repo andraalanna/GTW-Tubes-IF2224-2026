@@ -1,0 +1,13 @@
+program TestBanyakVar;
+var a, b, c, d, e, f, g, h: integer;
+begin
+    a := 1;
+    b := 2;
+    c := 3;
+    d := 4;
+    e := a + b;
+    f := c + d;
+    g := e * f;
+    h := g - a;
+    writeln(h)
+end.

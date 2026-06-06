@@ -1,0 +1,81 @@
+
+=== Intermediate Code ===
+0 INT 0 6
+1 JMP 0 2
+2 LIT 0 3
+3 LIT 0 4
+4 OPR 0 2
+5 LIT 0 10
+6 LIT 0 2
+7 OPR 0 3
+8 OPR 0 4
+9 STO 0 3
+10 LOD 0 3
+11 LIT 0 7
+12 OPR 0 5
+13 LOD 0 3
+14 LIT 0 7
+15 OPR 0 6
+16 OPR 0 2
+17 STO 0 4
+18 LOD 0 4
+19 LOD 0 4
+20 OPR 0 4
+21 LOD 0 3
+22 LIT 0 1
+23 OPR 0 2
+24 OPR 0 3
+25 STO 0 5
+26 LOD 0 3
+27 OPR 0 14
+28 LOD 0 4
+29 OPR 0 14
+30 LOD 0 5
+31 OPR 0 14
+32 RET 0 0
+
+=== Output Program ===
+56
+8
+7
+
+=== Decorated AST ===
+ProgramNode(name: 'TestEkspresiKompleks')		→ tab_index:38, type:void, lev:0
+├── Declarations
+│   ├── VarDecl('x')		→ tab_index:39, type:integer, lev:1
+│   ├── VarDecl('y')		→ tab_index:40, type:integer, lev:1
+│   └── VarDecl('z')		→ tab_index:41, type:integer, lev:1
+└── CompoundStmt		→ type:void
+    ├── Assign(x := 3 + 4times10 - 2)		→ type:void
+    │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │   └── BinOp(times)		→ type:integer
+    │       ├── BinOp(plus)		→ type:integer
+    │       │   ├── Num(3)		→ type:integer
+    │       │   └── Num(4)		→ type:integer
+    │       └── BinOp(minus)		→ type:integer
+    │           ├── Num(10)		→ type:integer
+    │           └── Num(2)		→ type:integer
+    ├── Assign(y := xidiv7 + ximod7)		→ type:void
+    │   ├── Var(y)		→ tab_index:40, type:integer, lev:1
+    │   └── BinOp(plus)		→ type:integer
+    │       ├── BinOp(idiv)		→ type:integer
+    │       │   ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │       │   └── Num(7)		→ type:integer
+    │       └── BinOp(imod)		→ type:integer
+    │           ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │           └── Num(7)		→ type:integer
+    ├── Assign(z := ytimesy - x + 1)		→ type:void
+    │   ├── Var(z)		→ tab_index:41, type:integer, lev:1
+    │   └── BinOp(minus)		→ type:integer
+    │       ├── BinOp(times)		→ type:integer
+    │       │   ├── Var(y)		→ tab_index:40, type:integer, lev:1
+    │       │   └── Var(y)		→ tab_index:40, type:integer, lev:1
+    │       └── BinOp(plus)		→ type:integer
+    │           ├── Var(x)		→ tab_index:39, type:integer, lev:1
+    │           └── Num(1)		→ type:integer
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(x)		→ tab_index:39, type:integer, lev:1
+    ├── ProcedureCall(name: 'writeln')		→ type:void
+    │   └── Var(y)		→ tab_index:40, type:integer, lev:1
+    └── ProcedureCall(name: 'writeln')		→ type:void
+        └── Var(z)		→ tab_index:41, type:integer, lev:1

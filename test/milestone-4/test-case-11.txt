@@ -1,0 +1,15 @@
+program TestAritmatika;
+var a, b, c, d, e, f: integer;
+begin
+    a := 10;
+    b := 3;
+    c := a + b;
+    d := a - b;
+    e := a * b;
+    f := a div b;
+    writeln(c);
+    writeln(d);
+    writeln(e);
+    writeln(f);
+    writeln(a mod b)
+end.

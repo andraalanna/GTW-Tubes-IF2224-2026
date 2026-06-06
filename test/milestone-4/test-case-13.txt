@@ -1,0 +1,10 @@
+program TestEkspresiKompleks;
+var x, y, z: integer;
+begin
+    x := (3 + 4) * (10 - 2);
+    y := x div 7 + x mod 7;
+    z := (y * y) - (x + 1);
+    writeln(x);
+    writeln(y);
+    writeln(z)
+end.

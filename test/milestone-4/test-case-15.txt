@@ -1,0 +1,8 @@
+program TestTipeCampuran;
+var c: char; r: real;
+begin
+    c := 'Z';
+    writeln(c);
+    r := 3.14;
+    writeln(r)
+end.

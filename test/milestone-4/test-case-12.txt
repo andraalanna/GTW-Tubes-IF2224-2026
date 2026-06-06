@@ -1,0 +1,12 @@
+program TestUner;
+var a: integer; b: boolean;
+begin
+    a := -5;
+    writeln(a);
+    a := -(3 + 2);
+    writeln(a);
+    b := not true;
+    writeln(b);
+    b := not false;
+    writeln(b)
+end.
