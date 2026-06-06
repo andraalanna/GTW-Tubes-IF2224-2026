@@ -98,7 +98,7 @@ class Interpreter {
         bool debugMode = false;
 
         int base(int levels, int b) const;
-        void outputValue(int val, bool newline);
+        void outputValue(int val, DataType type, bool newline);
 
         StackValue memLoad(int addr) const;
         void memStore(int addr, StackValue sv);
