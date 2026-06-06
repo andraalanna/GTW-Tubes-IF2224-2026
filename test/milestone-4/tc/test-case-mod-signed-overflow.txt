@@ -1,8 +1,0 @@
-program TestModSignedOverflow;
-var
-  x, y: integer;
-begin
-  x := -2147483648;
-  y := x mod -1;
-  writeln(y)
-end.

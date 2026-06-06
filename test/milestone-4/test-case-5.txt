@@ -1,0 +1,19 @@
+program TestStackSmashing;
+type
+  Corruptor == record
+    arr: array[1.. -3] of integer;
+    staticLink: integer;         
+    dynamicLink: integer;        
+    returnAddr: integer          
+  end;
+
+procedure p;
+var
+  c: Corruptor;
+begin
+  c.returnAddr := 999999;
+end;
+
+begin
+  p();
+end.
