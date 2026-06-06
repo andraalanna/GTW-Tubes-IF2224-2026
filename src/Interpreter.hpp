@@ -65,6 +65,12 @@ struct ArithmeticOverflowError : public RuntimeError
         : RuntimeError("Arithmetic overflow in operation: " + op) {}
 };
 
+struct StackValue
+{
+    int val;
+    DataType type;
+};
+
 class Interpreter {
     public:
         static constexpr int MAX_STACK_DEPTH = 1000;
@@ -79,24 +85,28 @@ class Interpreter {
 
     private:
         std::ostream& output;
-        std::vector<int> stack;
+        std::vector<StackValue> stack;
         int stackPtr;
         int basePtr;
         int pointerCtr;
         int pushCtr;
         int popCtr;
-        void push(int val);
-        int pop();
-        int peek() const;
+        void push(int val, DataType type = DataType::INTEGER);
+        void push(StackValue sv);
+        StackValue pop();
+        StackValue peek() const;
         bool debugMode = false;
 
         int base(int levels, int b) const;
         void outputValue(int val, bool newline);
 
-        int memLoad(int addr) const;
-        void memStore(int addr, int val);
+        StackValue memLoad(int addr) const;
+        void memStore(int addr, StackValue sv);
 
         void validateJump(int target, int codeSize) const;
+
+        void pushReal(double dVal);
+        bool compareValues(OprCode op, const StackValue &a, const StackValue &b) const;
 
         int doAdd(int a, int b);
         int doSub(int a, int b);

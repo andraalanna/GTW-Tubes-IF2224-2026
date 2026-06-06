@@ -75,20 +75,25 @@ void Interpreter::run(const std::vector<Instruction> &code)
             break;
         case OpCode::LODA:
         {
-            int addr = pop();
+            int addr = pop().val;
             push(memLoad(addr));
             break;
         }
         case OpCode::STOA:
         {
-            int addr = pop();
-            int val = pop();
+            int addr = pop().val;
+            StackValue val = pop();
             memStore(addr, val);
             break;
         }
         case OpCode::CKB:
         {
-            int index = peek();
+            StackValue indexVal = peek();
+            if (indexVal.type != DataType::INTEGER && indexVal.type != DataType::CHAR && indexVal.type != DataType::BOOLEAN && indexVal.type != DataType::SUBRANGE)
+            {
+                throw RuntimeError("Type mismatch: array index must be an ordinal type, got " + SymbolTable::DataTypeToString(indexVal.type));
+            }
+            int index = indexVal.val;
             int low = ins.level;
             int high = ins.operand;
             if (index < low || index > high)
@@ -101,28 +106,35 @@ void Interpreter::run(const std::vector<Instruction> &code)
     }
 }
 
-void Interpreter::push(int val)
+void Interpreter::push(int val, DataType type)
 {
-    stack.push_back(val);
+    stack.push_back({val, type});
     stackPtr++;
     pushCtr++;
 }
 
-int Interpreter::pop()
+void Interpreter::push(StackValue sv)
+{
+    stack.push_back(sv);
+    stackPtr++;
+    pushCtr++;
+}
+
+StackValue Interpreter::pop()
 {
     if (stackPtr < 0 || stack.empty())
     {
         throw StackUnderflowError();
     }
 
-    int val = stack.at(stackPtr);
+    StackValue val = stack.at(stackPtr);
     stack.pop_back();
     stackPtr--;
     popCtr++;
     return val;
 }
 
-int Interpreter::peek() const
+StackValue Interpreter::peek() const
 {
     if (stackPtr < 0 || stack.empty())
     {
@@ -137,7 +149,7 @@ int Interpreter::base(int levels, int b) const
     {
         if (b < 0 || b >= static_cast<int>(stack.size()))
             throw StackCorruptionError("static link out of bounds during base() traversal");
-        b = stack[b]; // static link: stack[b+0]
+        b = stack[b].val; // static link: stack[b+0]
         levels--;
     }
     return b;
@@ -149,18 +161,105 @@ void Interpreter::validateJump(int target, int codeSize) const
         throw InvalidJumpError(target);
 }
 
-int Interpreter::memLoad(int addr) const
+void Interpreter::pushReal(double dVal)
+{
+    int idx = -1;
+    for (auto &[k, v] : realPool)
+    {
+        if (v == dVal)
+        {
+            idx = k;
+            break;
+        }
+    }
+    if (idx == -1)
+    {
+        int minIdx = -1;
+        for (auto &[k, v] : realPool)
+        {
+            if (k < minIdx) minIdx = k;
+        }
+        idx = minIdx - 1;
+        realPool[idx] = dVal;
+    }
+    push(idx, DataType::REAL);
+}
+
+bool Interpreter::compareValues(OprCode op, const StackValue &a, const StackValue &b) const
+{
+    if ((a.type == DataType::STRING || b.type == DataType::STRING) && a.type != b.type)
+    {
+        throw RuntimeError("Type mismatch: cannot compare String and " + SymbolTable::DataTypeToString(b.type == DataType::STRING ? a.type : b.type));
+    }
+    if ((a.type == DataType::BOOLEAN || b.type == DataType::BOOLEAN) && a.type != b.type)
+    {
+        throw RuntimeError("Type mismatch: cannot compare Boolean and " + SymbolTable::DataTypeToString(b.type == DataType::BOOLEAN ? a.type : b.type));
+    }
+
+    if (a.type == DataType::STRING && b.type == DataType::STRING)
+    {
+        const std::string &sA = stringTable.at(a.val);
+        const std::string &sB = stringTable.at(b.val);
+        switch (op)
+        {
+            case OprCode::EQL: return sA == sB;
+            case OprCode::NEQ: return sA != sB;
+            case OprCode::LSS: return sA < sB;
+            case OprCode::GEQ: return sA >= sB;
+            case OprCode::GTR: return sA > sB;
+            case OprCode::LEQ: return sA <= sB;
+            default: return false;
+        }
+    }
+    else if (a.type == DataType::REAL || b.type == DataType::REAL)
+    {
+        if (a.type != DataType::INTEGER && a.type != DataType::REAL)
+            throw RuntimeError("Type mismatch: cannot compare numeric with " + SymbolTable::DataTypeToString(a.type));
+        if (b.type != DataType::INTEGER && b.type != DataType::REAL)
+            throw RuntimeError("Type mismatch: cannot compare numeric with " + SymbolTable::DataTypeToString(b.type));
+
+        double valA = (a.type == DataType::REAL) ? realPool.at(a.val) : a.val;
+        double valB = (b.type == DataType::REAL) ? realPool.at(b.val) : b.val;
+        switch (op)
+        {
+            case OprCode::EQL: return valA == valB;
+            case OprCode::NEQ: return valA != valB;
+            case OprCode::LSS: return valA < valB;
+            case OprCode::GEQ: return valA >= valB;
+            case OprCode::GTR: return valA > valB;
+            case OprCode::LEQ: return valA <= valB;
+            default: return false;
+        }
+    }
+    else
+    {
+        int valA = a.val;
+        int valB = b.val;
+        switch (op)
+        {
+            case OprCode::EQL: return valA == valB;
+            case OprCode::NEQ: return valA != valB;
+            case OprCode::LSS: return valA < valB;
+            case OprCode::GEQ: return valA >= valB;
+            case OprCode::GTR: return valA > valB;
+            case OprCode::LEQ: return valA <= valB;
+            default: return false;
+        }
+    }
+}
+
+StackValue Interpreter::memLoad(int addr) const
 {
     if (addr < 0 || addr >= static_cast<int>(stack.size()))
         throw OutOfBoundsError(addr, basePtr, static_cast<int>(stack.size()));
     return stack[addr];
 }
 
-void Interpreter::memStore(int addr, int val)
+void Interpreter::memStore(int addr, StackValue sv)
 {
     if (addr < 0 || addr >= static_cast<int>(stack.size()))
         throw OutOfBoundsError(addr, basePtr, static_cast<int>(stack.size()));
-    stack[addr] = val;
+    stack[addr] = sv;
 }
 
 int Interpreter::doAdd(int a, int b)
@@ -196,7 +295,7 @@ int Interpreter::doNeg(int a)
 
 void Interpreter::operateLIT(const Instruction &ins)
 {
-    push(ins.operand);
+    push(ins.operand, static_cast<DataType>(ins.level));
 }
 
 void Interpreter::operateLOD(const Instruction &ins)
@@ -208,7 +307,7 @@ void Interpreter::operateLOD(const Instruction &ins)
 
 void Interpreter::operateSTO(const Instruction &instr)
 {
-    int val = pop();
+    StackValue val = pop();
     int frameBase = base(instr.level, basePtr);
     int addr = frameBase + instr.operand;
     memStore(addr, val);
@@ -221,7 +320,7 @@ void Interpreter::operateCAL(const Instruction &instr)
     int walkBp = basePtr;
     while (walkBp > 0 && depth <= MAX_STACK_DEPTH)
     {
-        walkBp = stack[walkBp + 1];
+        walkBp = stack[walkBp + 1].val;
         depth++;
     }
     if (depth >= MAX_STACK_DEPTH)
@@ -231,9 +330,9 @@ void Interpreter::operateCAL(const Instruction &instr)
     int dynamicLink = basePtr;
     int returnAddr = pointerCtr;
 
-    push(staticLink);
-    push(dynamicLink);
-    push(returnAddr);
+    push(staticLink, DataType::INTEGER);
+    push(dynamicLink, DataType::INTEGER);
+    push(returnAddr, DataType::INTEGER);
 
     basePtr = stackPtr - 2;
     pointerCtr = instr.operand;
@@ -249,7 +348,7 @@ void Interpreter::operateINT(const Instruction &instr)
     int toAllocate = m - currentFrameSize;
 
     for (int i = 0; i < toAllocate; i++)
-        push(0);
+        push(0, DataType::INTEGER);
 }
 
 void Interpreter::operateJMP(const Instruction &instr, int codeSize)
@@ -260,8 +359,12 @@ void Interpreter::operateJMP(const Instruction &instr, int codeSize)
 
 void Interpreter::operateJPC(const Instruction &instr, int codeSize)
 {
-    int cond = pop();
-    if (cond == 0)
+    StackValue cond = pop();
+    if (cond.type != DataType::BOOLEAN && cond.type != DataType::INTEGER)
+    {
+        throw RuntimeError("Type mismatch: condition must be Boolean or Integer, got " + SymbolTable::DataTypeToString(cond.type));
+    }
+    if (cond.val == 0)
     {
         validateJump(instr.operand, codeSize);
         pointerCtr = instr.operand;
@@ -285,7 +388,7 @@ void Interpreter::operateRET(const Instruction &ins, int codeSize)
     bool isFunction = (ins.level == 1);
     int psze = ins.operand;
 
-    int returnValue = 0;
+    StackValue returnValue;
     if (isFunction)
     {
         if (stackPtr < 0 || stackPtr >= static_cast<int>(stack.size()))
@@ -293,8 +396,8 @@ void Interpreter::operateRET(const Instruction &ins, int codeSize)
         returnValue = stack[stackPtr];
     }
 
-    int retAddr = stack[basePtr + 2];
-    int callerBp = stack[basePtr + 1];
+    int retAddr = stack[basePtr + 2].val;
+    int callerBp = stack[basePtr + 1].val;
 
     if (retAddr < 0 || retAddr >= codeSize)
     {
@@ -330,106 +433,154 @@ void Interpreter::operateOPR(const Instruction &instr)
     {
     case OprCode::NEG:
     {
-        int a = pop();
-        push(doNeg(a));
+        StackValue a = pop();
+        if (a.type != DataType::INTEGER && a.type != DataType::REAL)
+        {
+            throw RuntimeError("Type mismatch: operand of NEG must be numeric, got " + SymbolTable::DataTypeToString(a.type));
+        }
+        if (a.type == DataType::REAL)
+        {
+            pushReal(-realPool.at(a.val));
+        }
+        else
+        {
+            push(doNeg(a.val), DataType::INTEGER);
+        }
         break;
     }
     case OprCode::ADD:
     {
-        int b = pop(), a = pop();
-        push(doAdd(a, b));
+        StackValue b = pop(), a = pop();
+        if ((a.type != DataType::INTEGER && a.type != DataType::REAL) ||
+            (b.type != DataType::INTEGER && b.type != DataType::REAL))
+        {
+            throw RuntimeError("Type mismatch: expected numeric operands for ADD, got " + SymbolTable::DataTypeToString(a.type) + " and " + SymbolTable::DataTypeToString(b.type));
+        }
+        if (a.type == DataType::REAL || b.type == DataType::REAL)
+        {
+            double valA = (a.type == DataType::REAL) ? realPool.at(a.val) : a.val;
+            double valB = (b.type == DataType::REAL) ? realPool.at(b.val) : b.val;
+            pushReal(valA + valB);
+        }
+        else
+        {
+            push(doAdd(a.val, b.val), DataType::INTEGER);
+        }
         break;
     }
     case OprCode::SUB:
     {
-        int b = pop(), a = pop();
-        push(doSub(a, b));
+        StackValue b = pop(), a = pop();
+        if ((a.type != DataType::INTEGER && a.type != DataType::REAL) ||
+            (b.type != DataType::INTEGER && b.type != DataType::REAL))
+        {
+            throw RuntimeError("Type mismatch: expected numeric operands for SUB, got " + SymbolTable::DataTypeToString(a.type) + " and " + SymbolTable::DataTypeToString(b.type));
+        }
+        if (a.type == DataType::REAL || b.type == DataType::REAL)
+        {
+            double valA = (a.type == DataType::REAL) ? realPool.at(a.val) : a.val;
+            double valB = (b.type == DataType::REAL) ? realPool.at(b.val) : b.val;
+            pushReal(valA - valB);
+        }
+        else
+        {
+            push(doSub(a.val, b.val), DataType::INTEGER);
+        }
         break;
     }
     case OprCode::MUL:
     {
-        int b = pop(), a = pop();
-        push(doMul(a, b));
+        StackValue b = pop(), a = pop();
+        if ((a.type != DataType::INTEGER && a.type != DataType::REAL) ||
+            (b.type != DataType::INTEGER && b.type != DataType::REAL))
+        {
+            throw RuntimeError("Type mismatch: expected numeric operands for MUL, got " + SymbolTable::DataTypeToString(a.type) + " and " + SymbolTable::DataTypeToString(b.type));
+        }
+        if (a.type == DataType::REAL || b.type == DataType::REAL)
+        {
+            double valA = (a.type == DataType::REAL) ? realPool.at(a.val) : a.val;
+            double valB = (b.type == DataType::REAL) ? realPool.at(b.val) : b.val;
+            pushReal(valA * valB);
+        }
+        else
+        {
+            push(doMul(a.val, b.val), DataType::INTEGER);
+        }
         break;
     }
     case OprCode::DIV:
     {
-        int b = pop(), a = pop();
-        if (b == 0)
+        StackValue b = pop(), a = pop();
+        if ((a.type != DataType::INTEGER && a.type != DataType::REAL) ||
+            (b.type != DataType::INTEGER && b.type != DataType::REAL))
+        {
+            throw RuntimeError("Type mismatch: expected numeric operands for DIV, got " + SymbolTable::DataTypeToString(a.type) + " and " + SymbolTable::DataTypeToString(b.type));
+        }
+        double valA = (a.type == DataType::REAL) ? realPool.at(a.val) : a.val;
+        double valB = (b.type == DataType::REAL) ? realPool.at(b.val) : b.val;
+        if (valB == 0.0)
             throw DivisionByZeroError();
-        if (b == -1 && a == static_cast<int>(INT_MIN_VAL))
-            throw ArithmeticOverflowError("DIV signed overflow (" + std::to_string(a) + " / " + std::to_string(b) + ")");
-        push(a / b);
+
+        if (a.type == DataType::REAL || b.type == DataType::REAL)
+        {
+            pushReal(valA / valB);
+        }
+        else
+        {
+            if (b.val == -1 && a.val == static_cast<int>(INT_MIN_VAL))
+                throw ArithmeticOverflowError("DIV signed overflow (" + std::to_string(a.val) + " / " + std::to_string(b.val) + ")");
+            push(a.val / b.val, DataType::INTEGER);
+        }
         break;
     }
     case OprCode::MOD:
     {
-        int b = pop(), a = pop();
-        if (b == 0)
+        StackValue b = pop(), a = pop();
+        if (a.type != DataType::INTEGER || b.type != DataType::INTEGER)
+        {
+            throw RuntimeError("Type mismatch: operands of MOD must be Integer, got " + SymbolTable::DataTypeToString(a.type) + " and " + SymbolTable::DataTypeToString(b.type));
+        }
+        if (b.val == 0)
             throw DivisionByZeroError();
-        if (b == -1 && a == static_cast<int>(INT_MIN_VAL))
-            throw ArithmeticOverflowError("MOD signed overflow (" + std::to_string(a) + " % " + std::to_string(b) + ")");
-        push(a % b);
+        if (b.val == -1 && a.val == static_cast<int>(INT_MIN_VAL))
+            throw ArithmeticOverflowError("MOD signed overflow (" + std::to_string(a.val) + " % " + std::to_string(b.val) + ")");
+        push(a.val % b.val, DataType::INTEGER);
         break;
     }
     case OprCode::EQL:
-    {
-        int b = pop(), a = pop();
-        push(a == b ? 1 : 0);
-        break;
-    }
     case OprCode::NEQ:
-    {
-        int b = pop(), a = pop();
-        push(a != b ? 1 : 0);
-        break;
-    }
     case OprCode::LSS:
-    {
-        int b = pop(), a = pop();
-        push(a < b ? 1 : 0);
-        break;
-    }
     case OprCode::GEQ:
-    {
-        int b = pop(), a = pop();
-        push(a >= b ? 1 : 0);
-        break;
-    }
     case OprCode::GTR:
-    {
-        int b = pop(), a = pop();
-        push(a > b ? 1 : 0);
-        break;
-    }
     case OprCode::LEQ:
     {
-        int b = pop(), a = pop();
-        push(a <= b ? 1 : 0);
+        StackValue b = pop(), a = pop();
+        bool res = compareValues(op, a, b);
+        push(res ? 1 : 0, DataType::BOOLEAN);
         break;
     }
 
     // Output operations
     case OprCode::WRT:
     {
-        int val = pop();
+        int val = pop().val;
         outputValue(val, false);
         break;
     }
     case OprCode::WRTLN:
     {
-        int val = pop();
+        int val = pop().val;
         outputValue(val, true);
         break;
     }
     case OprCode::PUSHBP:
     {
-        push(basePtr);
+        push(basePtr, DataType::INTEGER);
         break;
     }   
     case OprCode::RED:
     {
-        int addr = pop();
+        int addr = pop().val;
         std::string inputStr;
         DataType expectedType = static_cast<DataType>(instr.level);
         bool readSuccess = false;
@@ -484,7 +635,7 @@ void Interpreter::operateOPR(const Instruction &instr)
                         idx = minIdx - 1;
                         realPool[idx] = doubleVal;
                     }
-                    memStore(addr, idx);
+                    memStore(addr, {idx, DataType::REAL});
                 }
                 else if (expectedType == DataType::INTEGER)
                 {
@@ -494,7 +645,7 @@ void Interpreter::operateOPR(const Instruction &instr)
                     {
                         throw std::invalid_argument("not a pure integer");
                     }
-                    memStore(addr, intVal);
+                    memStore(addr, {intVal, DataType::INTEGER});
                 }
                 else if (expectedType == DataType::CHAR)
                 {
@@ -502,7 +653,7 @@ void Interpreter::operateOPR(const Instruction &instr)
                     {
                         throw std::invalid_argument("not a char");
                     }
-                    memStore(addr, static_cast<int>(inputStr[0]));
+                    memStore(addr, {static_cast<int>(inputStr[0]), DataType::CHAR});
                 }
                 else if (expectedType == DataType::BOOLEAN)
                 {
@@ -510,11 +661,11 @@ void Interpreter::operateOPR(const Instruction &instr)
                     for (char &c : lowerStr) c = tolower(c);
                     if (lowerStr == "true" || lowerStr == "1")
                     {
-                        memStore(addr, 1);
+                        memStore(addr, {1, DataType::BOOLEAN});
                     }
                     else if (lowerStr == "false" || lowerStr == "0")
                     {
-                        memStore(addr, 0);
+                        memStore(addr, {0, DataType::BOOLEAN});
                     }
                     else
                     {
@@ -542,7 +693,7 @@ void Interpreter::operateOPR(const Instruction &instr)
                         idx = minIdx - 1;
                         stringTable[idx] = inputStr;
                     }
-                    memStore(addr, idx);
+                    memStore(addr, {idx, DataType::STRING});
                 }
                 else
                 {

@@ -206,19 +206,19 @@ void ICG::genNumber(NumberNode *node)
             idx = nextRealIdx--;
             realPool[idx] = f;
         }
-        emit(OpCode::LIT, 0, idx);
+        emit(OpCode::LIT, static_cast<int>(DataType::REAL), idx);
     }
     else
     {
         int value = stoi(node->rawValue);
-        emit(OpCode::LIT, 0, value);
+        emit(OpCode::LIT, static_cast<int>(DataType::INTEGER), value);
     }
 }
 
 void ICG::genChar(CharNode *node)
 {
     char c = node->rawValue.empty() ? 0 : node->rawValue[0];
-    emit(OpCode::LIT, 0, (int)c);
+    emit(OpCode::LIT, static_cast<int>(DataType::CHAR), (int)c);
 }
 
 void ICG::genVar(VarNode *node)
@@ -226,7 +226,7 @@ void ICG::genVar(VarNode *node)
     int idx = node->tabIndex;
     if (st.tab[idx].obj == AllowedObj::CONSTANT)
     {
-        emit(OpCode::LIT, 0, st.tab[idx].adr);
+        emit(OpCode::LIT, static_cast<int>(st.tab[idx].type), st.tab[idx].adr);
         return;
     }
 
@@ -785,7 +785,7 @@ void ICG::genString(StringNode *node)
         stringTable[idx] = s;
     }
 
-    emit(OpCode::LIT, 0, idx);
+    emit(OpCode::LIT, static_cast<int>(DataType::STRING), idx);
 }
 
 void ICG::genFieldAccessAddress(FieldAccessNode *fn)
