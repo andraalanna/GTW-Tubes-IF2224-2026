@@ -76,6 +76,7 @@ private:
     int nextStringIdx = -100000;
     int nextRealIdx = -1;
     void genString(StringNode *node);
+    int resolveAddr(int tabIdx);
     
     int getFuncStartLine(const string&name) const; // anggota 2
     void genProgram(ProgramNode *node);

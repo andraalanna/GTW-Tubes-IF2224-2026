@@ -135,12 +135,14 @@ void ICG::genAssign(AssignNode *node)
             int psze = (ref > 0 && ref < (int)st.btab.size())
                        ? st.btab[ref].psze
                        : (int)0;
-            emit(OpCode::STO, 0, 3 + psze);
+            int vsze = (ref > 0 && ref < (int)st.btab.size())  // ← TAMBAH
+                       ? st.btab[ref].vsze
+                       : 0;
+            emit(OpCode::STO, 0, 3 + psze + vsze);
             return;
         }
 
-        if (varLevel >= 1)
-            addr += 3;
+        addr = resolveAddr(vn->tabIndex);
 
         emit(OpCode::STO, relLevel, addr);
     }
@@ -233,16 +235,13 @@ void ICG::genVar(VarNode *node)
     int idx = node->tabIndex;
     if (st.tab[idx].obj == AllowedObj::CONSTANT)
     {
-        emit(OpCode::LIT, static_cast<int>(st.tab[idx].type), st.tab[idx].adr);
+        emit(OpCode::LIT, 0, st.tab[idx].adr);
         return;
     }
 
-    int addr     = st.tab[idx].adr;
+    int addr     = resolveAddr(idx);           // ← ganti
     int varLevel = st.tab[idx].lev;
     int relLevel = currentLevel - varLevel;
-
-    if (varLevel >= 1)
-        addr += 3;
 
     emit(OpCode::LOD, relLevel, addr);
 }
@@ -342,6 +341,7 @@ void ICG::genFor(ForNode *node)
  
     int varAddr  = -1;
     int varLevel = -1;
+    int varIdx   = -1; 
  
     for (int i = 0; i < (int)st.tab.size(); i++)
     {
@@ -350,6 +350,7 @@ void ICG::genFor(ForNode *node)
         {
             varAddr  = st.tab[i].adr;
             varLevel = st.tab[i].lev;
+            varIdx   = i;
         }
     }
  
@@ -357,6 +358,8 @@ void ICG::genFor(ForNode *node)
         throw runtime_error("ICG genFor: variabel loop '" + node->varName + "' tidak ditemukan di symbol table");
 
     int relLevel = currentLevel - varLevel;
+
+    varAddr = resolveAddr(varIdx);   
 
     genExpression(node->fromExpr.get());
     emit(OpCode::STO, relLevel, varAddr);
@@ -765,7 +768,10 @@ int ICG::findReturnVarAddr(FuncDeclNode *node)
     int psze = (ref > 0 && ref < (int)st.btab.size())
                ? st.btab[ref].psze
                : (int)node->params.size();
-    return 3 + psze; // sudah benar, tidak perlu diubah
+    int vsze = (ref > 0 && ref < (int)st.btab.size())  // ← TAMBAH
+               ? st.btab[ref].vsze
+               : 0;
+    return 3 + psze + vsze; // sudah benar, tidak perlu diubah
 }
 
 int ICG::getFuncStartLine(const string& name) const{
@@ -812,7 +818,7 @@ void ICG::genRecordAddress(ASTNode *node)
     {
         int baseAddr = st.tab[vn->tabIndex].adr;
         int varLevel = st.tab[vn->tabIndex].lev;
-        if (varLevel >= 1)
+        if (varLevel >= 2)
             baseAddr += 3;
 
         emit(OpCode::OPR, 0, (int)OprCode::PUSHBP);
@@ -836,4 +842,47 @@ void ICG::genRecordAddress(ASTNode *node)
     {
         throw std::runtime_error("ICG: Unsupported base for address generation");
     }
+}
+
+int ICG::resolveAddr(int tabIdx)
+{
+    int varLevel = st.tab[tabIdx].lev;
+    int addr     = st.tab[tabIdx].adr;
+
+    if (varLevel < 2)
+        return addr; // program utama: tidak ada offset
+
+    // Cari btab scope variabel ini (level = varLevel)
+    for (int b = 0; b < (int)st.btab.size(); b++)
+    {
+        int lpar = st.btab[b].lpar;
+        int psze = st.btab[b].psze;
+
+        // Cek apakah tabIdx ada di linked list parameter blok ini
+        bool isParam = false;
+        int cur = lpar;
+        while (cur > 0)
+        {
+            if (cur == tabIdx) { isParam = true; break; }
+            cur = st.tab[cur].link;
+        }
+
+        // Cek apakah tabIdx ada di blok ini sama sekali
+        bool inThisBlock = false;
+        cur = st.btab[b].last;
+        while (cur > 0)
+        {
+            if (cur == tabIdx) { inThisBlock = true; break; }
+            cur = st.tab[cur].link;
+        }
+
+        if (!inThisBlock) continue;
+
+        if (isParam)
+            return 3 + addr;         // parameter: bp+3, bp+4, ...
+        else
+            return 3 + psze + addr;  // variabel lokal: bp+3+psze, bp+4+psze, ...
+    }
+
+    return 3 + addr; // fallback
 }
